@@ -183,6 +183,8 @@ void main() {
     // Einzige Karte ist bereits aufgeklappt.
     await tester.scrollUntilVisible(find.text('Weißt du mehr?'), 200);
     expect(find.text('Welche Information würde die Einstufung klären?'), findsOneWidget);
+    await tester.ensureVisible(find.text('Weißt du mehr?'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Weißt du mehr?'));
     await tester.pumpAndSettle();
     expect(find.text('Information ergänzen'), findsOneWidget);
