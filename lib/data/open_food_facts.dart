@@ -69,7 +69,7 @@ class OpenFoodFactsClient {
     }
     Map<String, dynamic> json;
     try {
-      json = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      json = jsonDecode(utf8.decode(res.bodyBytes, allowMalformed: true)) as Map<String, dynamic>;
     } catch (_) {
       if (res.statusCode == 404) return null;
       throw LookupException(LookupError.invalidResponse);
@@ -246,7 +246,7 @@ class OffTaxonomyClient {
       if (res.statusCode >= 400) {
         throw LookupException(LookupError.server, '${res.statusCode}');
       }
-      final parsed = parse(utf8.decode(res.bodyBytes));
+      final parsed = parse(utf8.decode(res.bodyBytes, allowMalformed: true));
       if (parsed == null) throw LookupException(LookupError.invalidResponse);
       _cache.addAll(parsed);
     }

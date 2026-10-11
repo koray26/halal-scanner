@@ -85,10 +85,10 @@ void main() {
 
     test('2b. Allgemeine Taxonomie-Daten klären nichts', () {
       final v = eval(product('Zucker, Aroma'),
-          research: ResearchContext(
+          research: const ResearchContext(
             taxonomyStatus: OnlineSourceStatus.ok,
             taxonomy: {
-              'en:flavouring': const TaxonomyEntry(
+              'en:flavouring': TaxonomyEntry(
                   id: 'en:flavouring', vegan: 'yes', vegetarian: 'yes'),
             },
           ));
@@ -128,8 +128,8 @@ void main() {
 
   test('4. E471 ohne belegte Herkunft -> keine Freigabe', () {
     final v = eval(product('Weizenmehl, Emulgator: E471, Salz'),
-        research: ResearchContext(taxonomyStatus: OnlineSourceStatus.ok, taxonomy: {
-          'en:e471': const TaxonomyEntry(id: 'en:e471', vegan: 'maybe'),
+        research: const ResearchContext(taxonomyStatus: OnlineSourceStatus.ok, taxonomy: {
+          'en:e471': TaxonomyEntry(id: 'en:e471', vegan: 'maybe'),
         }));
     expect(v.status, HalalStatus.unclear);
     final i = inv(v, 'e_number_animal_possible');
@@ -272,8 +272,8 @@ void main() {
 
     setUp(() {
       SharedPreferences.setMockInitialValues({'language': 'de'});
-      taxonomyHandler = (_) async => http.Response(
-          File('test/fixtures/off/taxonomy-ingredients.json').readAsStringSync(), 200);
+      taxonomyHandler = (_) async => http.Response.bytes(
+          File('test/fixtures/off/taxonomy-ingredients.json').readAsBytesSync(), 200);
     });
 
     test('10. Nutzer-Feedback ändert den Status nicht', () async {
@@ -310,8 +310,8 @@ void main() {
       expect(step.outcome, StepOutcome.unavailable);
       expect(v.unknowns, contains(UnknownReason.researchSourceUnavailable));
       // Erneute Prüfung, wenn die Quelle wieder erreichbar ist:
-      taxonomyHandler = (_) async => http.Response(
-          File('test/fixtures/off/taxonomy-ingredients.json').readAsStringSync(), 200);
+      taxonomyHandler = (_) async => http.Response.bytes(
+          File('test/fixtures/off/taxonomy-ingredients.json').readAsBytesSync(), 200);
       final v2 = (await state.lookup(code)).entry!.verdict;
       expect(inv(v2, 'flavouring').steps.firstWhere((s) => s.kind == StepKind.taxonomy).outcome,
           StepOutcome.found);

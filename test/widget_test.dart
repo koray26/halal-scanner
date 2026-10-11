@@ -178,6 +178,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text('Warum kein grünes Ergebnis?'), findsOneWidget);
+    await tester.scrollUntilVisible(find.textContaining('noch nicht abschließend geklärt'), 200);
     expect(find.textContaining('noch nicht abschließend geklärt'), findsOneWidget);
     // Einzige Karte ist bereits aufgeklappt.
     await tester.scrollUntilVisible(find.text('Weißt du mehr?'), 200);
