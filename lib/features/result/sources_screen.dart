@@ -43,7 +43,7 @@ class SourcesScreen extends StatelessWidget {
                                 style: const TextStyle(fontWeight: FontWeight.w700)),
                             Text(s.t('sources.retrieved', {'date': formatDateTime(src.retrievedAt)})),
                             if (src.version != null)
-                              Text(s.t('sources.version', {'version': ltr(src.version!)})),
+                              Text(s.t('sources.version', {'version': _version(src.version!)})),
                             if (src.kind == SourceKind.openFoodFacts) Text(s.t('sources.offLicense')),
                             if (src.url != null)
                               TextButton.icon(
@@ -93,4 +93,11 @@ class SourcesScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Open Food Facts liefert den Datenstand als Unix-Zeitstempel.
+String _version(String v) {
+  final secs = int.tryParse(v);
+  if (secs == null || secs < 1000000000) return ltr(v);
+  return formatDateTime(DateTime.fromMillisecondsSinceEpoch(secs * 1000, isUtc: true));
 }

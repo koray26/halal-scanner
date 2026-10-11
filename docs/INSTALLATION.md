@@ -10,7 +10,9 @@ Alle beschriebenen Wege sind **kostenlos**.
 ### 1. APK herunterladen
 1. Öffnen Sie **auf dem Android-Handy** den Browser (z. B. Chrome).
 2. Gehen Sie zu: **https://github.com/koray26/halal-scanner/releases**
-3. Tippen Sie bei **„Neueste Testversion“** unter „Assets“ auf **`HalalScanner.apk`**.
+3. Tippen Sie bei **„Neueste Testversion“** unter „Assets“ auf **`HalalScanner-arm64.apk`**
+   (kleiner, passt für fast alle Handys ab ca. 2017). Falls die Installation damit nicht klappt,
+   nehmen Sie **`HalalScanner.apk`** (größer, passt für alle).
 4. Falls eine Warnung kommt („Datei kann schädlich sein“): **„Trotzdem herunterladen“**.
    Die Warnung erscheint bei jeder App, die nicht aus dem Play Store kommt.
 

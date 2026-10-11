@@ -84,6 +84,12 @@ void main() {
       expect(ruleIds(v), contains('alcoholic_beverage'));
     });
 
+    test('Weinsauce -> HARAM, Weintrauben/Weinsäure nicht', () {
+      expect(ruleIds(eval('Nudeln, Weinsauce, Salz')), contains('alcoholic_beverage'));
+      expect(ruleIds(eval('Weintrauben, Zucker, Säuerungsmittel: Weinsäure')),
+          isNot(contains('alcoholic_beverage')));
+    });
+
     test('Alkohol deklariert -> HARAM', () {
       final v = eval('Zucker, Kakaobutter, Alkohol 2%, Vollmilchpulver');
       expect(v.status, HalalStatus.haram);
