@@ -17,6 +17,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: '3.47.7'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   test:
@@ -31,18 +32,26 @@ jobs:
           cache: true
       - run: flutter --version
       - run: flutter pub get
-      - name: Statische Analyse
-        run: flutter analyze --no-fatal-infos
-      - name: Tests
+      - name: Statische Analyse und Tests
         run: |
-          set -o pipefail
-          flutter test --reporter expanded 2>&1 | tee test-report.txt
+          mkdir -p ci-logs
+          set +e
+          flutter analyze --no-fatal-infos > ci-logs/analyze.txt 2>&1; echo $? > ci-logs/analyze.code
+          flutter test --reporter expanded > ci-logs/test-report.txt 2>&1; echo $? > ci-logs/test.code
+          tail -n 60 ci-logs/analyze.txt; tail -n 80 ci-logs/test-report.txt
+      - name: Protokolle im Branch ci-logs-test ablegen
+        if: always()
+        run: ./tool/publish_logs.sh ci-logs-test
       - name: Testbericht hochladen
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: testbericht
-          path: test-report.txt
+          path: ci-logs/
+      - name: Ergebnis auswerten
+        run: |
+          test "$(cat ci-logs/analyze.code)" = "0"
+          test "$(cat ci-logs/test.code)" = "0"
 
   android:
     name: Android-APK
@@ -61,7 +70,13 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: APK bauen
-        run: flutter build apk --release --dart-define=CONTACT_EMAIL=${{ vars.CONTACT_EMAIL || 'kontakt-nicht-konfiguriert@example.invalid' }}
+        run: |
+          mkdir -p ci-logs
+          set -o pipefail
+          flutter build apk --release --dart-define=CONTACT_EMAIL=${{ vars.CONTACT_EMAIL || 'kontakt-nicht-konfiguriert@example.invalid' }} 2>&1 | tee ci-logs/android-build.txt
+      - name: Protokolle im Branch ci-logs-android ablegen
+        if: always()
+        run: ./tool/publish_logs.sh ci-logs-android
       - name: APK umbenennen
         run: cp build/app/outputs/flutter-apk/app-release.apk HalalScanner.apk
       - uses: actions/upload-artifact@v4
@@ -82,7 +97,13 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: iOS bauen (ohne Signatur)
-        run: flutter build ios --release --no-codesign --dart-define=CONTACT_EMAIL=${{ vars.CONTACT_EMAIL || 'kontakt-nicht-konfiguriert@example.invalid' }}
+        run: |
+          mkdir -p ci-logs
+          set -o pipefail
+          flutter build ios --release --no-codesign --dart-define=CONTACT_EMAIL=${{ vars.CONTACT_EMAIL || 'kontakt-nicht-konfiguriert@example.invalid' }} 2>&1 | tee ci-logs/ios-build.txt
+      - name: Protokolle im Branch ci-logs-ios ablegen
+        if: always()
+        run: ./tool/publish_logs.sh ci-logs-ios
       - name: Unsignierte IPA verpacken
         run: |
           mkdir -p Payload

@@ -15,7 +15,23 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>halal_scanner</string>
+	<string>Halal Scanner</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>de</string>
+		<string>en</string>
+		<string>ar</string>
+		<string>tr</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Die Kamera wird verwendet, um Barcodes zu scannen und Zutatenlisten zu fotografieren. Fotos werden nur auf dem Gerät ausgewertet und danach gelöscht.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Sie können ein vorhandenes Foto einer Zutatenliste auswählen. Es wird nur auf dem Gerät ausgewertet.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>mailto</string>
+	</array>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -56,8 +72,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
