@@ -1,0 +1,21 @@
+
+::group::✅ Passing tests
+✅ 01 Start
+✅ 02 Ergebnis HARAM
+✅ 03 Ergebnis UNKLAR
+✅ 04 Ergebnis HALAL NACH ZUTATENPRÜFUNG
+✅ 05 Quellen
+✅ 06 Einstellungen dunkel
+✅ 07 Sprachauswahl
+✅ 08 Start Englisch dunkel
+✅ 10 Recherche-Karte Aroma (ganze Seite)
+✅ 11 Grün mit Checkliste (ganze Seite)
+✅ 16 Details aufgeklappt (ganze Seite)
+✅ 09 Ergebnis Arabisch (Layout RTL)
+✅ 12 Start Urdu (RTL)
+✅ 13 Ergebnis Persisch (RTL)
+✅ 14 Ergebnis Indonesisch
+✅ 15 Start Hausa (englische Flutter-Standardtexte)
+::endgroup::
+
+🎉 16 tests passed.

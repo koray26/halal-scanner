@@ -1,0 +1,315 @@
+00:00 +0: loading /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart
+00:00 +0: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 1. Eindeutig problematischer Stoff mit Fundstelle -> HARAM
+00:00 +1: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 2./3. Aroma 2. Aroma ohne Informationen: Recherche läuft, Ergebnis UNKLAR
+00:00 +2: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 2./3. Aroma 2b. Allgemeine Taxonomie-Daten klären nichts
+00:00 +3: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 2./3. Aroma 2c. Vegan-Kennzeichnung allein klärt Alkohol nicht -> UNKLAR
+00:00 +4: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 2./3. Aroma 3. Aroma mit produktbezogener Herkunftsangabe -> Neubewertung
+00:00 +5: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 2./3. Aroma 3b. Herstellerangabe "halal" an der Zutat klärt Aroma
+00:00 +6: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 4. E471 ohne belegte Herkunft -> keine Freigabe
+00:00 +7: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 4b. Klartextname ohne Nummer wird E471 zugeordnet
+00:00 +8: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 5. Gelatine ohne Herkunftsangabe -> UNKLAR
+00:00 +9: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 5b. Vegan-Label + Gelatine ist ein Widerspruch -> NICHT VERIFIZIERT
+00:00 +10: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 6. Grün nur mit allen Voraussetzungen vollständige unkritische Liste -> grün, alle Bedingungen erfüllt
+00:00 +11: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 6. Grün nur mit allen Voraussetzungen Datenqualitätswarnung -> nicht grün
+00:00 +12: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 6. Grün nur mit allen Voraussetzungen Unausgeglichene Klammern (abgeschnitten?) -> nicht grün
+00:00 +13: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 6. Grün nur mit allen Voraussetzungen Strittiger Stoff -> nie grün
+00:00 +14: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 7. Fehlende oder unvollständige Zutatenliste -> NICHT VERIFIZIERT
+00:00 +15: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 8. Widersprüchliche Quellen -> keine grüne Freigabe
+00:00 +16: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 9. Foto/OCR abgeschnitten/unleserlich -> keine Freigabe
+00:00 +17: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 9. Foto/OCR nicht unterstützte Schrift -> keine Freigabe
+00:00 +18: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 9. Foto/OCR vollständiges, korrigiertes Foto -> trotzdem nie grün
+00:00 +19: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 9. Foto/OCR Foto durchläuft dieselbe Recherche
+00:00 +20: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 10.–12. AppState: Feedback, offline, Quelle nicht erreichbar 10. Nutzer-Feedback ändert den Status nicht
+00:00 +21: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 10.–12. AppState: Feedback, offline, Quelle nicht erreichbar 11. Offline: keine Behauptung einer erfolgreichen Recherche
+00:00 +22: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 10.–12. AppState: Feedback, offline, Quelle nicht erreichbar 12. Recherchequelle nicht erreichbar -> Unsicherheit + erneut prüfbar
+00:00 +23: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 10.–12. AppState: Feedback, offline, Quelle nicht erreichbar Offline mit gespeichertem Ergebnis -> Ergebnis aus Speicher, markiert
+00:00 +24: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 13. Falscher oder nicht existierender Barcode -> NICHT VERIFIZIERT
+00:00 +25: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 14. Zertifikat nur für andere Variante -> keine Zertifizierung
+00:00 +26: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: 15. Jede grüne Einstufung erfüllt alle Freigabebedingungen
+00:00 +27: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Netzwerk und fehlerhafte Daten langsame Verbindung -> Zeitüberschreitung
+00:00 +28: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Netzwerk und fehlerhafte Daten leere Antwort -> invalidResponse
+00:00 +29: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Netzwerk und fehlerhafte Daten API-Limit (429) -> rateLimited
+00:00 +30: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Netzwerk und fehlerhafte Daten Taxonomie: Zeitüberschreitung und kaputtes JSON
+00:00 +31: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Netzwerk und fehlerhafte Daten fehlerhafte strukturierte Zutaten werden robust ignoriert
+00:00 +32: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Netzwerk und fehlerhafte Daten Taxonomie-Format (echte Antwort) wird gelesen
+00:00 +33: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Echte Open-Food-Facts-Antworten (Oktober 2026) Nutella (DE): vollständige Liste ohne kritische Stoffe -> grün
+00:00 +34: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Echte Open-Food-Facts-Antworten (Oktober 2026) Mars (EN): natürlicher Vanilleextrakt -> UNKLAR
+00:00 +35: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Echte Open-Food-Facts-Antworten (Oktober 2026) Fruchtgummi (IT, nicht unterstützte Sprache): Gelatine über Datenbankanalyse erkannt
+00:00 +36: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Echte Open-Food-Facts-Antworten (Oktober 2026) Datensatz mit Sprachfehler und unbekannten Zutaten -> NICHT VERIFIZIERT
+00:00 +37: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Regelversion erhöht
+00:00 +38: /home/runner/work/halal-scanner/halal-scanner/test/research_test.dart: Verdict mit Recherche ist serialisierbar (Verlauf/Offline)
+00:00 +39: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Zuordnung Sprache -> Zutaten-Erkennung Grün nur für Deutsch und Englisch; Französisch/Türkisch eingeschränkt
+00:00 +40: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Zuordnung Sprache -> Zutaten-Erkennung Regelversion für die Sperre von Grün bei fr/tr
+00:00 +41: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Deutsch/Englisch können Grün ergeben Deutsch, unkritisch -> Grün
+00:00 +42: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Deutsch/Englisch können Grün ergeben Englisch, unkritisch -> Grün
+00:00 +43: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Deutsch/Englisch können Grün ergeben Deutsch + Französisch: die deutsche Liste trägt, Französisch wird mitgeprüft
+00:00 +44: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Deutsch/Englisch können Grün ergeben Deutsch unkritisch, Französisch mit Schwein -> Widerspruch, nie Grün
+00:00 +45: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Französisch – erkannt, aber vorerst kein Grün Unkritische Liste -> NICHT VERIFIZIERT (Sprache eingeschränkt)
+00:00 +46: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Französisch – erkannt, aber vorerst kein Grün Verbotene Bestandteile werden erkannt -> HARAM
+00:00 +47: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Französisch – erkannt, aber vorerst kein Grün Ungeklärte Herkunft wird erkannt -> UNKLAR
+00:00 +48: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Französisch – erkannt, aber vorerst kein Grün Schweine-Angabe wird als Sachaussage erkannt
+00:00 +49: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Französisch – erkannt, aber vorerst kein Grün Ohne Fund: Schwein/Alkohol „ungeklärt“ statt „nicht nachgewiesen“
+00:00 +50: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Türkisch – erkannt, aber vorerst kein Grün Unkritische Liste -> NICHT VERIFIZIERT (Sprache eingeschränkt)
+00:01 +51: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Türkisch – erkannt, aber vorerst kein Grün Verbotene Bestandteile werden erkannt -> HARAM
+00:01 +52: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Türkisch – erkannt, aber vorerst kein Grün Ungeklärte Herkunft wird erkannt -> UNKLAR
+00:01 +53: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Türkisch – erkannt, aber vorerst kein Grün Großbuchstaben mit İ und I (ı) werden erkannt
+00:01 +54: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Türkisch – erkannt, aber vorerst kein Grün Fundstelle zeigt den Wortlaut der Quelle
+00:01 +55: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 1: Türkisch – erkannt, aber vorerst kein Grün Vereinheitlichung ändert Länge und andere Zeichen nicht
+00:01 +56: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün ar: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +57: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün id: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +58: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün ms: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +59: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün ur: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +60: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün bn: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +61: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün hi: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +62: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün fa: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +63: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün ha: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +64: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün zh: unkritisch wirkend -> NICHT VERIFIZIERT
+00:01 +65: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün Text wird mit denselben Regeln geprüft (Grund-Erkennung)
+00:01 +66: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün Chinesisch: weder Wortlisten noch Grund-Erkennung
+00:01 +67: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün Strukturierte Datenbank-Analyse kann HARAM/UNKLAR liefern, nie Grün
+00:01 +68: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Nicht unterstützte Schriften Anteil nicht-lateinischer Buchstaben
+00:01 +69: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Nicht unterstützte Schriften Als Deutsch/Englisch markierter Text in fremder Schrift -> nie Grün
+00:01 +70: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Nicht unterstützte Schriften Foto-Texterkennung: jede nicht-lateinische Schrift wird gemeldet
+00:01 +71: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Ziffern anderer Schriften im Barcode Arabisch-indische, persische, Devanagari- und bengalische Ziffern
+00:01 +72: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Ziffern anderer Schriften im Barcode Andere Zeichen bleiben unverändert und werden weiter abgelehnt
+00:01 +73: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Ziffern anderer Schriften im Barcode Eingabefeld wandelt beim Tippen um
+00:01 +74: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Wurstwaren ohne Zutatenangabe (Pepperoni, Chorizo, Mortadella) Ohne Unterzutaten -> NICHT VERIFIZIERT (Liste nicht vollständig)
+00:01 +75: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Wurstwaren ohne Zutatenangabe (Pepperoni, Chorizo, Mortadella) Schwein/Alkohol gelten dann als ungeklärt, nicht als „nicht nachgewiesen“
+00:01 +76: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Wurstwaren ohne Zutatenangabe (Pepperoni, Chorizo, Mortadella) Mit Unterzutaten werden diese normal geprüft
+00:01 +77: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Wurstwaren ohne Zutatenangabe (Pepperoni, Chorizo, Mortadella) Belegtes UNKLAR hat Vorrang vor der fehlenden Angabe
+00:01 +78: /home/runner/work/halal-scanner/halal-scanner/test/language_support_test.dart: Wurstwaren ohne Zutatenangabe (Pepperoni, Chorizo, Mortadella) „Peperoni“ (Gemüse, ein p) ist nicht betroffen
+00:02 +79: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +80: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +81: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +82: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +83: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +84: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +85: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +86: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +87: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +88: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +89: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +90: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +91: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +92: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +93: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +94: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +95: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +96: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:02 +97: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:03 +98: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:03 +99: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:03 +100: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:03 +101: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Startbildschirm: Deutsch, Scan-Button, Navigation
+00:03 +102: /home/runner/work/halal-scanner/halal-scanner/test/dimensions_test.dart: Schweinebestandteile Mehrsprachige Bezeichnungen und Synonyme
+00:03 +103: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ar wird rechts-nach-links dargestellt
+00:03 +104: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ar wird rechts-nach-links dargestellt
+00:03 +105: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ar wird rechts-nach-links dargestellt
+00:03 +106: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ar wird rechts-nach-links dargestellt
+00:03 +107: /home/runner/work/halal-scanner/halal-scanner/test/dimensions_test.dart: Ethanol und andere Alkohole Zuckeralkohole sind kein Ethanol
+00:03 +108: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +109: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +110: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +111: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +112: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +113: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +114: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +115: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +116: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +117: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +118: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ur wird rechts-nach-links dargestellt
+00:03 +119: /home/runner/work/halal-scanner/halal-scanner/test/dimensions_test.dart: Anzeige: drei getrennte Aussagen mit Hinweis
+00:04 +120: /home/runner/work/halal-scanner/halal-scanner/test/dimensions_test.dart: Anzeige: drei getrennte Aussagen mit Hinweis
+00:04 +121: /home/runner/work/halal-scanner/halal-scanner/test/dimensions_test.dart: Anzeige: drei getrennte Aussagen mit Hinweis
+00:04 +122: /home/runner/work/halal-scanner/halal-scanner/test/dimensions_test.dart: Anzeige: drei getrennte Aussagen mit Hinweis
+00:04 +123: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: bn: Startbildschirm
+00:04 +124: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: hi: Startbildschirm
+00:04 +125: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: ha: Startbildschirm
+00:04 +126: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: fr: Startbildschirm
+00:04 +127: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Sprachwechsel zur Laufzeit
+00:05 +128: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Gleiche Zutat -> gleiche Regel (gemeinsame Kennung) Gelatine (de) -> Regel „gelatine“, UNKLAR
+00:05 +129: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Gleiche Zutat -> gleiche Regel (gemeinsame Kennung) Gelatine (de) -> Regel „gelatine“, UNKLAR
+00:05 +130: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Sprachauswahl zeigt Oberfläche und Zutatenprüfung getrennt
+00:05 +131: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Sprachauswahl zeigt Oberfläche und Zutatenprüfung getrennt
+00:05 +132: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Sprachauswahl zeigt Oberfläche und Zutatenprüfung getrennt
+00:05 +133: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Gleiche Zutat -> gleiche Regel (gemeinsame Kennung) Gelatine (tr) -> Regel „gelatine“, UNKLAR
+00:05 +134: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Gleiche Zutat -> gleiche Regel (gemeinsame Kennung) Gelatine (tr) -> Regel „gelatine“, UNKLAR
+00:05 +135: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis HARAM zeigt Zutat, Begründung und Buttons
+00:05 +136: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis HARAM zeigt Zutat, Begründung und Buttons
+00:05 +137: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis HARAM zeigt Zutat, Begründung und Buttons
+00:05 +138: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis HARAM zeigt Zutat, Begründung und Buttons
+00:05 +139: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis HARAM zeigt Zutat, Begründung und Buttons
+00:05 +140: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis HARAM zeigt Zutat, Begründung und Buttons
+00:05 +141: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Gleiche Zutat -> gleiche Regel (gemeinsame Kennung) Gelatine (fa) -> Regel „gelatine“, UNKLAR
+00:05 +142: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +143: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +144: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +145: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +146: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +147: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +148: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +149: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +150: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +151: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Ergebnis UNKLAR bei Gelatine unbekannter Herkunft
+00:05 +152: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Gleiche Zutat -> gleiche Regel (gemeinsame Kennung) Wein (de) -> Regel „alcoholic_beverage“, HARAM
+00:05 +153: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +154: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +155: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +156: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +157: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +158: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +159: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +160: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +161: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +162: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +163: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +164: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +165: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +166: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +167: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +168: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +169: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien
+00:05 +170: /home/runner/work/halal-scanner/halal-scanner/test/cross_language_test.dart: Grundsatz: nur Deutsch/Englisch können Grün ergeben Grund-Erkennung liefert nie Grün, auch ohne Fund
+00:05 +171: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +172: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +173: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +174: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +175: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +176: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +177: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +178: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +179: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +180: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +181: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +182: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +183: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +184: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +185: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +186: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +187: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +188: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +189: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +190: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +191: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +192: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +193: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +194: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Große Schrift (200 %) ohne Layout-Fehler
+00:05 +195: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Verlauf: Speichern und Laden (offline verfügbar)
+00:05 +196: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Sprachdateien laden über das Asset-System
+00:05 +197: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Kurze Ergebnisseite: Status und Zusammenfassung im ersten Bildschirm
+00:05 +198: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Details sind eingeklappt und lassen sich per Antippen öffnen
+00:06 +199: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: Gleiches Produkt, andere App-Sprache: gleiche Bewertung, übersetzter Begriff
+00:06 +200: /home/runner/work/halal-scanner/halal-scanner/test/i18n_test.dart: Alle wählbaren Sprachen haben eine Datei mit allen Schlüsseln
+00:06 +201: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: HARAM: verbotene Zutat steht oben, ohne Aufklappen
+00:06 +202: /home/runner/work/halal-scanner/halal-scanner/test/i18n_test.dart: Platzhalter sind in allen Sprachen identisch
+00:06 +203: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: NICHT VERIFIZIERT ohne Funde: kein Kasten „Das Wichtigste“
+00:06 +204: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: NICHT VERIFIZIERT ohne Funde: kein Kasten „Das Wichtigste“
+00:06 +205: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: NICHT VERIFIZIERT ohne Funde: kein Kasten „Das Wichtigste“
+00:06 +206: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: NICHT VERIFIZIERT ohne Funde: kein Kasten „Das Wichtigste“
+00:06 +207: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: NICHT VERIFIZIERT ohne Funde: kein Kasten „Das Wichtigste“
+00:06 +208: /home/runner/work/halal-scanner/halal-scanner/test/i18n_test.dart: Keine absoluten Aussagen wie "100 % halal" oder "garantiert halal"
+00:06 +209: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +210: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +211: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +212: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +213: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +214: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +215: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +216: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +217: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +218: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +219: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:06 +220: /home/runner/work/halal-scanner/halal-scanner/test/widget_test.dart: USDA-Schlüssel: verdeckte Eingabe, speichern, löschen
+00:07 +221: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schweinegelatine -> HARAM mit Beleg
+00:07 +222: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Gelatine (Schwein) in Klammern -> HARAM
+00:07 +223: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Englisch: pork gelatin -> HARAM
+00:07 +224: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schweinefleisch -> HARAM
+00:07 +225: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Rotwein als Zutat -> HARAM
+00:07 +226: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Weinsauce -> HARAM, Weintrauben/Weinsäure nicht
+00:07 +227: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Alkohol deklariert -> HARAM
+00:07 +228: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Blut -> HARAM, Blutorange nicht
+00:07 +229: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:07 +230: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:07 +231: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:07 +232: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:07 +233: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:07 +234: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +235: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +236: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +237: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +238: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +239: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +240: /home/runner/work/halal-scanner/halal-scanner/test/halal_engine_test.dart: Regel A – belegtes HARAM Schmalz vom Schwein (lard) -> HARAM
+00:08 +241: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +242: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +243: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +244: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +245: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +246: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +247: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +248: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +249: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +250: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +251: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +252: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +253: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +254: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +255: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +256: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +257: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +258: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +259: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +260: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +261: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +262: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +263: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +264: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +265: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +266: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +267: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +268: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +269: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +270: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +271: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +272: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +273: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +274: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +275: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +276: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +277: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +278: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +279: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +280: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +281: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +282: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +283: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) Unkritische FDC-Liste -> nie grün (Freigabe nur mit Open-Food-Facts-Daten)
+00:08 +284: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) FDC-Liste mit Schweinegelatine -> HARAM
+00:08 +285: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Bewertung mit FDC-Daten (Regeln unverändert) FDC-Liste mit Aroma -> UNKLAR
+00:08 +286: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand OFF ohne Treffer -> FDC wird abgefragt und protokolliert
+00:08 +287: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand OFF mit Zutaten -> FDC wird nicht abgefragt
+00:08 +288: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Ohne Schlüssel -> „nicht eingerichtet“, Ergebnis NICHT VERIFIZIERT
+00:08 +289: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand FDC nicht erreichbar -> protokolliert, keine erfundenen Daten
+00:08 +290: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Persönlicher USDA-Schlüssel (optional, sicher gespeichert) Standard: kein Schlüssel eingebaut, USDA wird nicht abgefragt
+00:08 +291: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Persönlicher USDA-Schlüssel (optional, sicher gespeichert) Ungültige Eingabe wird abgelehnt und nicht gespeichert
+00:08 +292: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Persönlicher USDA-Schlüssel (optional, sicher gespeichert) Gespeicherter Schlüssel: sicherer Speicher, Kopfzeile, übersteht Neustart
+00:08 +293: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Persönlicher USDA-Schlüssel (optional, sicher gespeichert) Schlüssel löschen: entfernt, USDA wird nicht mehr abgefragt
+00:08 +294: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Persönlicher USDA-Schlüssel (optional, sicher gespeichert) Von USDA abgelehnter Schlüssel: Hinweis, Ergebnis NICHT VERIFIZIERT
+00:08 +295: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Kein USDA-Schlüssel in Build-Konfiguration oder App-Code
+00:08 +296: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: USDA FoodData Central Abfragereihenfolge im App-Zustand Geprüfte Quellen bleiben im Verlauf gespeichert
+00:08 +297: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: Produktsuche (Open Food Facts) Echte Antwort wird gelesen; nur numerische Codes, keine Duplikate
+00:08 +298: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: Produktsuche (Open Food Facts) Ungültige Einträge werden verworfen
+00:08 +299: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: Produktsuche (Open Food Facts) Zu kurze Suche -> keine Anfrage
+00:08 +300: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: Produktsuche (Open Food Facts) Anfrage enthält Suchtext und Sprache; Limit 10 pro Minute
+00:08 +301: /home/runner/work/halal-scanner/halal-scanner/test/sources_test.dart: Produktsuche (Open Food Facts) Serverfehler und API-Limit
+00:09 +302: /home/runner/work/halal-scanner/halal-scanner/test/ocr_text_test.dart: Worttrennung am Zeilenende wird zusammengefügt
+00:09 +303: /home/runner/work/halal-scanner/halal-scanner/test/ocr_text_test.dart: E-Nummern, Mengen und Klammern bleiben erhalten
+00:09 +304: /home/runner/work/halal-scanner/halal-scanner/test/ocr_text_test.dart: Nicht lateinische Schrift wird erkannt
+00:09 +305: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: Barcode gültige Codes
+00:09 +306: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: Barcode UPC-E wird zu UPC-A erweitert
+00:09 +307: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: Barcode ungültige Codes
+00:09 +308: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: IngredientParser verschachtelte Klammern
+00:09 +309: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: IngredientParser Dezimalpunkt trennt nicht
+00:09 +310: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: IngredientParser OFF-Allergenmarkierung wird entfernt
+00:09 +311: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: IngredientParser Spurenhinweis wird abgetrennt
+00:09 +312: /home/runner/work/halal-scanner/halal-scanner/test/barcode_parser_test.dart: IngredientParser Unbalancierte Klammer bricht nicht ab
+00:09 +313: All tests passed!
