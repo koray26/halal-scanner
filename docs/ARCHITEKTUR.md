@@ -10,13 +10,16 @@ lib/
 │  └─ widgets/widgets.dart      Logo, Statusanzeige, Karten, Leerzustände
 ├─ domain/                      Reines Dart, ohne Flutter → vollständig testbar
 │  ├─ barcode.dart              GTIN-Prüfziffer, UPC-E→UPC-A, Produktvergleich
-│  ├─ models.dart               Produkt, Zutatenliste, Quelle, Zertifikat
+│  ├─ models.dart               Produkt (inkl. strukturierter OFF-Zutaten), Zutatenliste, Quelle, Zertifikat
+│  ├─ knowledge/substances.dart Stoffwissen: E-Nummern, Stoffklassen, mögliche Herkünfte, Prüffragen
+│  ├─ research/research.dart    Recherche-Pipeline je Zutat (Schritte, Belege, Prüffragen)
 │  └─ rules/
 │     ├─ catalog.dart           Versionierte Wortlisten (siehe HALAL_REGELN.md)
 │     ├─ ingredient_parser.dart Zerlegung der Zutatenliste in einen Baum
 │     └─ halal_engine.dart      Entscheidungslogik, Bericht-Daten
 ├─ data/
-│  ├─ open_food_facts.dart      API-Adapter (v2), Ratenbegrenzung, Fehlerbehandlung
+│  ├─ open_food_facts.dart      Produkt-API (v2) + Taxonomie-API, Ratenbegrenzung, Fehlerbehandlung
+│  ├─ feedback_store.dart       Unbestätigte Nutzerhinweise (lokal) + Export
 │  └─ history_store.dart        Verlauf/Favoriten/Einstellungen lokal (shared_preferences)
 ├─ state/app_state.dart         App-Zustand, Scan-/Foto-Ablauf, Offline-Rückfall
 └─ features/                    Bildschirme: home, scanner, result, ocr, history, settings
@@ -25,8 +28,11 @@ lib/
 ## Datenfluss beim Scan
 1. `ScannerScreen` (mobile_scanner, EAN-8/13, UPC-A/E) → Prüfziffer → Doppelscan-Schutz (3 s).
 2. `AppState.lookup` → `OpenFoodFactsClient.fetch` → `ProductRecord` (mit Quelle + Abrufzeit).
-3. `HalalEngine.evaluate` → `Verdict` (Status, Belege, Unbekanntes, Aussagekraft, Regelversion).
-4. Ergebnis wird lokal gespeichert (Verlauf). Bei Netzwerkfehler: gespeichertes Ergebnis mit Warnhinweis.
+3. `AppState.evaluateWithResearch`: erster Durchgang offline → für offene Zutaten Abfrage der
+   Open-Food-Facts-Taxonomie → zweiter Durchgang mit `ResearchContext`.
+4. `HalalEngine.evaluate` → für jede kritische Zutat `ResearchPipeline.investigate` → `Verdict`
+   (Status, Untersuchungen je Zutat, Freigabebedingungen, Unbekanntes, Aussagekraft, Regelversion).
+5. Ergebnis wird lokal gespeichert (Verlauf). Bei Netzwerkfehler: gespeichertes Ergebnis mit Warnhinweis.
 
 ## Foto-Ablauf
 `image_picker` → Google ML Kit Texterkennung (offline, lateinische Schrift) → Foto sofort löschen →
@@ -41,6 +47,6 @@ Backend (z. B. Supabase mit Row Level Security) für Nutzerkorrekturen, geprüft
 Zertifikate ergänzt werden kann – siehe STATUS.md.
 
 ## Build & Tests
-GitHub Actions (`.github/workflows/build.yml`): Analyse → über 80 automatische Tests → Bildschirmfotos →
+GitHub Actions (`.github/workflows/build.yml`): Analyse → 130 automatische Tests → Bildschirmfotos →
 Android-APK (universal + arm64) → iOS-Build ohne Signatur → Veröffentlichung unter Releases.
 Die Protokolle landen zusätzlich in den Branches `ci-logs-test`, `ci-logs-android`, `ci-logs-ios`.

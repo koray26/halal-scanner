@@ -83,6 +83,11 @@ Bitte notieren Sie, was nicht funktioniert, und schicken Sie es mir (oder als �
 - [ ] Ergebnis: Status mit Farbe, Symbol **und** Text; „Zutaten anzeigen“; „Quellen und Begründung“.
 - [ ] Produkt, das es nicht in der Datenbank gibt → NICHT VERIFIZIERT + Angebot zum Fotografieren.
 - [ ] **Zutaten fotografieren**: Foto → Text prüfen/korrigieren → Haken setzen → „Zutaten prüfen“.
+- [ ] Produkt mit „Aroma“ scannen → Karte der Zutat aufklappen: Recherche-Schritte, offene Fragen, „Was würde klären?“.
+- [ ] „Weißt du mehr?“ → Hinweis speichern → erscheint als „unbestätigt“, Ergebnis bleibt gleich.
+- [ ] Einstellungen → „Meine Hinweise“ → kopieren / per E-Mail senden.
+- [ ] „Hersteller fragen“ → E-Mail-Programm öffnet sich mit vorbereitetem Text (nicht automatisch senden).
+- [ ] Grünes Ergebnis: Checkliste „Freigabebedingungen – alle erfüllt“ sichtbar.
 - [ ] Favorit setzen (Stern), Verlauf ansehen, Eintrag löschen (nach links wischen).
 - [ ] **Flugmodus**: früher gescanntes Produkt erneut scannen → gespeichertes Ergebnis mit Warnhinweis.
 - [ ] Dunkelmodus, große Schrift (Telefon-Einstellungen), Bildschirmleser (TalkBack / VoiceOver).

@@ -4,14 +4,16 @@ Mobile App für **Android und iPhone** (Flutter), die Lebensmittel per Barcode o
 
 **Grundsatz:** Keine erfundenen Zutaten. Keine unbelegten Halal-Freigaben. Fehlende oder unsichere Daten führen nie zu „halal“.
 
+Für jede kritische Zutat recherchiert die App automatisch (Stoffidentität/E-Nummer, strukturierte Produktdaten, Herkunftsangaben, Verpackungskennzeichnung, Open-Food-Facts-Taxonomie, Herstellerlink) und zeigt, was belegt ist, was offen bleibt und welche Information die Einstufung klären würde.
+
 ## Ergebnisse
 
 | Status | Bedeutung |
 |---|---|
-| 🔴 **HARAM** | Ein verbotener Bestandteil ist ausdrücklich genannt (z. B. Schweinegelatine, Wein, Alkohol). |
-| 🟠 **UNKLAR** | Herkunft offen (z. B. Gelatine, Aroma, E471, Lab, Fleisch) oder unter Gelehrten strittig (z. B. Karmin, Weinessig). |
-| 🟠 **NICHT VERIFIZIERT** | Produkt nicht gefunden, Zutaten fehlen, unvollständig, widersprüchlich, nur fotografiert oder von Hand eingegeben. |
-| 🟢 **HALAL NACH ZUTATENPRÜFUNG** | Vollständige Liste aus der Datenbank ohne problematische Bestandteile. **Keine Zertifizierung.** |
+| 🔴 **HARAM** | Ein verbotener Bestandteil ist ausdrücklich genannt (z. B. Schweinegelatine, Wein, Alkohol) – mit Fundstelle und Grund. |
+| 🟠 **UNKLAR** | Herkunft trotz automatischer Recherche nicht belegt (z. B. Gelatine, Aroma, E471, Lab, Fleisch) oder unter Gelehrten strittig (z. B. Karmin, Weinessig). |
+| ⚪ **NICHT VERIFIZIERT** (grau) | Produkt, vollständige Zutatenliste oder entscheidende Informationen fehlen, sind unvollständig, widersprüchlich, nur fotografiert oder von Hand eingegeben. |
+| 🟢 **HALAL NACH VOLLSTÄNDIGER ZUTATENPRÜFUNG** | Nur wenn **alle zehn Freigabebedingungen** erfüllt sind (Checkliste in der App). **Keine Zertifizierung, keine Garantie.** |
 | 🟢 **HALAL-ZERTIFIZIERT** | Nur mit verifiziertem, gültigem Zertifikat für genau dieses Produkt (derzeit keine kostenlose Quelle angebunden). |
 
 ## Download
