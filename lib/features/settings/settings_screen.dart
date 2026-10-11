@@ -86,7 +86,7 @@ class SettingsScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.mail_outline),
                   title: Text(s.t('settings.contact')),
-                  subtitle: Text(AppConfig.contactEmail),
+                  subtitle: const Text(AppConfig.contactEmail),
                   onTap: () => launchUrl(Uri(scheme: 'mailto', path: AppConfig.contactEmail)),
                 ),
             ]),

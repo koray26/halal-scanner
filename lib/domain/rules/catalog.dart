@@ -119,7 +119,7 @@ const List<String> _porkCores = [
   'lard',
   'lardo',
   'saindoux',
-  '${_l}خنزير$_l',
+  '$_lخنزير$_l',
 ];
 
 const _cheeseOrRennetResolvers = {

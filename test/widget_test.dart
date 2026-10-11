@@ -82,6 +82,7 @@ void main() {
     await tester.pumpWidget(HalalScannerApp(state: state));
     await tester.pumpAndSettle();
     expect(find.text('Deutsch'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('اردو'), 200);
     final urdu = tester.widget<ListTile>(
         find.ancestor(of: find.text('اردو'), matching: find.byType(ListTile)));
     expect(urdu.enabled, isFalse);
