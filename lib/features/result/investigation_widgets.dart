@@ -5,6 +5,7 @@ import '../../core/i18n/strings.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/history_store.dart';
+import '../../domain/knowledge/pubchem_data.dart';
 import '../../domain/knowledge/substances.dart';
 import '../../domain/research/research.dart';
 import '../../domain/rules/catalog.dart';
@@ -127,6 +128,22 @@ class InvestigationCard extends StatelessWidget {
             ].join()),
             if (inv.functionClass != null)
               _kv(s.t('inv.class'), s.t('class.${inv.functionClass}')),
+            if (pubchemFor(inv.additiveCode) case final pc?) ...[
+              _kv(s.t('inv.pubchem'), [
+                'CID ${ltr('${pc.cid}')}',
+                if (pc.cas != null) 'CAS ${ltr(pc.cas!)}',
+                if (pc.formula != null) ltr(pc.formula!),
+              ].join(' · ')),
+              Text(s.t('inv.pubchem.note', {'date': pubchemRetrievedAt}),
+                  style: theme.textTheme.bodySmall),
+              TextButton.icon(
+                style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: Text(s.t('sources.open')),
+                onPressed: () =>
+                    launchUrl(Uri.parse(pc.url), mode: LaunchMode.externalApplication),
+              ),
+            ],
             label('inv.q.known'),
             Text(s.t('substance.${inv.ruleId}.identity')),
             if (inv.possibleOrigins.isNotEmpty) ...[
@@ -298,4 +315,10 @@ Future<void> openManufacturerInquiry(
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(s.t('inquiry.noMailApp'))));
   }
+}
+
+/// Allgemeine PubChem-Stoffidentität zu einer E-Nummer wie „E422“ (falls eindeutig).
+PubChemRecord? pubchemFor(String? additiveCode) {
+  if (additiveCode == null || additiveCode.length < 2) return null;
+  return pubchemByAdditive[additiveCode.substring(1).toLowerCase()];
 }

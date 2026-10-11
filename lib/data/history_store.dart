@@ -17,6 +17,7 @@ class ScanEntry {
     this.barcode,
     this.product,
     this.analyzedTexts = const [],
+    this.sourceChecks = const [],
     this.favorite = false,
   });
 
@@ -27,6 +28,9 @@ class ScanEntry {
 
   /// Texte, die tatsächlich ausgewertet wurden (z. B. OCR / korrigiert).
   final List<IngredientText> analyzedTexts;
+
+  /// Welche Produktquellen bei diesem Scan abgefragt wurden und mit welchem Ergebnis.
+  final List<SourceCheck> sourceChecks;
   final Verdict verdict;
   bool favorite;
 
@@ -42,6 +46,7 @@ class ScanEntry {
         barcode: barcode,
         product: product ?? this.product,
         analyzedTexts: analyzedTexts ?? this.analyzedTexts,
+        sourceChecks: sourceChecks,
         favorite: favorite,
       );
 
@@ -52,6 +57,7 @@ class ScanEntry {
         'product': product?.toJson(),
         'analyzedTexts': analyzedTexts.map((t) => t.toJson()).toList(),
         'verdict': verdict.toJson(),
+        'sourceChecks': sourceChecks.map((c) => c.toJson()).toList(),
         'favorite': favorite,
       };
 
@@ -66,6 +72,9 @@ class ScanEntry {
             .map((e) => IngredientText.fromJson(e as Map<String, dynamic>))
             .toList(),
         verdict: Verdict.fromJson(j['verdict'] as Map<String, dynamic>),
+        sourceChecks: ((j['sourceChecks'] as List?) ?? const [])
+            .map((e) => SourceCheck.fromJson(e as Map<String, dynamic>))
+            .toList(),
         favorite: j['favorite'] as bool? ?? false,
       );
 }

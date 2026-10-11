@@ -24,6 +24,17 @@ class AppConfig {
 
   static const offBaseUrl = 'https://world.openfoodfacts.org';
 
+  /// Offizielle Produktsuche von Open Food Facts (Search-a-licious).
+  static const offSearchUrl = 'https://search.openfoodfacts.org/search';
+
+  /// USDA FoodData Central: kostenloser Schlüssel von https://api.data.gov/signup/
+  /// Beim Bauen setzen mit:
+  ///   flutter build apk --dart-define=FDC_API_KEY=ihr-schluessel
+  /// Ohne Schlüssel wird die Quelle nicht abgefragt („nicht konfiguriert“).
+  static const fdcApiKey = String.fromEnvironment('FDC_API_KEY');
+  static bool get hasFdcKey => fdcApiKey.isNotEmpty;
+  static const fdcBaseUrl = 'https://api.nal.usda.gov/fdc/v1';
+
   /// Felder, die von Open Food Facts abgefragt werden (Datensparsamkeit).
   static const offFields = [
     'code',

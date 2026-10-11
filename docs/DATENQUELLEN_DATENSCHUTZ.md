@@ -20,6 +20,29 @@
 - Wikidata-Links (CC0) werden nur als Verweis angezeigt.
 - Testdaten in `test/fixtures/off/` stammen aus Open Food Facts (ODbL).
 
+## Open Food Facts – Produktsuche
+- `GET https://search.openfoodfacts.org/search?q=…&langs=…&page_size=20&fields=…` (Search-a-licious).
+- Übermittelt wird nur der eingegebene Suchtext. Höchstens 10 Suchen pro Minute.
+- Treffer werden nur angezeigt; geprüft wird erst der angetippte Barcode (normale Abfrage).
+
+## USDA FoodData Central (optional)
+- `GET https://api.nal.usda.gov/fdc/v1/foods/search?query=<GTIN>&dataType=Branded&api_key=…`
+- Nur aktiv, wenn beim Bauen ein **kostenloser Schlüssel** gesetzt wird
+  (`--dart-define=FDC_API_KEY=…`; in GitHub: Settings → Secrets → Actions → `FDC_API_KEY`).
+  Schlüssel gibt es unter https://api.data.gov/signup/. Hinweis: Ein in die App eingebauter
+  Schlüssel lässt sich aus der APK auslesen; er dient nur der Mengenbegrenzung (1.000/Std.).
+- Abgefragt wird nur, wenn Open Food Facts kein Produkt oder keine Zutatenliste liefert.
+- Übernommen werden nur Datensätze mit **exakt gleicher GTIN**; mehrere Datensätze → der neueste.
+- Lizenz: Public Domain (CC0 1.0); Quellenangabe „USDA FoodData Central“ erfolgt in der App.
+- Herstellerangaben für den **US-Markt** – Rezepturen anderer Länder können abweichen (Hinweis in der App).
+
+## PubChem (nur beim Erstellen der App)
+- `tool/fetch_pubchem.py` ruft einmalig allgemeine Stoffdaten ab (CID, IUPAC-Name, Formel, CAS)
+  und speichert sie mit Datum in `lib/domain/knowledge/pubchem_data.dart`.
+- Die App selbst sendet nichts an PubChem.
+
+Übersicht aller geprüften Quellen: [QUELLEN_UEBERSICHT.md](QUELLEN_UEBERSICHT.md).
+
 ## Weitere Komponenten (alle kostenlos)
 | Paket | Zweck | Lizenz |
 |---|---|---|
@@ -30,6 +53,8 @@
 ## Datenschutz (DSGVO-orientiert)
 - Keine Konten, keine Werbung, keine Analyse-/Tracking-Werkzeuge, kein eigener Server.
 - Übermittelt werden nur die **Barcode-Nummer** und – für die Zutatenrecherche – allgemeine Stoffkennungen (z. B. `en:e471`) an Open Food Facts (dabei technisch die IP-Adresse).
+- Bei der Produktsuche: der eingegebene **Suchtext** an Open Food Facts.
+- Nur falls eingerichtet und nötig: die **Barcode-Nummer** an USDA FoodData Central.
 - Produktbilder werden direkt von Open Food Facts geladen.
 - Fotos der Zutatenliste werden **nur auf dem Gerät** ausgewertet und danach gelöscht.
 - Verlauf/Favoriten/Einstellungen liegen **nur lokal**; löschbar in den Einstellungen oder durch Deinstallation.

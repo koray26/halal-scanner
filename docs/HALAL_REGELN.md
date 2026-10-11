@@ -81,6 +81,26 @@ ersten Punkt – das Ergebnis bleibt UNKLAR, bis auch „ohne Alkohol“ belegt 
 Ist eine Online-Quelle nicht erreichbar, steht im Bericht „Quelle nicht erreichbar – nicht geprüft“; die App
 behauptet keine erfolgreiche Recherche.
 
+## 4a. Getrennte Sachaussagen: Schwein und Alkohol
+
+Zusätzlich zum Halal-Status zeigt die App zwei Sachaussagen. Sie werden **aus dem fertigen
+Ergebnis abgeleitet** (`lib/domain/rules/dimensions.dart`) und ändern weder Regeln noch Status.
+
+| Aussage | Schweinebestandteile | Ethanol / alkoholische Zutaten |
+|---|---|---|
+| **Nachgewiesen** | Regel „Schwein“ oder Eskalation „vom Schwein“ hat angeschlagen | Regel „Alkoholisches Getränk“ oder „Alkohol deklariert“ hat angeschlagen |
+| **Ungeklärt** | Zutat mit möglicher tierischer/Schweine-Herkunft, deren Tierart/Herkunft offen ist (z. B. Gelatine, E471, Aroma); oder Zutatenliste fehlt, ist unvollständig, unsicher erkannt, in nicht unterstützter Sprache oder widersprüchlich | Zutat mit offener Alkohol-Frage (Aroma, alkoholfreies Bier/Wein) oder Weinessig (Restalkohol nicht belegt); dieselben Datenlücken |
+| **In den geprüften Quellen nicht nachgewiesen** | sonst | sonst |
+
+„Nicht nachgewiesen“ heißt **nicht** „garantiert nicht enthalten“. Cetyl-, Stearyl-, Benzylalkohol und
+Zuckeralkohole sind kein Ethanol (Ausnahmen der Regel „Alkohol deklariert“). Zur Unterscheidung zeigt die
+App allgemeine PubChem-Stoffdaten an – sie belegen nie die Herkunft in einem Produkt.
+
+## Zusätzliche Produktquelle (USDA FoodData Central)
+Zutatenlisten aus USDA FoodData Central werden mit denselben Regeln geprüft. Weil Freigabebedingung 3
+weiterhin Open-Food-Facts-Daten verlangt, können sie **HARAM oder UNKLAR aufdecken, aber nie allein zu
+GRÜN führen**. Die Regeln selbst sind unverändert (Regelversion bleibt 2026.10-2).
+
 ## 5. Wortlisten
 
 ### HARAM (ausdrücklich genannt)

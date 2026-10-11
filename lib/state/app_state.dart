@@ -4,7 +4,9 @@ import '../config.dart';
 import '../core/i18n/strings.dart';
 import '../data/feedback_store.dart';
 import '../data/history_store.dart';
+import '../data/off_search.dart';
 import '../data/open_food_facts.dart';
+import '../data/usda_fdc.dart';
 import '../domain/models.dart';
 import '../domain/research/research.dart';
 import '../domain/rules/halal_engine.dart';
@@ -22,6 +24,8 @@ class AppState extends ChangeNotifier {
   AppState({
     OpenFoodFactsClient? off,
     OffTaxonomyClient? taxonomy,
+    UsdaFdcClient? fdc,
+    OffSearchClient? productSearch,
     HistoryStore? history,
     SettingsStore? settings,
     FeedbackStore? feedbackStore,
@@ -29,6 +33,8 @@ class AppState extends ChangeNotifier {
     DateTime Function()? clock,
   })  : _off = off ?? OpenFoodFactsClient(),
         _taxonomy = taxonomy ?? OffTaxonomyClient(),
+        _fdc = fdc ?? UsdaFdcClient(),
+        productSearch = productSearch ?? OffSearchClient(),
         _historyStore = history ?? HistoryStore(),
         _settings = settings ?? SettingsStore(),
         _feedbackStore = feedbackStore ?? FeedbackStore(),
@@ -37,6 +43,10 @@ class AppState extends ChangeNotifier {
 
   final OpenFoodFactsClient _off;
   final OffTaxonomyClient _taxonomy;
+  final UsdaFdcClient _fdc;
+
+  /// Suche nach Produktname/Marke (Open Food Facts).
+  final OffSearchClient productSearch;
   final FeedbackStore _feedbackStore;
   List<FeedbackEntry> feedback = [];
   final HistoryStore _historyStore;
@@ -97,9 +107,34 @@ class AppState extends ChangeNotifier {
     return null;
   }
 
+  /// Fragt Open Food Facts ab und – nur wenn dort kein Produkt oder keine
+  /// Zutatenliste vorliegt – USDA FoodData Central (exakt gleiche GTIN).
+  /// Ist Open Food Facts nicht erreichbar, gilt das bisherige Verhalten:
+  /// gespeichertes Ergebnis mit Warnhinweis oder Fehlermeldung.
   Future<LookupOutcome> lookup(String barcode) async {
     try {
-      final product = await _off.fetch(barcode);
+      var product = await _off.fetch(barcode);
+      final checks = <SourceCheck>[
+        SourceCheck(SourceKind.openFoodFacts,
+            product == null ? SourceCheckStatus.notFound : SourceCheckStatus.found,
+            checkedAt: now()),
+      ];
+      if (product != null && product.ingredientTexts.isNotEmpty) {
+        checks.add(const SourceCheck(SourceKind.usdaFdc, SourceCheckStatus.skipped));
+      } else if (!_fdc.isConfigured) {
+        checks.add(const SourceCheck(SourceKind.usdaFdc, SourceCheckStatus.notConfigured));
+      } else {
+        try {
+          final fdc = await _fdc.fetchByGtin(barcode);
+          checks.add(SourceCheck(SourceKind.usdaFdc,
+              fdc == null ? SourceCheckStatus.notFound : SourceCheckStatus.found,
+              checkedAt: now()));
+          product = mergeProductSources(product, fdc);
+        } on LookupException {
+          checks.add(SourceCheck(SourceKind.usdaFdc, SourceCheckStatus.unavailable,
+              checkedAt: now()));
+        }
+      }
       final verdict = await evaluateWithResearch(
           product: product, scannedBarcode: barcode);
       final entry = ScanEntry(
@@ -108,6 +143,7 @@ class AppState extends ChangeNotifier {
         barcode: barcode,
         product: product,
         verdict: verdict,
+        sourceChecks: checks,
         favorite: history.any((e) => e.barcode == barcode && e.favorite),
       );
       await _upsert(entry);

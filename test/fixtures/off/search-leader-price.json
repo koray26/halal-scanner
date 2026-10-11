@@ -1,0 +1,60 @@
+{
+  "hits": [
+    {
+      "code": "3263850314391",
+      "brands": [
+        "Leader Price"
+      ],
+      "countries_tags": [
+        "en:france"
+      ],
+      "product_name": "Ail Semoule",
+      "image_front_small_url": "https://images.openfoodfacts.org/images/products/326/385/031/4391/front.3.200.jpg"
+    },
+    {
+      "code": "0965031320612",
+      "brands": [
+        "Leader price"
+      ],
+      "countries_tags": [
+        "en:ireland"
+      ],
+      "product_name": "Flocon dâ€™avoine leader price"
+    },
+    {
+      "code": "5297117091761",
+      "brands": [
+        "Leader Price"
+      ],
+      "countries_tags": [
+        "en:cyprus"
+      ],
+      "product_name": "Limonade - Leader Price - 1,5 L",
+      "image_front_small_url": "https://images.openfoodfacts.org/images/products/529/711/709/1761/front_en.16.200.jpg"
+    },
+    {
+      "code": "8054383507764",
+      "brands": [
+        "Leader price"
+      ],
+      "countries_tags": [
+        "en:france"
+      ],
+      "product_name": "Biscuits secs bio leader price"
+    },
+    {
+      "code": "3263853524711",
+      "brands": [
+        "Pain d'Ã©pices Figues et Noix"
+      ],
+      "countries_tags": [
+        "en:france"
+      ],
+      "product_name": "Leader Price",
+      "image_front_small_url": "https://images.openfoodfacts.org/images/products/326/385/352/4711/front.3.200.jpg"
+    }
+  ],
+  "page": 1,
+  "page_size": 5,
+  "count": 6671
+}

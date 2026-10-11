@@ -14,6 +14,7 @@ import '../../domain/rules/halal_engine.dart';
 import '../../state/app_state.dart';
 import '../feedback/feedback_screen.dart';
 import '../ocr/ocr_screen.dart';
+import 'dimensions_card.dart';
 import 'ingredients_screen.dart';
 import 'investigation_widgets.dart';
 import 'sources_screen.dart';
@@ -237,6 +238,8 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           ),
           const SizedBox(height: Gap.m),
+          DimensionsCard(verdict: v, strings: s),
+          const SizedBox(height: Gap.m),
           GreenChecklist(verdict: v, strings: s),
           const SizedBox(height: Gap.m),
           Semantics(
@@ -381,11 +384,28 @@ class _ResultScreenState extends State<ResultScreen> {
   String _evidenceText(AppStrings s, ScanEntry e) {
     final v = e.verdict;
     final parts = <String>[];
-    if (e.product != null) {
-      parts.add(s.t('evidence.off', {
-        'date': formatDate(e.product!.source.retrievedAt),
-        'modified': e.product!.lastModified == null ? '-' : formatDate(e.product!.lastModified!),
-      }));
+    final p = e.product;
+    if (p != null) {
+      if (p.source.kind == SourceKind.usdaFdc) {
+        parts.add(s.t('evidence.fdc', {
+          'date': formatDate(p.source.retrievedAt),
+          'published': p.source.version ?? '-',
+        }));
+      } else {
+        parts.add(s.t('evidence.off', {
+          'date': formatDate(p.source.retrievedAt),
+          'modified': p.lastModified == null ? '-' : formatDate(p.lastModified!),
+        }));
+        final fdc = p.ingredientTexts
+            .where((t) => t.source.kind == SourceKind.usdaFdc)
+            .firstOrNull;
+        if (fdc != null) {
+          parts.add(s.t('evidence.fdcIngredients', {
+            'date': formatDate(fdc.source.retrievedAt),
+            'published': fdc.source.version ?? '-',
+          }));
+        }
+      }
     }
     if (e.analyzedTexts.isNotEmpty) {
       final kind = e.analyzedTexts.first.source.kind;

@@ -19,11 +19,17 @@ class SourcesScreen extends StatelessWidget {
     final s = AppScope.of(context).strings;
     final v = entry.verdict;
     final r = Report(v, s);
-    final sources = <SourceRef>[
-      if (entry.product != null) entry.product!.source,
-      ...entry.analyzedTexts.map((t) => t.source),
-      if (v.validCertification != null) v.validCertification!.source,
-    ];
+    final sources = <SourceRef>[];
+    void add(SourceRef src) {
+      if (!sources.any((x) => x.kind == src.kind && x.url == src.url)) sources.add(src);
+    }
+
+    if (entry.product != null) {
+      add(entry.product!.source);
+      entry.product!.ingredientTexts.map((t) => t.source).forEach(add);
+    }
+    entry.analyzedTexts.map((t) => t.source).forEach(add);
+    if (v.validCertification != null) add(v.validCertification!.source);
 
     return Scaffold(
       appBar: AppBar(title: Text(s.t('result.sources'))),
@@ -46,6 +52,7 @@ class SourcesScreen extends StatelessWidget {
                             if (src.version != null)
                               Text(s.t('sources.version', {'version': _version(src.version!)})),
                             if (src.kind == SourceKind.openFoodFacts) Text(s.t('sources.offLicense')),
+                            if (src.kind == SourceKind.usdaFdc) Text(s.t('sources.fdcLicense')),
                             if (src.url != null)
                               TextButton.icon(
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero),
@@ -58,6 +65,29 @@ class SourcesScreen extends StatelessWidget {
                         )).toList(),
                   ),
           ),
+          if (entry.sourceChecks.isNotEmpty) ...[
+            const SizedBox(height: Gap.m),
+            SectionCard(
+              title: s.t('sources.checked'),
+              icon: Icons.manage_search,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final c in entry.sourceChecks)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: Gap.xs),
+                      child: Text('• ${s.t('ingredients.source.${c.kind.name}')}: '
+                          '${s.t('sources.check.${c.status.name}')}'),
+                    ),
+                  if (entry.sourceChecks.any((c) =>
+                      c.status == SourceCheckStatus.unavailable ||
+                      c.status == SourceCheckStatus.notConfigured))
+                    Text(s.t('sources.incomplete'),
+                        style: const TextStyle(color: AppColors.unclear)),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: Gap.m),
           SectionCard(
             title: s.t('sources.reasoning'),

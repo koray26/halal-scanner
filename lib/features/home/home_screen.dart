@@ -8,6 +8,7 @@ import '../../state/app_state.dart';
 import '../ocr/ocr_screen.dart';
 import '../result/result_screen.dart';
 import '../scanner/scanner_screen.dart';
+import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -60,6 +61,12 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.keyboard_outlined),
             label: Text(s.t('home.manual')),
             onPressed: () => showManualEntry(context),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.search),
+            label: Text(s.t('home.search')),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const SearchScreen())),
           ),
           const SizedBox(height: Gap.l),
           if (recent.isEmpty)

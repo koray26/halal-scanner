@@ -14,6 +14,47 @@ enum SourceKind {
 
   /// Zertifikatsregister (derzeit keine kostenlose, verifizierbare Quelle angebunden).
   certificationRegistry,
+
+  /// USDA FoodData Central, Datentyp „Branded Foods“ (Public Domain, CC0).
+  /// Herstellerangaben für den US-Markt; nur bei exakt gleicher GTIN genutzt.
+  usdaFdc,
+}
+
+/// Ergebnis der Abfrage einer Quelle bei einem Scan (Nachweis, was geprüft wurde).
+enum SourceCheckStatus {
+  /// Passender Datensatz gefunden.
+  found,
+
+  /// Abgefragt, aber kein passender Datensatz.
+  notFound,
+
+  /// Abfrage fehlgeschlagen (offline, Zeitüberschreitung, Limit) – NICHT geprüft.
+  unavailable,
+
+  /// Quelle braucht einen kostenlosen Schlüssel, der nicht hinterlegt ist.
+  notConfigured,
+
+  /// Nicht nötig, weil eine vorrangige Quelle bereits Zutaten lieferte.
+  skipped,
+}
+
+class SourceCheck {
+  const SourceCheck(this.kind, this.status, {this.checkedAt});
+  final SourceKind kind;
+  final SourceCheckStatus status;
+  final DateTime? checkedAt;
+
+  Map<String, dynamic> toJson() => {
+        'kind': kind.name,
+        'status': status.name,
+        'checkedAt': checkedAt?.toIso8601String(),
+      };
+
+  factory SourceCheck.fromJson(Map<String, dynamic> j) => SourceCheck(
+        SourceKind.values.byName(j['kind'] as String),
+        SourceCheckStatus.values.byName(j['status'] as String),
+        checkedAt: j['checkedAt'] == null ? null : DateTime.parse(j['checkedAt'] as String),
+      );
 }
 
 class SourceRef {
@@ -278,11 +319,11 @@ class ProductRecord {
     }
   }
 
-  ProductRecord copyWith({List<IngredientText>? ingredientTexts}) =>
+  ProductRecord copyWith({List<IngredientText>? ingredientTexts, String? name}) =>
       ProductRecord(
         barcode: barcode,
         source: source,
-        name: name,
+        name: name ?? this.name,
         localizedNames: localizedNames,
         brand: brand,
         quantity: quantity,
