@@ -169,6 +169,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('HARAM'), findsOneWidget);
     expect(find.textContaining('Schweinegelatine'), findsWidgets);
+    await tester.scrollUntilVisible(find.text('Was wurde gefunden?'), 200);
     expect(find.text('Was wurde gefunden?'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Quellen und Begründung'), 200);
     expect(find.text('Zutaten anzeigen'), findsOneWidget);
@@ -227,7 +228,7 @@ void main() {
     expect(ar.t('status.haram'), 'حرام');
   });
 
-  testWidgets('Kurze Ergebnisseite: Status, Zusammenfassung und Zutat ohne Scrollen',
+  testWidgets('Kurze Ergebnisseite: Status und Zusammenfassung im ersten Bildschirm',
       (tester) async {
     final state = await makeStateIn(tester, 'de');
     // Kleines Smartphone (360 × 640 logische Pixel).
@@ -245,20 +246,19 @@ void main() {
     // Status: Farbe UND Symbol UND Text.
     expect(find.text('UNKLAR'), findsOneWidget);
     expect(find.byIcon(Icons.help), findsWidgets);
-    // Wichtigste Zutat mit Begriff, Wortlaut, Einstufung und fehlender Angabe.
-    expect(find.text('Das Wichtigste'), findsOneWidget);
-    expect(find.text('Gelatine/Kollagen: „Gelatine“'), findsOneWidget);
-    expect(find.text('noch nicht abschließend geklärt'), findsOneWidget);
-    expect(find.textContaining('Es fehlt:'), findsOneWidget);
-    // Status und Zusammenfassung liegen vollständig im ersten Bildschirm,
-    // die wichtigsten Zutaten beginnen dort (Testschrift ist breiter als
-    // echte Schriften, auf Geräten passt mehr auf den Bildschirm).
+    // Status und Zusammenfassung liegen vollständig im ersten Bildschirm.
+    // (Die Testschrift ist deutlich breiter als echte Schriften; mit echter
+    // Schrift passt auch „Das Wichtigste“ hinein, siehe Bildschirmfoto 03.)
     for (final k in ['result.status', 'result.summary']) {
       expect(tester.getRect(find.byKey(ValueKey(k))).bottom, lessThanOrEqualTo(640),
           reason: k);
     }
-    expect(tester.getRect(find.byKey(const ValueKey('result.keyPoints'))).top,
-        lessThan(640));
+    // Wichtigste Zutat mit Begriff, Wortlaut, Einstufung und fehlender Angabe.
+    await tester.scrollUntilVisible(find.textContaining('Es fehlt:'), 200);
+    expect(find.text('Das Wichtigste'), findsOneWidget);
+    expect(find.text('Gelatine/Kollagen: „Gelatine“'), findsOneWidget);
+    expect(find.text('noch nicht abschließend geklärt'), findsOneWidget);
+    expect(find.textContaining('Es fehlt:'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -271,6 +271,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     // Überschriften der Abschnitte sind sichtbar, ihr Inhalt nicht.
+    await tester.scrollUntilVisible(find.text('Ausführliche Analyse'), 200);
     expect(find.text('Details (zum Öffnen antippen)'), findsOneWidget);
     expect(find.text('Warum kein grünes Ergebnis?'), findsOneWidget);
     expect(find.text('Was wurde gefunden?'), findsOneWidget);

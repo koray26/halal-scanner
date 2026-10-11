@@ -104,9 +104,14 @@ void main() {
     }
 
     for (final e in pork.entries) {
-      test('Schwein (${e.key}) -> Regel „pork“, HARAM', () {
+      test('Schwein (${e.key}) -> Schwein erkannt, HARAM', () {
         final v = evalLang(e.value, e.key);
-        expect(ruleIds(v), contains('pork'));
+        // Entweder eigene Regel „pork“ oder ein Bestandteil „vom Schwein“
+        // (z. B. Schweinegelatine = Gelatine, durch Schwein auf HARAM gesetzt).
+        expect(
+            v.findings.any((f) =>
+                !f.isResolved && (f.ruleId == 'pork' || f.escalatedByPork)),
+            isTrue);
         expect(v.status, HalalStatus.haram);
       });
     }
