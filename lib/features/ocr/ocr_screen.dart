@@ -31,6 +31,7 @@ class _OcrScreenState extends State<OcrScreen> {
   List<String> _uncertain = [];
   bool _completeConfirmed = false;
   bool _tooLittle = false;
+  bool _unsupportedScript = false;
   String? _error;
 
   static final _header = RegExp(
@@ -65,7 +66,8 @@ class _OcrScreenState extends State<OcrScreen> {
           if (c != null && c < 0.6) uncertain.add(line.text);
         }
       }
-      _recognized = lines.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+      _recognized = OcrText.join(lines);
+      _unsupportedScript = OcrText.looksLikeUnsupportedScript(_recognized);
       _text.text = _recognized;
       _uncertain = uncertain;
       _tooLittle = _recognized.length < 15;
@@ -98,6 +100,7 @@ class _OcrScreenState extends State<OcrScreen> {
       ),
       possiblyTruncated: !_completeConfirmed || !_header.hasMatch(text),
       uncertainFragments: edited ? const [] : _uncertain,
+      unsupportedScript: _unsupportedScript,
     );
     final entry = await state.analyzeTexts([input],
         barcode: widget.barcode, product: widget.product);
@@ -187,6 +190,19 @@ class _OcrScreenState extends State<OcrScreen> {
                     ],
                   ),
                 ),
+              if (_unsupportedScript)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Gap.m),
+                  child: MaterialBanner(
+                    leading: const Icon(Icons.translate, color: AppColors.unclear),
+                    content: Text(s.t('ocr.unsupportedScript')),
+                    actions: [
+                      TextButton(
+                          onPressed: () => setState(() => _phase = _Phase.intro),
+                          child: Text(s.t('ocr.retake'))),
+                    ],
+                  ),
+                ),
               Text(s.t('ocr.review.title'),
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: Gap.xs),
@@ -229,5 +245,45 @@ class _OcrScreenState extends State<OcrScreen> {
           ),
       },
     );
+  }
+}
+
+/// Hilfsfunktionen für erkannten Text (testbar ohne Kamera).
+class OcrText {
+  OcrText._();
+
+  /// Fügt Zeilen zusammen und repariert Worttrennungen am Zeilenende
+  /// ("Emul-" + "gator" -> "Emulgator"). Bindestriche in Wörtern wie
+  /// "Mono- und" bleiben erhalten, weil danach ein Leerzeichen folgt.
+  static String join(List<String> lines) {
+    final buf = StringBuffer();
+    for (var i = 0; i < lines.length; i++) {
+      final l = lines[i].trim();
+      if (l.isEmpty) continue;
+      final next = i + 1 < lines.length ? lines[i + 1].trim() : '';
+      final hyphenated = RegExp(r'\p{Ll}-$', unicode: true).hasMatch(l) &&
+          RegExp(r'^\p{Ll}', unicode: true).hasMatch(next);
+      if (hyphenated) {
+        buf.write(l.substring(0, l.length - 1));
+      } else {
+        buf.write(l);
+        buf.write(' ');
+      }
+    }
+    return buf.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  /// Viele Fragezeichen/Sonderzeichen oder kaum Buchstaben deuten auf eine
+  /// nicht unterstützte Schrift (z. B. Arabisch) oder ein unlesbares Foto hin.
+  static bool looksLikeUnsupportedScript(String text) {
+    if (text.isEmpty) return false;
+    final nonLatinLetters =
+        RegExp(r'[\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Han}\p{Script=Hebrew}\p{Script=Devanagari}\p{Script=Bengali}]', unicode: true)
+            .allMatches(text)
+            .length;
+    final letters = RegExp(r'\p{L}', unicode: true).allMatches(text).length;
+    final noise = RegExp(r'[^\p{L}\p{N}\s,.;:()%\-/&+]', unicode: true).allMatches(text).length;
+    if (letters == 0) return true;
+    return nonLatinLetters > letters * 0.2 || noise > text.length * 0.15;
   }
 }

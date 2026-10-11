@@ -1,7 +1,7 @@
 name: halal_scanner
 description: "Halal-Scanner: prüft Lebensmittel anhand von Barcode und Zutatenliste mit transparenten, testbaren Regeln."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: ">=3.7.0 <4.0.0"

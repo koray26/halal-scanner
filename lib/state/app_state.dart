@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../config.dart';
 import '../core/i18n/strings.dart';
+import '../data/feedback_store.dart';
 import '../data/history_store.dart';
 import '../data/open_food_facts.dart';
 import '../domain/models.dart';
+import '../domain/research/research.dart';
 import '../domain/rules/halal_engine.dart';
 
 class LookupOutcome {
@@ -19,17 +21,24 @@ class LookupOutcome {
 class AppState extends ChangeNotifier {
   AppState({
     OpenFoodFactsClient? off,
+    OffTaxonomyClient? taxonomy,
     HistoryStore? history,
     SettingsStore? settings,
+    FeedbackStore? feedbackStore,
     HalalEngine? engine,
     DateTime Function()? clock,
   })  : _off = off ?? OpenFoodFactsClient(),
+        _taxonomy = taxonomy ?? OffTaxonomyClient(),
         _historyStore = history ?? HistoryStore(),
         _settings = settings ?? SettingsStore(),
+        _feedbackStore = feedbackStore ?? FeedbackStore(),
         engine = engine ?? HalalEngine(),
         _clock = clock ?? DateTime.now;
 
   final OpenFoodFactsClient _off;
+  final OffTaxonomyClient _taxonomy;
+  final FeedbackStore _feedbackStore;
+  List<FeedbackEntry> feedback = [];
   final HistoryStore _historyStore;
   final SettingsStore _settings;
   final HalalEngine engine;
@@ -55,6 +64,7 @@ class AppState extends ChangeNotifier {
       _ => ThemeMode.system,
     };
     history = await _historyStore.load();
+    feedback = await _feedbackStore.load();
     notifyListeners();
   }
 
@@ -90,8 +100,8 @@ class AppState extends ChangeNotifier {
   Future<LookupOutcome> lookup(String barcode) async {
     try {
       final product = await _off.fetch(barcode);
-      final verdict = engine.evaluate(
-          product: product, scannedBarcode: barcode, now: now());
+      final verdict = await evaluateWithResearch(
+          product: product, scannedBarcode: barcode);
       final entry = ScanEntry(
         id: '${now().microsecondsSinceEpoch}',
         createdAt: now(),
@@ -115,11 +125,10 @@ class AppState extends ChangeNotifier {
   /// Der Originaldatensatz (z. B. aus Open Food Facts) bleibt unverändert.
   Future<ScanEntry> analyzeTexts(List<IngredientText> texts,
       {String? barcode, ProductRecord? product}) async {
-    final verdict = engine.evaluate(
+    final verdict = await evaluateWithResearch(
       product: product,
       scannedBarcode: product == null ? null : barcode,
       overrideTexts: texts,
-      now: now(),
     );
     final entry = ScanEntry(
       id: '${now().microsecondsSinceEpoch}',
@@ -132,6 +141,83 @@ class AppState extends ChangeNotifier {
     await _upsert(entry, replaceSameBarcode: false);
     return entry;
   }
+
+  /// Bewertung in zwei Durchgängen: zuerst offline, dann – falls kritische
+  /// Zutaten offen sind – mit allgemeinen Stoffinformationen aus der
+  /// Open-Food-Facts-Taxonomie. Ist die Quelle nicht erreichbar, wird das im
+  /// Bericht als "nicht erreichbar" ausgewiesen (keine vorgetäuschte Recherche).
+  Future<Verdict> evaluateWithResearch({
+    required ProductRecord? product,
+    String? scannedBarcode,
+    List<IngredientText>? overrideTexts,
+  }) async {
+    final first = engine.evaluate(
+      product: product,
+      scannedBarcode: scannedBarcode,
+      overrideTexts: overrideTexts,
+      now: now(),
+    );
+    final ids = <String>{
+      for (final inv in first.investigations)
+        for (final step in inv.steps)
+          if (step.kind == StepKind.taxonomy && step.detail['id'] != null)
+            step.detail['id']!,
+    };
+    if (ids.isEmpty) return first;
+    ResearchContext ctx;
+    try {
+      final tax = await _taxonomy.fetch(ids);
+      ctx = ResearchContext(
+          product: product, taxonomy: tax, taxonomyStatus: OnlineSourceStatus.ok);
+    } catch (_) {
+      // Offline, Zeitüberschreitung, Limit oder fehlerhafte Antwort.
+      ctx = ResearchContext(
+          product: product, taxonomyStatus: OnlineSourceStatus.unavailable);
+    }
+    return engine.evaluate(
+      product: product,
+      scannedBarcode: scannedBarcode,
+      overrideTexts: overrideTexts,
+      research: ctx,
+      now: now(),
+    );
+  }
+
+  // ------------------------------------------------------------- Feedback --
+
+  Future<FeedbackEntry> addFeedback({
+    required FeedbackKind kind,
+    required String text,
+    String? barcode,
+    String? productName,
+    String? ingredient,
+    String? sourceUrl,
+  }) async {
+    final e = FeedbackEntry(
+      id: '${now().microsecondsSinceEpoch}',
+      createdAt: now(),
+      kind: kind,
+      text: text.trim(),
+      barcode: barcode,
+      productName: productName,
+      ingredient: ingredient,
+      sourceUrl: (sourceUrl ?? '').trim().isEmpty ? null : sourceUrl!.trim(),
+    );
+    feedback = [e, ...feedback];
+    await _feedbackStore.save(feedback);
+    notifyListeners();
+    return e;
+  }
+
+  Future<void> removeFeedback(FeedbackEntry e) async {
+    feedback = feedback.where((x) => x.id != e.id).toList();
+    await _feedbackStore.save(feedback);
+    notifyListeners();
+  }
+
+  List<FeedbackEntry> feedbackFor(String? barcode) => barcode == null
+      ? const []
+      : feedback.where((f) => f.barcode == barcode).toList();
 
   Future<void> _upsert(ScanEntry entry, {bool replaceSameBarcode = true}) async {
     if (replaceSameBarcode && entry.barcode != null) {

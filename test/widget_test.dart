@@ -168,4 +168,23 @@ void main() {
     expect(ar.isRtl, isTrue);
     expect(ar.t('status.haram'), 'حرام');
   });
+
+  testWidgets('UNKLAR: Recherche-Karte, Checkliste und Feedback-Formular', (tester) async {
+    final state = await makeStateIn(tester, 'de');
+    final entry = entryFor('Zucker, Aroma', state);
+    await tester.pumpWidget(AppScope(
+      state: state,
+      child: MaterialApp(home: ResultScreen(entry: entry)),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Warum kein grünes Ergebnis?'), findsOneWidget);
+    expect(find.textContaining('noch nicht abschließend geklärt'), findsOneWidget);
+    // Einzige Karte ist bereits aufgeklappt.
+    await tester.scrollUntilVisible(find.text('Weißt du mehr?'), 200);
+    expect(find.text('Welche Information würde die Einstufung klären?'), findsOneWidget);
+    await tester.tap(find.text('Weißt du mehr?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Information ergänzen'), findsOneWidget);
+    expect(find.text('Herstellerangabe oder Quelle einreichen'), findsOneWidget);
+  });
 }

@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
 import '../../domain/rules/catalog.dart';
 import '../../state/app_state.dart';
+import '../feedback/feedback_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -77,6 +78,14 @@ class SettingsScreen extends StatelessWidget {
                 title: Text(s.t('settings.sources')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _openInfo(context, 'info.sources'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lightbulb_outline),
+                title: Text(s.t('feedback.list.title')),
+                subtitle: Text(s.t('feedback.list.sub', {'count': state.feedback.length})),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const FeedbackScreen())),
               ),
               ListTile(
                 leading: const Icon(Icons.feedback_outlined),

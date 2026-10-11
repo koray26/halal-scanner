@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/history_store.dart';
 import '../../domain/models.dart';
+import '../../domain/rules/halal_engine.dart';
 import '../../state/app_state.dart';
 import 'result_screen.dart';
 
@@ -69,7 +70,7 @@ class SourcesScreen extends StatelessWidget {
                     child: Text(
                       '• ${r.findingName(f)}: „${f.matchedText}“ – '
                       '${f.isResolved ? s.t('effect.resolved') : s.t('effect.${f.effect.name}')}'
-                      '${f.isResolved ? ' (${s.t('qualifier.${f.resolvedBy!.name}')})' : ''}',
+                      '${f.isResolved ? ' (${resolutionText(s, f)})' : ''}',
                     ),
                   )),
             ]),
@@ -100,4 +101,12 @@ String _version(String v) {
   final secs = int.tryParse(v);
   if (secs == null || secs < 1000000000) return ltr(v);
   return formatDateTime(DateTime.fromMillisecondsSinceEpoch(secs * 1000, isUtc: true));
+}
+
+/// Lesbarer Grund, warum eine Unklarheit aufgelöst wurde.
+String resolutionText(AppStrings s, Finding f) {
+  final keys = f.resolutionKeys.isNotEmpty
+      ? f.resolutionKeys
+      : [if (f.resolvedBy != null) 'qualifier.${f.resolvedBy!.name}'];
+  return keys.map((k) => s.t('resolution.$k')).join('; ');
 }

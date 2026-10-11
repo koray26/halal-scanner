@@ -59,6 +59,7 @@ class IngredientText {
     this.markedIncomplete = false,
     this.possiblyTruncated = false,
     this.uncertainFragments = const [],
+    this.unsupportedScript = false,
   });
 
   final String text;
@@ -74,6 +75,9 @@ class IngredientText {
   /// Textstellen, die die OCR nur unsicher erkannt hat.
   final List<String> uncertainFragments;
 
+  /// Foto enthält vermutlich nicht unterstützte Schrift.
+  final bool unsupportedScript;
+
   Map<String, dynamic> toJson() => {
         'text': text,
         'lang': lang,
@@ -81,6 +85,7 @@ class IngredientText {
         'markedIncomplete': markedIncomplete,
         'possiblyTruncated': possiblyTruncated,
         'uncertainFragments': uncertainFragments,
+        'unsupportedScript': unsupportedScript,
       };
 
   factory IngredientText.fromJson(Map<String, dynamic> j) => IngredientText(
@@ -91,6 +96,7 @@ class IngredientText {
         possiblyTruncated: j['possiblyTruncated'] as bool? ?? false,
         uncertainFragments:
             (j['uncertainFragments'] as List?)?.cast<String>() ?? const [],
+        unsupportedScript: j['unsupportedScript'] as bool? ?? false,
       );
 }
 
@@ -144,6 +150,54 @@ class Certification {
       );
 }
 
+/// Eine von Open Food Facts strukturiert erkannte Zutat (mit Unterzutaten).
+/// `vegan`/`vegetarian` stammen aus der allgemeinen OFF-Taxonomie und sind
+/// keine produktspezifische Herstellerangabe.
+class OffIngredient {
+  const OffIngredient({
+    required this.id,
+    required this.text,
+    this.inTaxonomy = false,
+    this.vegan,
+    this.vegetarian,
+    this.children = const [],
+  });
+
+  final String id;
+  final String text;
+  final bool inTaxonomy;
+  final String? vegan;
+  final String? vegetarian;
+  final List<OffIngredient> children;
+
+  Iterable<OffIngredient> get allNodes sync* {
+    yield this;
+    for (final c in children) {
+      yield* c.allNodes;
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'text': text,
+        'inTaxonomy': inTaxonomy,
+        'vegan': vegan,
+        'vegetarian': vegetarian,
+        'children': children.map((c) => c.toJson()).toList(),
+      };
+
+  factory OffIngredient.fromJson(Map<String, dynamic> j) => OffIngredient(
+        id: j['id'] as String? ?? '',
+        text: j['text'] as String? ?? '',
+        inTaxonomy: j['inTaxonomy'] as bool? ?? false,
+        vegan: j['vegan'] as String?,
+        vegetarian: j['vegetarian'] as String?,
+        children: ((j['children'] as List?) ?? const [])
+            .map((e) => OffIngredient.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 class ProductRecord {
   const ProductRecord({
     required this.barcode,
@@ -158,6 +212,16 @@ class ProductRecord {
     this.labelTags = const [],
     this.additiveTags = const [],
     this.certifications = const [],
+    this.structuredIngredients = const [],
+    this.analysisTags = const [],
+    this.categoryTags = const [],
+    this.allergenTags = const [],
+    this.dataQualityWarnings = const [],
+    this.manufacturerLink,
+    this.manufacturingPlaces,
+    this.customerService,
+    this.unknownIngredientsN,
+    this.ingredientsN,
   });
 
   /// Barcode, den die Quelle zurückgemeldet hat.
@@ -178,6 +242,30 @@ class ProductRecord {
   final List<String> additiveTags;
   final List<Certification> certifications;
 
+  /// Strukturierte Zutatenanalyse von Open Food Facts (inkl. Unterzutaten).
+  final List<OffIngredient> structuredIngredients;
+
+  /// z. B. en:non-vegan, en:vegan-status-unknown (aus allgemeiner Taxonomie berechnet).
+  final List<String> analysisTags;
+  final List<String> categoryTags;
+  final List<String> allergenTags;
+
+  /// Datenqualitäts-Warnungen der Datenbank.
+  final List<String> dataQualityWarnings;
+
+  /// Link zur Produktseite des Herstellers (laut Datenbank).
+  final String? manufacturerLink;
+  final String? manufacturingPlaces;
+  final String? customerService;
+  final int? unknownIngredientsN;
+  final int? ingredientsN;
+
+  Iterable<OffIngredient> get allStructuredIngredients sync* {
+    for (final i in structuredIngredients) {
+      yield* i.allNodes;
+    }
+  }
+
   ProductRecord copyWith({List<IngredientText>? ingredientTexts}) =>
       ProductRecord(
         barcode: barcode,
@@ -192,6 +280,16 @@ class ProductRecord {
         labelTags: labelTags,
         additiveTags: additiveTags,
         certifications: certifications,
+        structuredIngredients: structuredIngredients,
+        analysisTags: analysisTags,
+        categoryTags: categoryTags,
+        allergenTags: allergenTags,
+        dataQualityWarnings: dataQualityWarnings,
+        manufacturerLink: manufacturerLink,
+        manufacturingPlaces: manufacturingPlaces,
+        customerService: customerService,
+        unknownIngredientsN: unknownIngredientsN,
+        ingredientsN: ingredientsN,
       );
 
   Map<String, dynamic> toJson() => {
@@ -207,6 +305,17 @@ class ProductRecord {
         'labelTags': labelTags,
         'additiveTags': additiveTags,
         'certifications': certifications.map((e) => e.toJson()).toList(),
+        'structuredIngredients':
+            structuredIngredients.map((e) => e.toJson()).toList(),
+        'analysisTags': analysisTags,
+        'categoryTags': categoryTags,
+        'allergenTags': allergenTags,
+        'dataQualityWarnings': dataQualityWarnings,
+        'manufacturerLink': manufacturerLink,
+        'manufacturingPlaces': manufacturingPlaces,
+        'customerService': customerService,
+        'unknownIngredientsN': unknownIngredientsN,
+        'ingredientsN': ingredientsN,
       };
 
   factory ProductRecord.fromJson(Map<String, dynamic> j) => ProductRecord(
@@ -228,5 +337,18 @@ class ProductRecord {
         certifications: ((j['certifications'] as List?) ?? const [])
             .map((e) => Certification.fromJson(e as Map<String, dynamic>))
             .toList(),
+        structuredIngredients: ((j['structuredIngredients'] as List?) ?? const [])
+            .map((e) => OffIngredient.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        analysisTags: (j['analysisTags'] as List?)?.cast<String>() ?? const [],
+        categoryTags: (j['categoryTags'] as List?)?.cast<String>() ?? const [],
+        allergenTags: (j['allergenTags'] as List?)?.cast<String>() ?? const [],
+        dataQualityWarnings:
+            (j['dataQualityWarnings'] as List?)?.cast<String>() ?? const [],
+        manufacturerLink: j['manufacturerLink'] as String?,
+        manufacturingPlaces: j['manufacturingPlaces'] as String?,
+        customerService: j['customerService'] as String?,
+        unknownIngredientsN: j['unknownIngredientsN'] as int?,
+        ingredientsN: j['ingredientsN'] as int?,
       );
 }

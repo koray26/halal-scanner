@@ -8,7 +8,7 @@
 /// HARAM nur bei ausdrücklich genanntem verbotenem Bestandteil.
 library;
 
-const String rulesetVersion = '2026.10-1';
+const String rulesetVersion = '2026.10-2';
 
 /// Sprachen, für die die Wortlisten gepflegt sind. Zutatenlisten in anderen
 /// Sprachen werden nicht ausgewertet (-> NICHT VERIFIZIERT).
@@ -26,7 +26,7 @@ enum RuleEffect {
 }
 
 /// Herkunftsangaben, die im Kontext einer Zutat gefunden werden können.
-enum Qualifier { porcine, fish, plant, nonAnimalEnzyme, synthetic, halalStated }
+enum Qualifier { porcine, fish, plant, nonAnimalEnzyme, synthetic, halalStated, alcoholFree }
 
 class IngredientRule {
   const IngredientRule({
@@ -99,6 +99,15 @@ final Map<Qualifier, List<String>> qualifierPatterns = {
   ],
   Qualifier.synthetic: ['synthetisch$_l', 'synthetic', 'synthétique'],
   Qualifier.halalStated: ['halal', 'helal', 'حلال'],
+  Qualifier.alcoholFree: [
+    'alkoholfrei$_l',
+    r'ohne\s+alkohol',
+    r'alcohol[- ]free',
+    r'non[- ]alcoholic',
+    r'without\s+alcohol',
+    r'sans\s+alcool',
+    'alkolsüz',
+  ],
 };
 
 const List<String> _porkCores = [
@@ -259,6 +268,7 @@ const List<IngredientRule> ingredientRules = [
       'jelatin$_l',
       'gelatina',
       r'e\s?-?441',
+      r'e\s?-?428',
       '${_l}kollagen$_l',
       'collagen$_l',
     ],
@@ -424,7 +434,7 @@ const List<IngredientRule> ingredientRules = [
           r'paprikaextrakt|rosmarinextrakt|karottenextrakt|süßholzextrakt',
       r'fleischextrakt|rindfleischextrakt',
     ],
-    resolvedBy: {Qualifier.halalStated},
+    resolvedBy: {Qualifier.halalStated, Qualifier.plant, Qualifier.alcoholFree},
   ),
   IngredientRule(
     id: 'e_number_animal_possible',
@@ -513,6 +523,7 @@ const Map<String, String> additiveTagRules = {
   'en:e120': 'insect_derived',
   'en:e904': 'insect_derived',
   'en:e441': 'gelatine',
+  'en:e428': 'gelatine',
   'en:e542': 'bone_phosphate',
   'en:e422': 'e_number_animal_possible',
   'en:e430': 'e_number_animal_possible',

@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import '../domain/models.dart';
+import '../domain/research/research.dart';
 
 enum LookupError { network, timeout, rateLimited, server, invalidResponse }
 
@@ -25,10 +26,14 @@ class LookupException implements Exception {
 }
 
 class OpenFoodFactsClient {
-  OpenFoodFactsClient({http.Client? client, DateTime Function()? clock})
-      : _client = client ?? http.Client(),
+  OpenFoodFactsClient({
+    http.Client? client,
+    DateTime Function()? clock,
+    this.timeout = const Duration(seconds: 15),
+  })  : _client = client ?? http.Client(),
         _clock = clock ?? DateTime.now;
 
+  final Duration timeout;
   final http.Client _client;
   final DateTime Function() _clock;
   final List<DateTime> _recent = [];
@@ -45,7 +50,7 @@ class OpenFoodFactsClient {
     try {
       res = await _client
           .get(uri, headers: {'User-Agent': AppConfig.userAgent})
-          .timeout(const Duration(seconds: 15));
+          .timeout(timeout);
     } on TimeoutException {
       throw LookupException(LookupError.timeout);
     } on SocketException catch (e) {
@@ -57,6 +62,10 @@ class OpenFoodFactsClient {
     if (res.statusCode == 429) throw LookupException(LookupError.rateLimited);
     if (res.statusCode >= 500) {
       throw LookupException(LookupError.server, '${res.statusCode}');
+    }
+    if (res.bodyBytes.isEmpty) {
+      if (res.statusCode == 404) return null;
+      throw LookupException(LookupError.invalidResponse, 'empty');
     }
     Map<String, dynamic> json;
     try {
@@ -134,6 +143,34 @@ class OpenFoodFactsClient {
       addText(str('ingredients_text_$l'), l);
     }
 
+    int? intOf(String key) {
+      final v = p[key];
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v);
+      return null;
+    }
+
+    List<OffIngredient> parseIngredients(Object? raw, int depth) {
+      if (raw is! List || depth > 8) return const [];
+      final out = <OffIngredient>[];
+      for (final e in raw) {
+        if (e is! Map) continue;
+        final id = e['id'];
+        final text = e['text'];
+        if (id is! String && text is! String) continue;
+        out.add(OffIngredient(
+          id: id is String ? id : '',
+          text: text is String ? text : '',
+          inTaxonomy: e['is_in_taxonomy'] == 1 || e['is_in_taxonomy'] == true,
+          vegan: e['vegan'] is String ? e['vegan'] as String : null,
+          vegetarian: e['vegetarian'] is String ? e['vegetarian'] as String : null,
+          children: parseIngredients(e['ingredients'], depth + 1),
+        ));
+      }
+      return out;
+    }
+
     return ProductRecord(
       barcode: code,
       source: source,
@@ -149,6 +186,111 @@ class OpenFoodFactsClient {
       ingredientTexts: texts,
       labelTags: list('labels_tags'),
       additiveTags: list('additives_tags'),
+      structuredIngredients: parseIngredients(p['ingredients'], 0),
+      analysisTags: list('ingredients_analysis_tags'),
+      categoryTags: list('categories_tags'),
+      allergenTags: list('allergens_tags'),
+      dataQualityWarnings: list('data_quality_warnings_tags'),
+      manufacturerLink: str('link'),
+      manufacturingPlaces: str('manufacturing_places'),
+      customerService: str('customer_service'),
+      unknownIngredientsN: intOf('unknown_ingredients_n'),
+      ingredientsN: intOf('ingredients_n'),
     );
+  }
+}
+
+/// Allgemeine Stoffinformationen aus der Open-Food-Facts-Taxonomie
+/// (`/api/v2/taxonomy`). Diese Daten beschreiben einen Stoff allgemein und
+/// sind KEIN Beleg für die Zusammensetzung eines bestimmten Produkts.
+class OffTaxonomyClient {
+  OffTaxonomyClient({http.Client? client, DateTime Function()? clock})
+      : _client = client ?? http.Client(),
+        _clock = clock ?? DateTime.now;
+
+  final http.Client _client;
+  final DateTime Function() _clock;
+  final Map<String, TaxonomyEntry> _cache = {};
+  final List<DateTime> _recent = [];
+  static const _maxPerMinute = 10;
+
+  /// Liefert gefundene Einträge. Wirft [LookupException], wenn die Quelle
+  /// nicht erreichbar ist – der Aufrufer darf dann keine Recherche behaupten.
+  Future<Map<String, TaxonomyEntry>> fetch(Set<String> ids,
+      {Duration timeout = const Duration(seconds: 10)}) async {
+    final wanted = ids.where((i) => RegExp(r'^[a-z]{2}:[\w-]+$').hasMatch(i)).toSet();
+    final missing = wanted.where((i) => !_cache.containsKey(i)).toList();
+    if (missing.isNotEmpty) {
+      final now = _clock();
+      _recent.removeWhere((t) => now.difference(t) > const Duration(minutes: 1));
+      if (_recent.length >= _maxPerMinute) {
+        throw LookupException(LookupError.rateLimited);
+      }
+      _recent.add(now);
+      final uri = Uri.parse('${AppConfig.offBaseUrl}/api/v2/taxonomy'
+          '?tagtype=ingredients&tags=${missing.map(Uri.encodeComponent).join(',')}'
+          '&fields=name,vegan,vegetarian,wikidata,description&lc=de,en');
+      http.Response res;
+      try {
+        res = await _client
+            .get(uri, headers: {'User-Agent': AppConfig.userAgent})
+            .timeout(timeout);
+      } on TimeoutException {
+        throw LookupException(LookupError.timeout);
+      } on SocketException catch (e) {
+        throw LookupException(LookupError.network, e.message);
+      } on http.ClientException catch (e) {
+        throw LookupException(LookupError.network, e.message);
+      }
+      if (res.statusCode == 429) throw LookupException(LookupError.rateLimited);
+      if (res.statusCode >= 400) {
+        throw LookupException(LookupError.server, '${res.statusCode}');
+      }
+      final parsed = parse(utf8.decode(res.bodyBytes));
+      if (parsed == null) throw LookupException(LookupError.invalidResponse);
+      _cache.addAll(parsed);
+    }
+    return {for (final i in wanted) if (_cache[i] != null) i: _cache[i]!};
+  }
+
+  /// Format (geprüft mit echter Antwort, Oktober 2026):
+  /// {"en:e471":{"name":{"de":"E471"},"vegan":{"en":"maybe"},"wikidata":{"en":"Q416711"}}}
+  static Map<String, TaxonomyEntry>? parse(String body) {
+    Object? json;
+    try {
+      json = jsonDecode(body);
+    } catch (_) {
+      return null;
+    }
+    if (json is! Map) return null;
+    String? en(Object? v) {
+      if (v is String) return v;
+      if (v is Map) {
+        final e = v['en'] ?? (v.values.isEmpty ? null : v.values.first);
+        return e is String ? e : null;
+      }
+      return null;
+    }
+
+    final out = <String, TaxonomyEntry>{};
+    json.forEach((k, v) {
+      if (k is! String || v is! Map) return;
+      final names = <String, String>{};
+      final n = v['name'];
+      if (n is Map) {
+        n.forEach((lk, lv) {
+          if (lk is String && lv is String) names[lk] = lv;
+        });
+      }
+      out[k] = TaxonomyEntry(
+        id: k,
+        names: names,
+        vegan: en(v['vegan']),
+        vegetarian: en(v['vegetarian']),
+        description: en(v['description']),
+        wikidata: en(v['wikidata']),
+      );
+    });
+    return out;
   }
 }

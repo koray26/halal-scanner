@@ -6,7 +6,7 @@ class AppConfig {
   AppConfig._();
 
   static const appName = 'Halal Scanner';
-  static const appVersion = '0.1.0';
+  static const appVersion = '0.2.0';
 
   /// Open Food Facts verlangt eine Kontaktadresse im User-Agent.
   /// Beim Bauen setzen mit:
@@ -46,6 +46,16 @@ class AppConfig {
     'states_tags',
     'image_front_url',
     'last_modified_t',
+    'ingredients',
+    'ingredients_analysis_tags',
+    'categories_tags',
+    'allergens_tags',
+    'data_quality_warnings_tags',
+    'link',
+    'manufacturing_places',
+    'customer_service',
+    'unknown_ingredients_n',
+    'ingredients_n',
   ];
 
   /// Nach dieser Zeit gilt ein gespeichertes Ergebnis als veraltet.

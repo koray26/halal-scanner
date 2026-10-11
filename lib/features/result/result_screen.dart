@@ -8,11 +8,14 @@ import '../../core/widgets/widgets.dart';
 import '../../data/history_store.dart';
 import '../../data/open_food_facts.dart';
 import '../../domain/models.dart';
+import '../../domain/research/research.dart';
 import '../../domain/rules/catalog.dart';
 import '../../domain/rules/halal_engine.dart';
 import '../../state/app_state.dart';
+import '../feedback/feedback_screen.dart';
 import '../ocr/ocr_screen.dart';
 import 'ingredients_screen.dart';
+import 'investigation_widgets.dart';
 import 'sources_screen.dart';
 
 /// Bausteine des Berichts – beantwortet die fünf Pflichtfragen.
@@ -235,18 +238,49 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           ),
           const SizedBox(height: Gap.m),
-          SectionCard(
-            title: s.t('report.q.found'),
-            icon: Icons.search,
-            child: r.relevant.isEmpty
-                ? Text(s.t(v.findings.isEmpty && v.checkedIngredientCount == 0
-                    ? 'report.found.nothingChecked'
-                    : 'report.found.none'))
-                : Column(
-                    children: r.relevant
-                        .map((f) => _FindingRow(finding: f, report: r))
-                        .toList()),
+          GreenChecklist(verdict: v, strings: s),
+          const SizedBox(height: Gap.m),
+          Semantics(
+            header: true,
+            child: Text(s.t('report.q.found'),
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           ),
+          const SizedBox(height: Gap.xs),
+          if (v.investigations.isEmpty)
+            Text(s.t(v.findings.isEmpty && v.checkedIngredientCount == 0
+                ? 'report.found.nothingChecked'
+                : 'report.found.none'))
+          else ...[
+            Text(s.t('inv.intro'), style: theme.textTheme.bodySmall),
+            const SizedBox(height: Gap.s),
+            for (final inv in _sorted(v.investigations))
+              Padding(
+                padding: const EdgeInsets.only(bottom: Gap.s),
+                child: InvestigationCard(
+                  inv: inv,
+                  entry: entry,
+                  strings: s,
+                  initiallyExpanded: v.investigations.length == 1,
+                ),
+              ),
+          ],
+          if (v.investigations.any((i) => i.effect == RuleEffect.unclear && !i.resolved && !i.disputed) &&
+              entry.product != null) ...[
+            const SizedBox(height: Gap.xs),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.mail_outline),
+              label: Text(s.t('inquiry.buttonAll')),
+              onPressed: () => openManufacturerInquiry(context, entry,
+                  v.investigations.where((i) => i.effect == RuleEffect.unclear && !i.resolved).toList()),
+            ),
+          ],
+          const SizedBox(height: Gap.l),
+          Semantics(
+            header: true,
+            child: Text(s.t('report.details'),
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(height: Gap.s),
           if (r.whyTexts().isNotEmpty) ...[
             const SizedBox(height: Gap.m),
             SectionCard(
@@ -269,16 +303,12 @@ class _ResultScreenState extends State<ResultScreen> {
               child: _Bullets(r.unknownTexts()),
             ),
           ],
-          if (v.resolvedFindings.isNotEmpty || v.infoFindings.isNotEmpty) ...[
+          if (v.infoFindings.isNotEmpty) ...[
             const SizedBox(height: Gap.m),
             SectionCard(
               title: s.t('report.resolved'),
               icon: Icons.info_outline,
               child: _Bullets([
-                ...v.resolvedFindings.map((f) => s.t('report.resolvedItem', {
-                      'item': '„${f.matchedText}“',
-                      'reason': s.t('qualifier.${f.resolvedBy!.name}'),
-                    })),
                 ...v.infoFindings.map((f) =>
                     '„${f.matchedText}“: ${s.t('rule.${f.ruleId}.why')}'),
               ]),
@@ -290,6 +320,8 @@ class _ResultScreenState extends State<ResultScreen> {
             icon: Icons.balance,
             child: Text(s.t('certainty.${v.certainty.name}')),
           ),
+          const SizedBox(height: Gap.m),
+          ProductFeedbackSection(barcode: entry.barcode, productName: p?.name),
           const SizedBox(height: Gap.l),
           FilledButton.icon(
             icon: const Icon(Icons.list_alt),
@@ -335,6 +367,16 @@ class _ResultScreenState extends State<ResultScreen> {
         ],
       ),
     );
+  }
+
+  static List<Investigation> _sorted(List<Investigation> list) {
+    int rank(Investigation i) => i.effect == RuleEffect.haram
+        ? 0
+        : i.resolved
+            ? 2
+            : 1;
+    final out = [...list]..sort((a, b) => rank(a).compareTo(rank(b)));
+    return out;
   }
 
   String _evidenceText(AppStrings s, ScanEntry e) {
@@ -410,41 +452,6 @@ class _ProductHeader extends StatelessWidget {
         ]),
       ),
     ]);
-  }
-}
-
-class _FindingRow extends StatelessWidget {
-  const _FindingRow({required this.finding, required this.report});
-  final Finding finding;
-  final Report report;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = report.s;
-    final haram = finding.effect == RuleEffect.haram;
-    final color = haram ? AppColors.haram : AppColors.unclear;
-    return Semantics(
-      container: true,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: Gap.xs + 2),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(haram ? Icons.block : Icons.help, color: color, size: 22),
-          const SizedBox(width: Gap.s),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('${report.findingName(finding)} – ${s.t(haram ? 'effect.haram' : 'effect.unclear')}',
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              Text(finding.fromAdditiveTag
-                  ? s.t('finding.fromTag', {'code': ltr(finding.matchedText)})
-                  : s.t('finding.inText', {
-                      'match': finding.matchedText,
-                      'ingredient': finding.ingredient,
-                    })),
-            ]),
-          ),
-        ]),
-      ),
-    );
   }
 }
 

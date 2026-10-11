@@ -20,8 +20,8 @@ class AppColors {
   static const halal = Color(0xFF1E7A46);
   static const haram = Color(0xFFB3261E);
   static const unclear = Color(0xFFB45309);
-  static const notVerified = Color(0xFF8A5A00);
-  static const neutral = Color(0xFF5F6B66);
+  static const notVerified = Color(0xFF5B6470); // grau
+  static const neutral = Color(0xFF6B7280);
 }
 
 class Gap {

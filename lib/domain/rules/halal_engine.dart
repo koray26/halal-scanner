@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import '../barcode.dart';
 import '../models.dart';
+import '../research/research.dart';
 import 'catalog.dart';
 import 'ingredient_parser.dart';
 
@@ -16,39 +17,39 @@ enum HalalStatus {
   /// Regel B: verifiziertes, gültiges, passendes Zertifikat.
   halalCertified,
 
-  /// Regel C: Zutaten vollständig geprüft, nichts Problematisches gefunden.
-  /// KEINE Zertifizierung.
+  /// Regel C: HALAL NACH VOLLSTÄNDIGER ZUTATENPRÜFUNG – nur wenn ALLE
+  /// [GreenCondition]s erfüllt sind. KEINE Zertifizierung, keine Garantie.
   halalByIngredients,
 
   /// Regel A: verbotener Bestandteil ausdrücklich genannt.
   haram,
 
-  /// Regel D: Entscheidungsrelevante Information fehlt / strittig.
+  /// Regel D: Herkunft trotz Recherche ungeklärt oder Bewertung strittig.
   unclear,
 
-  /// Regel E: Produkt nicht eindeutig identifiziert, Daten fehlen,
-  /// sind unvollständig oder widersprüchlich.
+  /// Regel E: Produkt, vollständige Zutatenliste oder relevante Information
+  /// fehlt, ist unvollständig, widersprüchlich oder nicht zuverlässig.
   notVerified,
 }
 
 /// Textliche Aussagekraft – bewusst keine Prozentzahlen.
 enum Certainty { documented, limited, notAssessable }
 
-enum IdentityStatus {
-  /// Barcode der Quelle stimmt mit gescanntem Barcode überein, Name vorhanden.
-  confirmed,
+enum IdentityStatus { confirmed, weak, mismatch, notFound, notApplicable }
 
-  /// Barcode stimmt, aber Produktname fehlt -> Zuordnung schwach.
-  weak,
-
-  /// Quelle lieferte ein anderes Produkt.
-  mismatch,
-
-  /// Kein Datensatz gefunden.
-  notFound,
-
-  /// Kein Barcode-Bezug (z. B. nur fotografierte Zutatenliste).
-  notApplicable,
+/// Ausdrücklich definierte Voraussetzungen für ein grünes Ergebnis.
+/// Ein grünes Ergebnis entsteht NUR, wenn alle erfüllt sind.
+enum GreenCondition {
+  productIdentified,
+  ingredientListAvailable,
+  databaseSource,
+  languageSupported,
+  listComplete,
+  dataPlausible,
+  noConflicts,
+  noProhibited,
+  allOriginsClarified,
+  noDisputedSubstance,
 }
 
 enum UnknownReason {
@@ -68,6 +69,11 @@ enum UnknownReason {
   dataOld,
   manufacturingNotVerified,
   languageNotSupported,
+  languageMismatch,
+  ingredientsMostlyUnrecognized,
+  labelContradiction,
+  researchSourceUnavailable,
+  unsupportedScript,
 }
 
 class Finding {
@@ -80,6 +86,9 @@ class Finding {
     this.escalatedByPork = false,
     this.resolvedBy,
     this.fromAdditiveTag = false,
+    this.fromStructuredData = false,
+    this.qualifiers = const {},
+    this.resolutionKeys = const [],
   });
 
   final String ruleId;
@@ -93,11 +102,36 @@ class Finding {
   final SourceRef source;
   final bool escalatedByPork;
 
-  /// Falls die Unklarheit durch eine Angabe aufgelöst wurde (z. B. plant).
+  /// Durch welche produktbezogene Herkunftsangabe die Unklarheit
+  /// aufgelöst wurde (von der Recherche gesetzt).
   final Qualifier? resolvedBy;
   final bool fromAdditiveTag;
 
-  bool get isResolved => resolvedBy != null;
+  /// Aus der strukturierten Zutatenanalyse der Datenbank (nicht aus dem Text).
+  final bool fromStructuredData;
+
+  /// Herkunftsangaben im Kontext der Zutat.
+  final Set<Qualifier> qualifiers;
+
+  /// Produktbezogene Belege, die die Unklarheit aufgelöst haben
+  /// (z. B. "qualifier.plant", "labelVegan").
+  final List<String> resolutionKeys;
+
+  bool get isResolved => resolvedBy != null || resolutionKeys.isNotEmpty;
+
+  Finding withResolution(Qualifier? q, List<String> keys) => Finding(
+        ruleId: ruleId,
+        effect: effect,
+        matchedText: matchedText,
+        ingredient: ingredient,
+        source: source,
+        escalatedByPork: escalatedByPork,
+        resolvedBy: q,
+        fromAdditiveTag: fromAdditiveTag,
+        fromStructuredData: fromStructuredData,
+        qualifiers: qualifiers,
+        resolutionKeys: keys,
+      );
 
   Map<String, dynamic> toJson() => {
         'ruleId': ruleId,
@@ -108,6 +142,9 @@ class Finding {
         'escalatedByPork': escalatedByPork,
         'resolvedBy': resolvedBy?.name,
         'fromAdditiveTag': fromAdditiveTag,
+        'fromStructuredData': fromStructuredData,
+        'qualifiers': qualifiers.map((q) => q.name).toList(),
+        'resolutionKeys': resolutionKeys,
       };
 
   factory Finding.fromJson(Map<String, dynamic> j) => Finding(
@@ -121,6 +158,12 @@ class Finding {
             ? null
             : Qualifier.values.byName(j['resolvedBy'] as String),
         fromAdditiveTag: j['fromAdditiveTag'] as bool? ?? false,
+        fromStructuredData: j['fromStructuredData'] as bool? ?? false,
+        qualifiers: ((j['qualifiers'] as List?) ?? const [])
+            .map((e) => Qualifier.values.byName(e as String))
+            .toSet(),
+        resolutionKeys:
+            (j['resolutionKeys'] as List?)?.cast<String>() ?? const [],
       );
 }
 
@@ -137,6 +180,8 @@ class Verdict {
     this.validCertification,
     this.tracesText,
     this.labelHalalUnverified = false,
+    this.investigations = const [],
+    this.greenConditions = const {},
   });
 
   final HalalStatus status;
@@ -155,6 +200,12 @@ class Verdict {
   /// Quelle nennt ein Halal-Label, das NICHT verifiziert ist.
   final bool labelHalalUnverified;
 
+  /// Rechercheergebnis je kritischer Zutat.
+  final List<Investigation> investigations;
+
+  /// Erfüllte/nicht erfüllte Voraussetzungen für ein grünes Ergebnis.
+  final Map<GreenCondition, bool> greenConditions;
+
   List<Finding> get haramFindings =>
       findings.where((f) => f.effect == RuleEffect.haram).toList();
   List<Finding> get unclearFindings => findings
@@ -164,6 +215,10 @@ class Verdict {
       findings.where((f) => f.isResolved).toList();
   List<Finding> get infoFindings =>
       findings.where((f) => f.effect == RuleEffect.info).toList();
+
+  bool get allGreenConditionsMet =>
+      greenConditions.length == GreenCondition.values.length &&
+      greenConditions.values.every((v) => v);
 
   Map<String, dynamic> toJson() => {
         'status': status.name,
@@ -177,6 +232,9 @@ class Verdict {
         'validCertification': validCertification?.toJson(),
         'tracesText': tracesText,
         'labelHalalUnverified': labelHalalUnverified,
+        'investigations': investigations.map((i) => i.toJson()).toList(),
+        'greenConditions':
+            greenConditions.map((k, v) => MapEntry(k.name, v)),
       };
 
   factory Verdict.fromJson(Map<String, dynamic> j) => Verdict(
@@ -187,7 +245,8 @@ class Verdict {
             .map((e) => Finding.fromJson(e as Map<String, dynamic>))
             .toList(),
         unknowns: ((j['unknowns'] as List?) ?? const [])
-            .map((e) => UnknownReason.values.byName(e as String))
+            .map((e) => UnknownReason.values.asNameMap()[e as String])
+            .whereType<UnknownReason>()
             .toList(),
         rulesetVersion: j['rulesetVersion'] as String,
         evaluatedAt: DateTime.parse(j['evaluatedAt'] as String),
@@ -198,6 +257,11 @@ class Verdict {
                 j['validCertification'] as Map<String, dynamic>),
         tracesText: j['tracesText'] as String?,
         labelHalalUnverified: j['labelHalalUnverified'] as bool? ?? false,
+        investigations: ((j['investigations'] as List?) ?? const [])
+            .map((e) => Investigation.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        greenConditions: ((j['greenConditions'] as Map?) ?? const {}).map(
+            (k, v) => MapEntry(GreenCondition.values.byName(k as String), v as bool)),
       );
 }
 
@@ -215,10 +279,12 @@ class _CompiledRule {
 }
 
 class TextAnalysis {
-  TextAnalysis(this.findings, this.ingredientCount, this.tracesText);
+  TextAnalysis(this.findings, this.ingredientCount, this.tracesText,
+      {this.unbalancedBrackets = false});
   final List<Finding> findings;
   final int ingredientCount;
   final String? tracesText;
+  final bool unbalancedBrackets;
 }
 
 class HalalEngine {
@@ -234,6 +300,7 @@ class HalalEngine {
 
   final List<_CompiledRule> _rules;
   final Map<Qualifier, List<RegExp>> _qualifiers;
+  static const _research = ResearchPipeline();
 
   /// Ab diesem Alter wird auf möglicherweise veraltete Daten hingewiesen.
   static const staleAfter = Duration(days: 365 * 3);
@@ -241,99 +308,126 @@ class HalalEngine {
   /// Exklusionen werden nur im direkten Umfeld des Treffers geprüft.
   static const _exclusionWindow = 12;
 
-  bool _hasQualifier(String context, Qualifier q) =>
-      _qualifiers[q]!.any((r) => r.hasMatch(context));
+  Set<Qualifier> _qualifiersIn(String context) => {
+        for (final e in _qualifiers.entries)
+          if (e.value.any((r) => r.hasMatch(context))) e.key,
+      };
+
+  /// Prüft einen einzelnen Bestandteil gegen alle Regeln.
+  Map<String, Finding> _matchHead(String head, String context, String fullText,
+      SourceRef source, {bool structured = false}) {
+    final nodeFindings = <String, Finding>{};
+    final quals = _qualifiersIn(context);
+    for (final cr in _rules) {
+      for (final re in cr.patterns) {
+        final m = re.firstMatch(head);
+        if (m == null) continue;
+        final from = math.max(0, m.start - _exclusionWindow);
+        final to = math.min(head.length, m.end + _exclusionWindow);
+        final window = head.substring(from, to);
+        final matched = m.group(0)!;
+        if (cr.exclusions.any((x) => x.hasMatch(matched) || x.hasMatch(window))) {
+          continue;
+        }
+        var effect = cr.rule.effect;
+        var escalated = false;
+        if (effect == RuleEffect.unclear &&
+            cr.rule.escalateOnPork &&
+            quals.contains(Qualifier.porcine)) {
+          effect = RuleEffect.haram;
+          escalated = true;
+        }
+        nodeFindings[cr.rule.id] = Finding(
+          ruleId: cr.rule.id,
+          effect: effect,
+          matchedText: matched.trim(),
+          ingredient: fullText,
+          source: source,
+          escalatedByPork: escalated,
+          fromStructuredData: structured,
+          qualifiers: quals,
+        );
+        break; // ein Treffer pro Regel und Bestandteil genügt
+      }
+    }
+    for (final cr in _rules) {
+      if (!nodeFindings.containsKey(cr.rule.id)) continue;
+      if (cr.rule.suppressedBy.any(nodeFindings.containsKey)) {
+        nodeFindings.remove(cr.rule.id);
+      }
+    }
+    if (nodeFindings.containsKey('pork') &&
+        nodeFindings.values.any((f) => f.escalatedByPork)) {
+      nodeFindings.remove('pork');
+    }
+    return nodeFindings;
+  }
 
   /// Analysiert eine einzelne Zutatenliste.
   TextAnalysis analyzeText(IngredientText input) {
     final parsed = IngredientParser.parse(input.text);
     final findings = <Finding>[];
     var count = 0;
-
     for (final node in parsed.allNodes) {
       final head = node.head.trim();
       if (head.isEmpty) continue;
       count++;
-      final context = node.qualifierContext;
-      final nodeFindings = <String, Finding>{};
-
-      for (final cr in _rules) {
-        for (final re in cr.patterns) {
-          final m = re.firstMatch(head);
-          if (m == null) continue;
-          final from = math.max(0, m.start - _exclusionWindow);
-          final to = math.min(head.length, m.end + _exclusionWindow);
-          final window = head.substring(from, to);
-          final matched = m.group(0)!;
-          if (cr.exclusions.any((x) => x.hasMatch(matched) || x.hasMatch(window))) {
-            continue;
-          }
-
-          var effect = cr.rule.effect;
-          var escalated = false;
-          Qualifier? resolved;
-          if (effect == RuleEffect.unclear) {
-            if (cr.rule.escalateOnPork &&
-                _hasQualifier(context, Qualifier.porcine)) {
-              effect = RuleEffect.haram;
-              escalated = true;
-            } else {
-              for (final q in cr.rule.resolvedBy) {
-                if (_hasQualifier(context, q)) {
-                  resolved = q;
-                  break;
-                }
-              }
-            }
-          }
-          nodeFindings[cr.rule.id] = Finding(
-            ruleId: cr.rule.id,
-            effect: effect,
-            matchedText: matched.trim(),
-            ingredient: node.fullText,
-            source: input.source,
-            escalatedByPork: escalated,
-            resolvedBy: resolved,
-          );
-          break; // ein Treffer pro Regel und Bestandteil genügt
-        }
-      }
-
-      // Unterdrückungen (z. B. Weinessig ist kein Wein).
-      for (final cr in _rules) {
-        if (!nodeFindings.containsKey(cr.rule.id)) continue;
-        if (cr.rule.suppressedBy.any(nodeFindings.containsKey)) {
-          nodeFindings.remove(cr.rule.id);
-        }
-      }
-      // "Schweinegelatine": eskalierte Gelatine ersetzt den reinen Schwein-Treffer.
-      if (nodeFindings.containsKey('pork') &&
-          nodeFindings.values.any((f) => f.escalatedByPork)) {
-        nodeFindings.remove('pork');
-      }
-      findings.addAll(nodeFindings.values);
+      findings.addAll(
+          _matchHead(head, node.qualifierContext, node.fullText, input.source).values);
     }
-    return TextAnalysis(findings, count, parsed.tracesText);
+    final opens = '('.allMatches(parsed.normalizedText).length;
+    final closes = ')'.allMatches(parsed.normalizedText).length;
+    return TextAnalysis(findings, count, parsed.tracesText,
+        unbalancedBrackets: opens != closes);
+  }
+
+  /// Wertet die strukturierte Zutatenanalyse der Datenbank aus (Kennungen
+  /// wie "en:pork-gelatin"). Wird genutzt, wenn der Text in einer nicht
+  /// unterstützten Sprache vorliegt. Kann nie zu einer Freigabe führen.
+  List<Finding> analyzeStructured(ProductRecord p) {
+    final out = <Finding>[];
+    void walk(OffIngredient n, String parentContext) {
+      if (n.id.startsWith('en:')) {
+        final pseudo = n.id.substring(3).replaceAll('-', ' ');
+        final context = '$pseudo | $parentContext';
+        out.addAll(_matchHead(pseudo, context, '${n.text} (${n.id})', p.source,
+                structured: true)
+            .values);
+      } else {
+        // Nicht in der Taxonomie: Originaltext trotzdem prüfen (z. B. "gelatine").
+        out.addAll(_matchHead(n.text, '${n.text} | $parentContext',
+                '${n.text} (${n.id})', p.source, structured: true)
+            .values);
+      }
+      for (final c in n.children) {
+        walk(c, n.id);
+      }
+    }
+
+    for (final n in p.structuredIngredients) {
+      walk(n, '');
+    }
+    return out;
   }
 
   /// Gesamtbewertung. Reihenfolge (erste zutreffende Regel gewinnt):
   ///  1. Produkt nicht gefunden / anderes Produkt -> NICHT VERIFIZIERT
-  ///  2. Keine Zutatenliste und kein gültiges Zertifikat -> NICHT VERIFIZIERT
-  ///  3. Quellen widersprechen sich bei verbotenen Bestandteilen -> NICHT VERIFIZIERT
+  ///  2. Keine Zutaten und kein gültiges Zertifikat -> NICHT VERIFIZIERT
+  ///  3. Widersprüchliche Quellen/Kennzeichnungen -> NICHT VERIFIZIERT
   ///  4. Verbotener Bestandteil ausdrücklich genannt -> HARAM
-  ///     (falls zugleich gültiges Zertifikat: Widerspruch -> NICHT VERIFIZIERT)
   ///  5. Gültiges, verifiziertes, passendes Zertifikat -> HALAL-ZERTIFIZIERT
-  ///  6. Ungeklärte Bestandteile -> UNKLAR
-  ///  7. Daten unvollständig / nur Foto / Nutzertext / schwache Zuordnung
-  ///     -> NICHT VERIFIZIERT
-  ///  8. Sonst -> HALAL NACH ZUTATENPRÜFUNG (keine Zertifizierung!)
+  ///  6. Herkunft trotz Recherche offen / strittig -> UNKLAR
+  ///  7. Nicht alle [GreenCondition]s erfüllt -> NICHT VERIFIZIERT
+  ///  8. Sonst -> HALAL NACH VOLLSTÄNDIGER ZUTATENPRÜFUNG (keine Zertifizierung)
   Verdict evaluate({
     required ProductRecord? product,
     String? scannedBarcode,
     List<IngredientText>? overrideTexts,
+    ResearchContext? research,
     required DateTime now,
   }) {
     final unknowns = <UnknownReason>{};
+    final ctx = research ?? ResearchContext(product: product);
 
     // --- Identität ---------------------------------------------------------
     IdentityStatus identity;
@@ -349,13 +443,22 @@ class HalalEngine {
       identity = IdentityStatus.confirmed;
     }
 
-    Verdict result(HalalStatus s, Certainty c,
-            {List<Finding> findings = const [],
-            int count = 0,
-            Certification? cert,
-            String? traces,
-            bool label = false}) =>
-        Verdict(
+    final conditions = <GreenCondition, bool>{
+      for (final c in GreenCondition.values) c: false,
+    };
+    conditions[GreenCondition.productIdentified] =
+        identity == IdentityStatus.confirmed;
+
+    var findings = <Finding>[];
+    var investigations = <Investigation>[];
+    var count = 0;
+    String? traces;
+    Certification? validCert;
+    final labelHalal =
+        product?.labelTags.any((t) => t.toLowerCase().endsWith(':halal')) ??
+            false;
+
+    Verdict result(HalalStatus s, Certainty c) => Verdict(
           status: s,
           certainty: c,
           identity: identity,
@@ -364,9 +467,11 @@ class HalalEngine {
           rulesetVersion: rulesetVersion,
           evaluatedAt: now,
           checkedIngredientCount: count,
-          validCertification: cert,
+          validCertification: s == HalalStatus.halalCertified ? validCert : null,
           tracesText: traces,
-          labelHalalUnverified: label,
+          labelHalalUnverified: labelHalal,
+          investigations: investigations,
+          greenConditions: Map.unmodifiable(conditions),
         );
 
     if (identity == IdentityStatus.notFound) {
@@ -382,17 +487,29 @@ class HalalEngine {
       unknowns.add(UnknownReason.notIdentifiedPhotoOnly);
     }
 
-    final labelHalal =
-        product?.labelTags.any((t) => t.toLowerCase().endsWith(':halal')) ??
-            false;
-
     if (product?.lastModified != null &&
         now.difference(product!.lastModified!) > staleAfter) {
       unknowns.add(UnknownReason.dataOld);
     }
 
+    // --- Datenqualität laut Datenbank ----------------------------------------
+    var plausible = true;
+    if (product != null && overrideTexts == null) {
+      final w = product.dataQualityWarnings.map((e) => e.toLowerCase());
+      if (w.any((x) => x.contains('ingredients-language-mismatch'))) {
+        unknowns.add(UnknownReason.languageMismatch);
+        plausible = false;
+      }
+      final n = product.ingredientsN ?? 0;
+      final unknownN = product.unknownIngredientsN ?? 0;
+      if (w.any((x) => x.contains('ingredients-80-percent-unknown')) ||
+          (n > 0 && unknownN * 2 > n)) {
+        unknowns.add(UnknownReason.ingredientsMostlyUnrecognized);
+        plausible = false;
+      }
+    }
+
     // --- Zertifikat --------------------------------------------------------
-    Certification? validCert;
     for (final c in product?.certifications ?? const <Certification>[]) {
       if (!c.verified) {
         unknowns.add(UnknownReason.certificationUnverified);
@@ -417,36 +534,32 @@ class HalalEngine {
     final available = (overrideTexts ?? product?.ingredientTexts ?? const [])
         .where((t) => t.text.trim().length >= 3)
         .toList();
-    // Datenbanktexte nur in Sprachen auswerten, für die Regeln existieren.
-    // Fotos/Nutzertexte können ohnehin keine Halal-Freigabe erzeugen.
     final texts = available
         .where((t) =>
             t.source.kind != SourceKind.openFoodFacts ||
             supportedRuleLanguages.contains(t.lang))
         .toList();
-    if (available.isNotEmpty && texts.isEmpty) {
-      unknowns.add(UnknownReason.languageNotSupported);
-    }
+    final unsupportedLanguage = available.isNotEmpty && texts.isEmpty;
+    if (unsupportedLanguage) unknowns.add(UnknownReason.languageNotSupported);
 
-    if (texts.isEmpty) {
-      if (validCert != null) {
-        unknowns.add(UnknownReason.manufacturingNotVerified);
-        return result(HalalStatus.halalCertified, Certainty.documented,
-            cert: validCert, label: labelHalal);
-      }
-      unknowns.add(UnknownReason.noIngredients);
-      return result(HalalStatus.notVerified, Certainty.notAssessable,
-          label: labelHalal);
-    }
+    conditions[GreenCondition.ingredientListAvailable] = available.isNotEmpty;
+    conditions[GreenCondition.databaseSource] = available.isNotEmpty &&
+        available.every((t) => t.source.kind == SourceKind.openFoodFacts);
 
     final analyses = texts.map(analyzeText).toList();
-    final findings = <Finding>[];
-    var count = 0;
-    String? traces;
     for (final a in analyses) {
       findings.addAll(a.findings);
       if (a.ingredientCount > count) count = a.ingredientCount;
       traces ??= a.tracesText;
+    }
+    if (analyses.any((a) => a.unbalancedBrackets)) {
+      unknowns.add(UnknownReason.possiblyTruncated);
+    }
+
+    // Nicht unterstützte Sprache: strukturierte Datenbankanalyse nutzen.
+    if (unsupportedLanguage && product != null && overrideTexts == null) {
+      findings.addAll(analyzeStructured(product));
+      count = product.allStructuredIngredients.length;
     }
 
     // Zusatzstoff-Tags der Quelle als Ergänzung (nur falls nicht im Text).
@@ -455,11 +568,12 @@ class HalalEngine {
       for (final tag in product.additiveTags) {
         final ruleId = additiveTagRules[tag.toLowerCase()];
         if (ruleId == null || ruleIdsFound.contains(ruleId)) continue;
+        final code = tag.split(':').last.toUpperCase();
         findings.add(Finding(
           ruleId: ruleId,
           effect: RuleEffect.unclear,
-          matchedText: tag.split(':').last.toUpperCase(),
-          ingredient: tag.split(':').last.toUpperCase(),
+          matchedText: code,
+          ingredient: code,
           source: product.source,
           fromAdditiveTag: true,
         ));
@@ -476,10 +590,56 @@ class HalalEngine {
       if (t.source.kind == SourceKind.userEdited) {
         unknowns.add(UnknownReason.userEditedText);
       }
+      if (t.unsupportedScript) unknowns.add(UnknownReason.unsupportedScript);
     }
 
-    // Widerspruch: verschiedene Listen desselben Produkts nennen
-    // unterschiedliche verbotene Bestandteile.
+    // --- Recherche je kritischer Zutat --------------------------------------
+    final allowed = {for (final r in ingredientRules) r.id: r.resolvedBy};
+    final researched = <Finding>[];
+    for (final f in findings) {
+      if (f.effect == RuleEffect.info) {
+        researched.add(f);
+        continue;
+      }
+      final inv = _research.investigate(
+        ResearchInput(
+          ruleId: f.ruleId,
+          effect: f.effect,
+          matchedText: f.matchedText,
+          ingredient: f.ingredient,
+          qualifiers: f.qualifiers,
+          allowedQualifiers: allowed[f.ruleId] ?? const {},
+        ),
+        ResearchContext(
+          product: ctx.product ?? product,
+          taxonomy: ctx.taxonomy,
+          taxonomyStatus: ctx.taxonomyStatus,
+        ),
+      );
+      investigations.add(inv);
+      if (inv.labelContradiction) unknowns.add(UnknownReason.labelContradiction);
+      if (inv.resolved) {
+        final keys = inv.evidence
+            .where((e) => e.strength == EvidenceStrength.productSpecific)
+            .map((e) => e.key)
+            .toList();
+        final q = keys
+            .where((k) => k.startsWith('qualifier.'))
+            .map((k) => Qualifier.values.byName(k.substring(10)))
+            .firstOrNull;
+        researched.add(f.withResolution(q, keys.isEmpty ? const ['none'] : keys));
+      } else {
+        researched.add(f);
+      }
+    }
+    findings = researched;
+    if (investigations.any((i) =>
+        i.steps.any((s) => s.outcome == StepOutcome.unavailable))) {
+      unknowns.add(UnknownReason.researchSourceUnavailable);
+    }
+
+    // --- Widersprüche ---------------------------------------------------------
+    var conflict = unknowns.contains(UnknownReason.labelContradiction);
     if (analyses.length > 1) {
       final haramSets = analyses
           .map((a) => a.findings
@@ -488,59 +648,58 @@ class HalalEngine {
               .toSet())
           .toList();
       final first = haramSets.first;
-      final conflict = haramSets.any(
-          (s) => s.length != first.length || !s.containsAll(first));
-      if (conflict) {
-        unknowns.add(UnknownReason.conflictingSources);
-        return result(HalalStatus.notVerified, Certainty.notAssessable,
-            findings: findings, count: count, traces: traces, label: labelHalal);
+      if (haramSets.any((s) => s.length != first.length || !s.containsAll(first))) {
+        conflict = true;
       }
     }
-
     final hasHaram = findings.any((f) => f.effect == RuleEffect.haram);
-    final hasUnclear = findings
-        .any((f) => f.effect == RuleEffect.unclear && !f.isResolved);
+    if (hasHaram && validCert != null) conflict = true;
+    if (conflict) unknowns.add(UnknownReason.conflictingSources);
 
-    if (hasHaram) {
-      if (validCert != null) {
-        unknowns.add(UnknownReason.conflictingSources);
-        return result(HalalStatus.notVerified, Certainty.notAssessable,
-            findings: findings, count: count, traces: traces, label: labelHalal);
-      }
-      return result(HalalStatus.haram, Certainty.documented,
-          findings: findings, count: count, traces: traces, label: labelHalal);
+    final hasUnclear =
+        findings.any((f) => f.effect == RuleEffect.unclear && !f.isResolved);
+    final disputed = investigations
+        .any((i) => i.disputed && i.effect == RuleEffect.unclear);
+
+    // --- Freigabebedingungen -----------------------------------------------
+    conditions[GreenCondition.languageSupported] = !unsupportedLanguage &&
+        !unknowns.contains(UnknownReason.languageMismatch) &&
+        !unknowns.contains(UnknownReason.unsupportedScript);
+    conditions[GreenCondition.listComplete] = available.isNotEmpty &&
+        !unknowns.contains(UnknownReason.ingredientsIncomplete) &&
+        !unknowns.contains(UnknownReason.possiblyTruncated) &&
+        !unknowns.contains(UnknownReason.uncertainOcrText);
+    conditions[GreenCondition.dataPlausible] = plausible;
+    conditions[GreenCondition.noConflicts] = !conflict;
+    conditions[GreenCondition.noProhibited] = !hasHaram;
+    conditions[GreenCondition.allOriginsClarified] = !hasUnclear;
+    conditions[GreenCondition.noDisputedSubstance] = !disputed;
+    if (identity != IdentityStatus.confirmed) {
+      conditions[GreenCondition.productIdentified] = false;
     }
 
+    // --- Entscheidung --------------------------------------------------------
+    if (available.isEmpty && validCert == null) {
+      unknowns.add(UnknownReason.noIngredients);
+      return result(HalalStatus.notVerified, Certainty.notAssessable);
+    }
+    if (conflict) {
+      return result(HalalStatus.notVerified, Certainty.notAssessable);
+    }
+    if (hasHaram) {
+      return result(HalalStatus.haram, Certainty.documented);
+    }
     if (validCert != null) {
       unknowns.add(UnknownReason.manufacturingNotVerified);
-      return result(HalalStatus.halalCertified, Certainty.documented,
-          findings: findings,
-          count: count,
-          cert: validCert,
-          traces: traces,
-          label: labelHalal);
+      return result(HalalStatus.halalCertified, Certainty.documented);
     }
-
     if (hasUnclear) {
-      return result(HalalStatus.unclear, Certainty.limited,
-          findings: findings, count: count, traces: traces, label: labelHalal);
+      return result(HalalStatus.unclear, Certainty.limited);
     }
-
-    const blocking = {
-      UnknownReason.identityWeak,
-      UnknownReason.notIdentifiedPhotoOnly,
-      UnknownReason.ingredientsIncomplete,
-      UnknownReason.possiblyTruncated,
-      UnknownReason.uncertainOcrText,
-      UnknownReason.userEditedText,
-    };
-    if (unknowns.any(blocking.contains)) {
-      return result(HalalStatus.notVerified, Certainty.notAssessable,
-          findings: findings, count: count, traces: traces, label: labelHalal);
+    if (!conditions.values.every((v) => v)) {
+      return result(HalalStatus.notVerified, Certainty.notAssessable);
     }
-
     unknowns.add(UnknownReason.manufacturingNotVerified);
-    return result(HalalStatus.halalByIngredients, Certainty.limited,
-        findings: findings, count: count, traces: traces, label: labelHalal);
+    return result(HalalStatus.halalByIngredients, Certainty.limited);
   }
 }

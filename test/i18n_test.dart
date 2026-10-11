@@ -62,4 +62,27 @@ void main() {
   test('Barcodes bleiben in RTL-Texten links-nach-rechts', () {
     expect(ltr('4006381333931'), '\u20664006381333931\u2069');
   });
+
+  test('Keine absoluten Aussagen wie "100 % halal" oder "garantiert halal"', () {
+    final banned = RegExp(
+        r'100\s?%|%\s?100|garantiert\s+halal|guaranteed\s+halal|'
+        r'helal\s+garanti|garantili\s+helal|حلال\s+مضمون|مضمون',
+        caseSensitive: false,
+        unicode: true);
+    for (final lang in appLanguages.where((l) => l.selectable)) {
+      final map = load(lang.code);
+      final hits = map.entries.where((e) => banned.hasMatch(e.value)).map((e) => e.key);
+      expect(hits, isEmpty, reason: '${lang.code}: $hits');
+    }
+  });
+
+  test('Grün ist überall als keine Zertifizierung gekennzeichnet', () {
+    for (final lang in appLanguages.where((l) => l.selectable)) {
+      final map = load(lang.code);
+      expect(map['status.halalByIngredients.meaning'], isNotEmpty);
+      expect(map['green.notGuarantee'], isNotEmpty);
+    }
+    expect(load('de')['status.halalByIngredients'],
+        'HALAL NACH VOLLSTÄNDIGER ZUTATENPRÜFUNG');
+  });
 }
