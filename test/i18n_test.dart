@@ -60,6 +60,6 @@ void main() {
   });
 
   test('Barcodes bleiben in RTL-Texten links-nach-rechts', () {
-    expect(ltr('4006381333931'), '⁦4006381333931⁩');
+    expect(ltr('4006381333931'), '\u20664006381333931\u2069');
   });
 }

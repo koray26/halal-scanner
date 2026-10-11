@@ -1,13 +1,12 @@
 /// Zentrales Übersetzungssystem.
 ///
-/// Alle sichtbaren Texte kommen aus assets/i18n/<sprache>.json.
+/// Alle sichtbaren Texte kommen aus `assets/i18n/SPRACHE.json`.
 /// Fehlt ein Schlüssel, wird Englisch verwendet (nie ein leerer Text).
 library;
 
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 enum TranslationStatus {
   /// Vollständig und geprüft.
@@ -104,4 +103,4 @@ class AppStrings {
 
 /// Einbettung eines Textes, der immer links-nach-rechts erscheinen muss
 /// (Barcodes, E-Nummern), auch in arabischen Sätzen.
-String ltr(String s) => '⁦$s⁩';
+String ltr(String s) => '\u2066$s\u2069';

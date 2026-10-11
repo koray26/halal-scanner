@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
@@ -37,7 +38,7 @@ class HistoryScreen extends StatelessWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(Gap.m),
               itemCount: items.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(height: Gap.s),
+              separatorBuilder: (_, _) => const SizedBox(height: Gap.s),
               itemBuilder: (context, i) {
                 if (i == 0) {
                   return Text(s.t('history.offlineNote'),

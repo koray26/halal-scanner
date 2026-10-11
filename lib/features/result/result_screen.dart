@@ -384,7 +384,7 @@ class _ProductHeader extends StatelessWidget {
                   p!.imageUrl!,
                   fit: BoxFit.cover,
                   semanticLabel: s.t('result.image'),
-                  errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported_outlined),
+                  errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported_outlined),
                 )
               : Icon(entry.barcode == null ? Icons.photo_camera_outlined : Icons.inventory_2_outlined, size: 36),
         ),

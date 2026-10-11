@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart' hide Barcode;
 
 import '../../core/i18n/strings.dart';
 import '../../core/theme/app_theme.dart';
