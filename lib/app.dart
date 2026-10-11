@@ -18,35 +18,41 @@ class HalalScannerApp extends StatelessWidget {
       state: state,
       child: ListenableBuilder(
         listenable: state,
-        builder: (context, _) {
-          final s = state.strings;
-          return MaterialApp(
-            title: s.t('app.name'),
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            themeMode: state.themeMode,
-            locale: Locale(s.code),
-            supportedLocales: const [
-              Locale('de'),
-              Locale('en'),
-              Locale('ar'),
-              Locale('tr'),
-            ],
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            // Schreibrichtung kommt aus unserem Sprachsystem (RTL für ar/ur/fa).
-            builder: (context, child) => Directionality(
-              textDirection: s.direction,
-              child: child!,
-            ),
-            home: state.languageChosen
-                ? const HomeShell()
-                : const LanguagePickerScreen(firstRun: true),
-          );
-        },
+        builder: (context, _) => buildMaterialApp(
+          state,
+          state.languageChosen
+              ? const HomeShell()
+              : const LanguagePickerScreen(firstRun: true),
+        ),
       ),
     );
   }
+}
+
+/// MaterialApp mit Thema, Sprache und Schreibrichtung aus dem AppState.
+Widget buildMaterialApp(AppState state, Widget home) {
+  final s = state.strings;
+  return MaterialApp(
+    title: s.t('app.name'),
+    debugShowCheckedModeBanner: false,
+    theme: AppTheme.light(),
+    darkTheme: AppTheme.dark(),
+    themeMode: state.themeMode,
+    locale: Locale(s.code),
+    supportedLocales: const [
+      Locale('de'),
+      Locale('en'),
+      Locale('ar'),
+      Locale('tr'),
+    ],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    // Schreibrichtung kommt aus unserem Sprachsystem (RTL für ar/ur/fa).
+    builder: (context, child) => Directionality(
+      textDirection: s.direction,
+      child: child!,
+    ),
+    home: home,
+  );
 }
 
 class HomeShell extends StatefulWidget {
