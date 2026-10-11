@@ -146,6 +146,20 @@ void main() {
 
   // Hinweis: Arabische Schrift erscheint mangels Testschriftart als Kästchen;
   // geprüft wird hier die Spiegelung des Layouts (RTL).
+  testWidgets('10 Recherche-Karte Aroma (ganze Seite)', (tester) async {
+    await setup(tester, 'de');
+    tester.view.physicalSize = const Size(1170, 9000);
+    final e = entry(state, 'Kekse', 'Beispielmarke',
+        'Weizenmehl, Zucker, Palmfett, Aroma, Salz', );
+    await shot(tester, themed(state, ResultScreen(entry: e)), '10_aroma_recherche');
+  });
+
+  testWidgets('11 Grün mit Checkliste (ganze Seite)', (tester) async {
+    await setup(tester, 'de');
+    tester.view.physicalSize = const Size(1170, 6000);
+    await shot(tester, themed(state, ResultScreen(entry: samples[2])), '11_gruen_checkliste');
+  });
+
   testWidgets('09 Ergebnis Arabisch (Layout RTL)', (tester) async {
     await setup(tester, 'ar');
     await shot(tester, themed(state, ResultScreen(entry: samples[1])), '09_ar_rtl');

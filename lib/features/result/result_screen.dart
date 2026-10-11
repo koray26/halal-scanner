@@ -38,7 +38,6 @@ class Report {
   }
 
   String summary() {
-    final st = s.t(StatusStyle.of(v.status).labelKey);
     final body = switch (v.status) {
       HalalStatus.haram => s.t('report.summary.haram', {'items': _items(v.haramFindings)}),
       HalalStatus.unclear =>
@@ -53,7 +52,7 @@ class Report {
               : s.t('unknown.${_primaryUnknown().name}'),
         }),
     };
-    return '$st – $body';
+    return body;
   }
 
   UnknownReason _primaryUnknown() {
