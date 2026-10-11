@@ -148,10 +148,14 @@ class EntryTile extends StatelessWidget {
     final state = AppScope.of(context);
     final s = state.strings;
     final style = StatusStyle.of(entry.verdict.status);
-    final title = entry.product?.name ??
+    final name = entry.product?.nameFor(s.code);
+    // Die Marke ersetzt den fehlenden Namen nur in der Anzeige.
+    final brand = entry.product?.brand;
+    final title = name ??
+        brand ??
         (entry.barcode != null ? ltr(entry.barcode!) : s.t('history.photoEntry'));
     final subtitle = [
-      if (entry.product?.brand != null) entry.product!.brand!,
+      if (name != null && brand != null) brand,
       formatDate(entry.createdAt),
     ].join(' · ');
     return Card(

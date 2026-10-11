@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:halal_scanner/data/open_food_facts.dart';
 import 'package:halal_scanner/domain/models.dart';
+import 'package:halal_scanner/domain/rules/halal_engine.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -130,5 +132,139 @@ void main() {
     expect(client.fetch('4006381333931'),
         throwsA(isA<LookupException>()
             .having((e) => e.error, 'error', LookupError.rateLimited)));
+  });
+
+  group('Produktnamen und Sprach-Fallback', () {
+    Map<String, dynamic> named(Map<String, dynamic> fields, {String lang = 'fr'}) => {
+          'code': '4006381333931',
+          'status': 1,
+          'product': {'code': '4006381333931', 'lang': lang, ...fields},
+        };
+    ProductRecord map(Map<String, dynamic> json) =>
+        OpenFoodFactsClient.mapProduct(json, retrievedAt: now)!;
+
+    test('Name in der App-Sprache wird bevorzugt, sonst Hauptname', () {
+      final p = map(named({
+        'product_name': 'Biscuits au chocolat',
+        'product_name_languages': {
+          'fr': 'Biscuits au chocolat',
+          'de': 'Schokoladenkekse',
+          'tr': 'Çikolatalı bisküvi',
+          'ar': 'بسكويت بالشوكولاتة',
+        },
+      }));
+      expect(p.name, 'Biscuits au chocolat');
+      expect(p.nameFor('de'), 'Schokoladenkekse');
+      expect(p.nameFor('tr'), 'Çikolatalı bisküvi');
+      expect(p.nameFor('ar'), 'بسكويت بالشوكولاتة');
+      expect(p.nameFor('en'), 'Biscuits au chocolat'); // kein en -> Hauptname
+    });
+
+    test('Nur ein Name in einer anderen Sprache -> dieser wird verwendet', () {
+      final p = map(named({
+        'product_name_languages': {'es': 'Galletas de chocolate'},
+      }));
+      expect(p.name, 'Galletas de chocolate');
+      expect(p.nameFor('de'), 'Galletas de chocolate');
+    });
+
+    test('Ohne Hauptname: Hauptsprache vor Deutsch/Englisch vor alphabetisch', () {
+      expect(
+          map(named({
+            'product_name_languages': {'it': 'Biscotti', 'en': 'Cookies', 'pl': 'Ciastka'},
+          }, lang: 'pl')).name,
+          'Ciastka');
+      expect(
+          map(named({
+            'product_name_languages': {'it': 'Biscotti', 'en': 'Cookies', 'de': 'Kekse'},
+          })).name,
+          'Kekse');
+      expect(
+          map(named({
+            'product_name_languages': {'it': 'Biscotti', 'es': 'Galletas'},
+          })).name,
+          'Galletas');
+    });
+
+    test('Einzelne product_name_xx-Felder werden ebenfalls gelesen', () {
+      final p = map(named({'product_name_tr': 'Bisküvi'}));
+      expect(p.name, 'Bisküvi');
+      expect(p.nameFor('tr'), 'Bisküvi');
+    });
+
+    test('Leere, ungültige und doppelte Namen werden verworfen', () {
+      final p = map(named({
+        'product_name': '  Kekse   Classic ',
+        'product_name_fr_imported': 'Importiert',
+        'product_name_languages': {
+          'fr': 'kekse classic', // gleich wie Hauptname
+          'de': '   ',
+          'en': '-',
+          'it': 42,
+          'x-y': 'Ungültiger Code',
+          'tr': 'Bisküvi\n Klasik',
+        },
+      }));
+      expect(p.name, 'Kekse Classic');
+      expect(p.localizedNames, {'tr': 'Bisküvi Klasik'});
+      expect(p.nameFor('de'), 'Kekse Classic');
+      expect(p.nameFor('en'), 'Kekse Classic');
+    });
+
+    test('Ohne jeden Namen bleibt name leer; generic_name als letzter Ersatz', () {
+      final none = map(named({'product_name_languages': {}, 'brands': 'Marke'}));
+      expect(none.name, isNull);
+      expect(none.nameFor('de'), isNull);
+      expect(none.brand, 'Marke');
+      expect(map(named({'generic_name': 'Kekse'})).name, 'Kekse');
+    });
+
+    test('Namen je Sprache bleiben im Verlauf erhalten', () {
+      final p = map(named({
+        'product_name': 'Biscuits',
+        'product_name_languages': {'de': 'Kekse'},
+      }));
+      final back = ProductRecord.fromJson(
+          jsonDecode(jsonEncode(p.toJson())) as Map<String, dynamic>);
+      expect(back.nameFor('de'), 'Kekse');
+      expect(back.nameFor('en'), 'Biscuits');
+      // Ältere gespeicherte Einträge ohne localizedNames bleiben lesbar.
+      final old = p.toJson()..remove('localizedNames');
+      expect(ProductRecord.fromJson(old).localizedNames, isEmpty);
+    });
+
+    test('fetch fragt product_name_languages ab', () async {
+      late Uri seen;
+      final client = OpenFoodFactsClient(
+        client: MockClient((req) async {
+          seen = req.url;
+          return http.Response.bytes(utf8.encode(jsonEncode(sample())), 200);
+        }),
+        clock: () => now,
+      );
+      await client.fetch('4006381333931');
+      expect(seen.queryParameters['fields']!.split(','),
+          containsAll(['product_name', 'product_name_languages']));
+    });
+
+    // Echte Antwort (Oktober 2026): Produkt vorhanden, aber ohne Namen und
+    // ohne Zutaten. Die Marke darf nicht als Produktname gelten.
+    test('Echtes Produkt ohne Namen (3263850373626) bleibt NICHT VERIFIZIERT', () {
+      final json = jsonDecode(
+              File('test/fixtures/off/product-3263850373626.json').readAsStringSync())
+          as Map<String, dynamic>;
+      final p = map(json);
+      expect(p.name, isNull);
+      expect(p.localizedNames, isEmpty);
+      expect(p.brand, 'Leader Price');
+      for (final lang in ['de', 'en', 'tr', 'ar']) {
+        expect(p.nameFor(lang), isNull);
+      }
+      final v = HalalEngine()
+          .evaluate(product: p, scannedBarcode: '3263850373626', now: now);
+      expect(v.status, HalalStatus.notVerified);
+      expect(v.identity, IdentityStatus.weak);
+      expect(v.unknowns, contains(UnknownReason.noIngredients));
+    });
   });
 }

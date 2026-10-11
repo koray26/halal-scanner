@@ -60,6 +60,8 @@
   "status.loading.meaning": "Ürün bilgileri yükleniyor.",
   "result.title": "Sonuç",
   "result.unknownProduct": "Bilinmeyen ürün",
+  "result.unnamedProduct": "İsimsiz ürün",
+  "result.nameMissing": "Ürün adı Open Food Facts'e girilmemiş",
   "result.barcode": "Barkod",
   "result.countries": "Ülkeler",
   "result.image": "Ürün resmi",

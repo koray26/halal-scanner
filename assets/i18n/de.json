@@ -60,6 +60,8 @@
   "status.loading.meaning": "Die Produktdaten werden geladen.",
   "result.title": "Prüfergebnis",
   "result.unknownProduct": "Unbekanntes Produkt",
+  "result.unnamedProduct": "Produkt ohne Namen",
+  "result.nameMissing": "Produktname in Open Food Facts nicht eingetragen",
   "result.barcode": "Barcode",
   "result.countries": "Länder",
   "result.image": "Produktbild",

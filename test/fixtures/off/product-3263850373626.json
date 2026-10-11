@@ -1,0 +1,44 @@
+{
+  "code": "3263850373626",
+  "product": {
+    "allergens_tags": [],
+    "brands": "Leader Price",
+    "code": "3263850373626",
+    "countries_tags": [],
+    "data_quality_warnings_tags": [
+      "en:environmental-score-origins-of-ingredients-origins-are-100-percent-unknown",
+      "en:environmental-score-packaging-packaging-data-missing",
+      "en:environmental-score-production-system-no-label",
+      "en:environmental-score-threatened-species-ingredients-missing"
+    ],
+    "image_front_url": "https://images.openfoodfacts.org/images/products/326/385/037/3626/front_en.3.400.jpg",
+    "labels_tags": [
+      "fr:triman"
+    ],
+    "lang": "en",
+    "last_modified_t": 1780105843,
+    "product_name_languages": {},
+    "states_tags": [
+      "en:to-be-completed",
+      "en:nutrition-facts-to-be-completed",
+      "en:ingredients-to-be-completed",
+      "en:expiration-date-to-be-completed",
+      "en:packaging-code-to-be-completed",
+      "en:characteristics-to-be-completed",
+      "en:origins-to-be-completed",
+      "en:categories-to-be-completed",
+      "en:brands-completed",
+      "en:packaging-to-be-completed",
+      "en:quantity-to-be-completed",
+      "en:product-name-to-be-completed",
+      "en:photos-validated",
+      "en:packaging-photo-selected",
+      "en:nutrition-photo-selected",
+      "en:ingredients-photo-selected",
+      "en:front-photo-selected",
+      "en:photos-uploaded"
+    ]
+  },
+  "status": 1,
+  "status_verbose": "product found"
+}

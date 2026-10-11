@@ -413,6 +413,14 @@ class _ProductHeader extends StatelessWidget {
     final p = entry.product;
     final theme = Theme.of(context);
     final s = strings;
+    final name = p?.nameFor(s.code);
+    // Die Marke ersetzt den fehlenden Namen nur in der Anzeige.
+    final brandAsTitle = p != null && name == null && p.brand != null;
+    final title = name ??
+        (p == null
+            ? s.t(entry.barcode == null ? 'history.photoEntry' : 'result.unknownProduct')
+            : p.brand ?? s.t('result.unnamedProduct'));
+    final subtitle = [if (!brandAsTitle) p?.brand, p?.quantity].whereType<String>();
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       ClipRRect(
         borderRadius: BorderRadius.circular(14),
@@ -434,12 +442,13 @@ class _ProductHeader extends StatelessWidget {
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
-            p?.name ?? s.t(entry.barcode == null ? 'history.photoEntry' : 'result.unknownProduct'),
+            title,
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
           ),
-          if (p?.brand != null || p?.quantity != null)
-            Text([p?.brand, p?.quantity].whereType<String>().join(' · '),
-                style: theme.textTheme.bodyLarge),
+          if (p != null && name == null)
+            Text(s.t('result.nameMissing'), style: theme.textTheme.bodyMedium),
+          if (subtitle.isNotEmpty)
+            Text(subtitle.join(' · '), style: theme.textTheme.bodyLarge),
           if (entry.barcode != null) ...[
             const SizedBox(height: Gap.xs),
             Text('${s.t('result.barcode')}: ${ltr(entry.barcode!)}',

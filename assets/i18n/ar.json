@@ -60,6 +60,8 @@
   "status.loading.meaning": "يتم تحميل بيانات المنتج.",
   "result.title": "النتيجة",
   "result.unknownProduct": "منتج غير معروف",
+  "result.unnamedProduct": "منتج بدون اسم",
+  "result.nameMissing": "اسم المنتج غير مُدخل في Open Food Facts",
   "result.barcode": "الرمز الشريطي",
   "result.countries": "الدول",
   "result.image": "صورة المنتج",

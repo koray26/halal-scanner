@@ -203,6 +203,7 @@ class ProductRecord {
     required this.barcode,
     required this.source,
     this.name,
+    this.localizedNames = const {},
     this.brand,
     this.quantity,
     this.countries = const [],
@@ -227,7 +228,14 @@ class ProductRecord {
   /// Barcode, den die Quelle zurückgemeldet hat.
   final String barcode;
   final SourceRef source;
+
+  /// Hauptname laut Quelle (Hauptsprache des Datensatzes, sonst ein Name in
+  /// einer anderen Sprache). Die Marke ist bewusst KEIN Ersatz für den Namen.
   final String? name;
+
+  /// Produktnamen je Sprachcode laut Quelle (bereinigt). Namen, die dem
+  /// Hauptnamen gleichen, sind nicht doppelt enthalten.
+  final Map<String, String> localizedNames;
   final String? brand;
   final String? quantity;
   final List<String> countries;
@@ -260,6 +268,10 @@ class ProductRecord {
   final int? unknownIngredientsN;
   final int? ingredientsN;
 
+  /// Name für die Anzeige: bevorzugt in der App-Sprache [lang], sonst der
+  /// Hauptname. Liefert `null`, wenn die Quelle keinen Namen enthält.
+  String? nameFor(String lang) => localizedNames[lang] ?? name;
+
   Iterable<OffIngredient> get allStructuredIngredients sync* {
     for (final i in structuredIngredients) {
       yield* i.allNodes;
@@ -271,6 +283,7 @@ class ProductRecord {
         barcode: barcode,
         source: source,
         name: name,
+        localizedNames: localizedNames,
         brand: brand,
         quantity: quantity,
         countries: countries,
@@ -296,6 +309,7 @@ class ProductRecord {
         'barcode': barcode,
         'source': source.toJson(),
         'name': name,
+        'localizedNames': localizedNames,
         'brand': brand,
         'quantity': quantity,
         'countries': countries,
@@ -322,6 +336,7 @@ class ProductRecord {
         barcode: j['barcode'] as String,
         source: SourceRef.fromJson(j['source'] as Map<String, dynamic>),
         name: j['name'] as String?,
+        localizedNames: (j['localizedNames'] as Map?)?.cast<String, String>() ?? const {},
         brand: j['brand'] as String?,
         quantity: j['quantity'] as String?,
         countries: (j['countries'] as List?)?.cast<String>() ?? const [],

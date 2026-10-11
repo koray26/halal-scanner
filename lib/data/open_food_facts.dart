@@ -89,6 +89,18 @@ class OpenFoodFactsClient {
     _recent.add(now);
   }
 
+  /// Sprachcode nach ISO 639-1/-3, wie Open Food Facts ihn verwendet.
+  static final _langCode = RegExp(r'^[a-z]{2,3}$');
+
+  /// Bereinigt einen Produktnamen: Leerraum zusammenfassen; Werte ohne
+  /// Buchstaben oder Ziffern (z. B. "", "-", "?") gelten als kein Name.
+  static String? cleanName(Object? value) {
+    if (value is! String) return null;
+    final n = value.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (!RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(n)) return null;
+    return n;
+  }
+
   /// Wandelt die API-Antwort in ein [ProductRecord]. Öffentlich für Tests.
   static ProductRecord? mapProduct(Map<String, dynamic> json,
       {required DateTime retrievedAt}) {
@@ -171,13 +183,45 @@ class OpenFoodFactsClient {
       return out;
     }
 
+    // Produktnamen je Sprache aus `product_name_languages` und einzelnen
+    // `product_name_xx`-Feldern. Leere, ungültige und doppelte Namen entfallen;
+    // interne Varianten wie `product_name_fr_imported` werden ignoriert.
+    final names = <String, String>{};
+    void addName(Object? lang, Object? value) {
+      final n = cleanName(value);
+      if (lang is String && _langCode.hasMatch(lang) && n != null) {
+        names.putIfAbsent(lang, () => n);
+      }
+    }
+
+    final byLang = p['product_name_languages'];
+    if (byLang is Map) byLang.forEach(addName);
+    for (final e in p.entries) {
+      if (e.key.startsWith('product_name_')) {
+        addName(e.key.substring('product_name_'.length), e.value);
+      }
+    }
+    final mainName = cleanName(p['product_name']);
+    if (mainName != null && mainLang != null) addName(mainLang, mainName);
+
+    // Hauptname: Hauptsprache, dann Deutsch/Englisch, dann alphabetisch.
+    final ordered = [
+      if (mainLang != null) mainLang,
+      'de',
+      'en',
+      ...(names.keys.toList()..sort()),
+    ];
+    final name = mainName ??
+        ordered.map((l) => names[l]).nonNulls.firstOrNull ??
+        cleanName(p['generic_name']);
+    String norm(String s) => s.toLowerCase();
+    names.removeWhere((_, n) => name != null && norm(n) == norm(name));
+
     return ProductRecord(
       barcode: code,
       source: source,
-      name: str('product_name') ??
-          str('product_name_de') ??
-          str('product_name_en') ??
-          str('generic_name'),
+      name: name,
+      localizedNames: names,
       brand: str('brands'),
       quantity: str('quantity'),
       countries: list('countries_tags'),

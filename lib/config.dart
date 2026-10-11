@@ -28,8 +28,8 @@ class AppConfig {
   static const offFields = [
     'code',
     'product_name',
-    'product_name_de',
-    'product_name_en',
+    // Alle sprachspezifischen Namen (product_name_xx) als Map {Sprachcode: Name}.
+    'product_name_languages',
     'generic_name',
     'brands',
     'quantity',

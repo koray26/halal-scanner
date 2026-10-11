@@ -208,7 +208,7 @@ class InvestigationCard extends StatelessWidget {
                 label: Text(s.t('feedback.knowMore')),
                 onPressed: () => showFeedbackSheet(context,
                     barcode: entry.barcode,
-                    productName: entry.product?.name,
+                    productName: entry.product?.nameFor(s.code),
                     ingredient: inv.originalText),
               ),
               if (!haram && !resolved && entry.product != null)
@@ -282,7 +282,7 @@ Future<void> openManufacturerInquiry(
     }
   }
   final body = s.t('inquiry.body', {
-    'product': p?.name ?? '-',
+    'product': p?.nameFor(s.code) ?? '-',
     'brand': p?.brand ?? '-',
     'barcode': entry.barcode ?? '-',
     'questions': questions.isEmpty ? '-' : questions.join('\n'),
@@ -290,7 +290,7 @@ Future<void> openManufacturerInquiry(
   final uri = Uri(
     scheme: 'mailto',
     path: to,
-    query: 'subject=${Uri.encodeComponent(s.t('inquiry.subject', {'product': p?.name ?? entry.barcode ?? ''}))}'
+    query: 'subject=${Uri.encodeComponent(s.t('inquiry.subject', {'product': p?.nameFor(s.code) ?? entry.barcode ?? ''}))}'
         '&body=${Uri.encodeComponent(body)}',
   );
   final ok = await launchUrl(uri);
