@@ -67,7 +67,7 @@ class SourcesScreen extends StatelessWidget {
               ...v.findings.map((f) => Padding(
                     padding: const EdgeInsets.only(bottom: Gap.s),
                     child: Text(
-                      '• ${r.findingName(f)}: „${f.matchedText}“ → '
+                      '• ${r.findingName(f)}: „${f.matchedText}“ – '
                       '${f.isResolved ? s.t('effect.resolved') : s.t('effect.${f.effect.name}')}'
                       '${f.isResolved ? ' (${s.t('qualifier.${f.resolvedBy!.name}')})' : ''}',
                     ),

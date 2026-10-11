@@ -36,9 +36,13 @@ class SettingsScreen extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.dark_mode_outlined),
                 title: Text(s.t('settings.theme')),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: Gap.s),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(Gap.m, 0, Gap.m, Gap.s),
+                child: SizedBox(
+                  width: double.infinity,
                   child: SegmentedButton<ThemeMode>(
+                    showSelectedIcon: false,
                     segments: [
                       ButtonSegment(value: ThemeMode.system, label: Text(s.t('settings.theme.system'))),
                       ButtonSegment(value: ThemeMode.light, label: Text(s.t('settings.theme.light'))),

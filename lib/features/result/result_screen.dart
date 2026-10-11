@@ -405,7 +405,7 @@ class _ProductHeader extends StatelessWidget {
                 style: theme.textTheme.bodyMedium),
           ],
           if (p != null && p.countries.isNotEmpty)
-            Text('${s.t('result.countries')}: ${p.countries.map((c) => c.split(':').last).take(4).join(', ')}',
+            Text('${s.t('result.countries')}: ${p.countries.map(_country).take(4).join(', ')}',
                 style: theme.textTheme.bodySmall),
         ]),
       ),
@@ -464,4 +464,9 @@ class _Bullets extends StatelessWidget {
                 ))
             .toList(),
       );
+}
+
+String _country(String tag) {
+  final c = tag.split(':').last.replaceAll('-', ' ');
+  return c.isEmpty ? c : c[0].toUpperCase() + c.substring(1);
 }

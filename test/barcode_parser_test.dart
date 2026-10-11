@@ -29,10 +29,10 @@ void main() {
     test('verschachtelte Klammern', () {
       final p = IngredientParser.parse(
           'Zutaten: Zucker, Füllung (Rindergelatine, Fett (pflanzlich)), Salz.');
-      expect(p.roots.map((n) => n.head.trim()), ['zucker', 'füllung', 'salz']);
+      expect(p.roots.map((n) => n.head.trim()), ['Zucker', 'Füllung', 'Salz']);
       final fuellung = p.roots[1];
       expect(fuellung.children.map((c) => c.head.trim()),
-          ['rindergelatine', 'fett']);
+          ['Rindergelatine', 'Fett']);
       expect(fuellung.children[1].children.single.head.trim(), 'pflanzlich');
     });
 
@@ -43,18 +43,18 @@ void main() {
 
     test('OFF-Allergenmarkierung wird entfernt', () {
       final p = IngredientParser.parse('_Milch_, Zucker');
-      expect(p.roots.first.head, 'milch');
+      expect(p.roots.first.head, 'Milch');
     });
 
     test('Spurenhinweis wird abgetrennt', () {
       final p = IngredientParser.parse('Zucker. May contain traces of nuts.');
-      expect(p.roots.single.head, 'zucker');
-      expect(p.tracesText, startsWith('may contain'));
+      expect(p.roots.single.head, 'Zucker');
+      expect(p.tracesText, startsWith('May contain'));
     });
 
     test('Unbalancierte Klammer bricht nicht ab', () {
       final p = IngredientParser.parse('Zucker, Gelatine (Schwein');
-      expect(p.allNodes.map((n) => n.head.trim()), contains('schwein'));
+      expect(p.allNodes.map((n) => n.head.trim()), contains('Schwein'));
     });
   });
 }

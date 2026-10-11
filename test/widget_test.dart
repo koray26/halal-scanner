@@ -51,7 +51,7 @@ void main() {
     expect(Directionality.of(tester.element(find.text('Produkt scannen'))),
         TextDirection.ltr);
 
-    await tester.tap(find.text('Einstellungen').last);
+    await tester.tap(find.text('Mehr'));
     await tester.pumpAndSettle();
     expect(find.text('Sprache'), findsOneWidget);
   });
@@ -110,7 +110,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text('HARAM'), findsOneWidget);
-    expect(find.textContaining('schweinegelatine'), findsWidgets);
+    expect(find.textContaining('Schweinegelatine'), findsWidgets);
     expect(find.text('Was wurde gefunden?'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Quellen und Begründung'), 200);
     expect(find.text('Zutaten anzeigen'), findsOneWidget);

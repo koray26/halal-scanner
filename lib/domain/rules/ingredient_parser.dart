@@ -79,8 +79,7 @@ class IngredientParser {
         .replaceAll('：', ':')
         .replaceAll('،', ',') // arabisches Komma
         .replaceAll(RegExp(r'\s+'), ' ')
-        .trim()
-        .toLowerCase();
+        .trim();
     t = t.replaceFirst(_prefix, '');
     return t;
   }

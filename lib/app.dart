@@ -105,7 +105,8 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDestination(
               icon: const Icon(Icons.settings_outlined),
               selectedIcon: const Icon(Icons.settings),
-              label: s.t('nav.settings')),
+              label: s.t('nav.more'),
+              tooltip: s.t('nav.settings')),
         ],
       ),
     );

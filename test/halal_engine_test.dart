@@ -62,7 +62,7 @@ void main() {
       final f = v.haramFindings.single;
       expect(f.ruleId, 'gelatine');
       expect(f.escalatedByPork, isTrue);
-      expect(f.ingredient, contains('schweinegelatine'));
+      expect(f.ingredient, contains('Schweinegelatine'));
     });
 
     test('Gelatine (Schwein) in Klammern -> HARAM', () {
@@ -180,7 +180,7 @@ void main() {
 
     test('Kann Spuren von … wird separat ausgewiesen', () {
       final v = eval('Zucker, Kakaomasse. Kann Spuren von Milch und Nüssen enthalten.');
-      expect(v.tracesText, contains('spuren'));
+      expect(v.tracesText, contains('Spuren'));
       expect(v.status, HalalStatus.halalByIngredients);
     });
 

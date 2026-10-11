@@ -1,17 +1,15 @@
 {
   "app.name": "Halal Scanner",
   "a11y.status": "Sonuç",
-
   "nav.home": "Ana sayfa",
   "nav.scan": "Tara",
   "nav.history": "Geçmiş",
   "nav.favorites": "Favoriler",
   "nav.settings": "Ayarlar",
-
+  "nav.more": "Ayarlar",
   "common.cancel": "İptal",
   "common.delete": "Sil",
   "common.retry": "Tekrar dene",
-
   "home.greeting": "Esselâmü aleyküm!",
   "home.intro": "Bir gıda ürününün barkodunu tarayın. Uygulama içindekiler listesini şeffaf kurallara göre kontrol eder ve sonucu açıklar.",
   "home.scan": "Ürün tara",
@@ -22,7 +20,6 @@
   "home.lastScan": "Son kontrol edilenler",
   "home.showAll": "Tümünü göster",
   "home.disclaimer": "Bu uygulama helal sertifikasının veya dini danışmanlığın yerini tutmaz. Eksik bilgiler asla helal olarak değerlendirilmez.",
-
   "manual.title": "Barkod gir",
   "manual.hint": "Rakamlar çizgilerin altında yazılıdır (8, 12 veya 13 hane).",
   "manual.label": "Barkod numarası",
@@ -31,7 +28,6 @@
   "barcode.problem.notNumeric": "Yalnızca rakam girilebilir.",
   "barcode.problem.wrongLength": "Bir barkod 8, 12, 13 veya 14 hanelidir.",
   "barcode.problem.badCheckDigit": "Kontrol hanesi uyuşmuyor. Lütfen numarayı kontrol edin.",
-
   "scanner.instruction": "Barkodu çerçevenin içinde tutun. Otomatik olarak algılanır.",
   "scanner.unreadable": "Barkod net okunamadı. Sabit tutun veya yaklaştırın.",
   "scanner.close": "Tarayıcıyı kapat",
@@ -42,7 +38,6 @@
   "scanner.permission.body": "Lütfen telefon ayarlarından kamera erişimine izin verin (Uygulamalar › Halal Scanner › İzinler). Barkodu elle de girebilirsiniz.",
   "scanner.error.title": "Kamera kullanılamıyor",
   "scanner.error.body": "Kamera başlatılamadı. Diğer kamera uygulamalarını kapatın veya barkodu elle girin.",
-
   "lookup.title": "Ürün kontrol ediliyor",
   "lookup.loading": "{code} için ürün bilgileri aranıyor …",
   "lookup.error.title": "Ürün bilgisi alınamadı",
@@ -51,7 +46,6 @@
   "lookup.error.rateLimited": "Kısa sürede çok fazla sorgu. Lütfen bir dakika bekleyin.",
   "lookup.error.server": "Ürün veritabanına şu anda ulaşılamıyor.",
   "lookup.error.invalidResponse": "Veritabanı geçersiz veri gönderdi.",
-
   "status.halalCertified": "HELAL SERTİFİKALI",
   "status.halalCertified.meaning": "Tam olarak bu ürün için geçerli ve doğrulanmış bir helal sertifikası bulundu.",
   "status.halalByIngredients": "İÇİNDEKİLERE GÖRE HELAL",
@@ -64,7 +58,6 @@
   "status.notVerified.meaning": "Mevcut veriler değerlendirme için yeterli değil. Bu bir onay değildir.",
   "status.loading": "KONTROL EDİLİYOR",
   "status.loading.meaning": "Ürün bilgileri yükleniyor.",
-
   "result.title": "Sonuç",
   "result.unknownProduct": "Bilinmeyen ürün",
   "result.barcode": "Barkod",
@@ -79,7 +72,6 @@
   "result.reportIssue": "Hatalı ürün bilgisini bildir",
   "result.stale": "{date} tarihli kayıtlı sonuç. Şu anda kontrol edilemedi – veriler güncel olmayabilir.",
   "result.disclaimer": "Kural sürümü {version} ile otomatik kontrol. Helal sertifikasının veya dini danışmanlığın yerini tutmaz.",
-
   "report.q.found": "Ne bulundu?",
   "report.q.why": "Neden önemli?",
   "report.q.evidence": "Hangi bilgiler bunu destekliyor?",
@@ -100,32 +92,27 @@
   "report.issue.body": "Ürün bilgileri (ad, içindekiler) Open Food Facts'ten gelir ve orada doğrudan düzeltilebilir – bu herkese fayda sağlar. Uygulamanın değerlendirmesindeki hataları bize bildirebilirsiniz. Bildiriminiz sonucu otomatik olarak değiştirmez.",
   "report.issue.off": "Ürünü Open Food Facts'te düzelt",
   "report.issue.app": "Değerlendirme hatası bildir (GitHub)",
-
   "effect.haram": "haram",
   "effect.unclear": "belirsiz",
   "effect.info": "not",
   "effect.resolved": "netleşti",
   "finding.inText": "„{match}“ şurada: {ingredient}",
   "finding.fromTag": "Veritabanı analizine göre katkı maddesi {code} (metinde algılanmadı)",
-
   "evidence.off": "Open Food Facts ürün bilgileri, {date} tarihinde alındı (veritabanında son değişiklik: {modified}).",
   "evidence.ocr": "İçindekiler listesi kullanıcı tarafından fotoğraflandı ve otomatik okundu (doğrulanmış kayıt değildir).",
   "evidence.userEdited": "İçindekiler listesi kullanıcı tarafından girildi veya düzeltildi (doğrulanmış kayıt değildir).",
   "evidence.cert": "{certifier} sertifikası.",
   "evidence.none": "Ürün bilgisi yok.",
   "evidence.rules": "{date} tarihinde kural sürümü {version} ile kontrol edildi.",
-
   "certainty.documented": "Belgelenmiş: Sonuç, ürün bilgilerindeki açık bir ifadeye veya doğrulanmış bir sertifikaya dayanır.",
   "certainty.limited": "Sınırlı: Sonuç yalnızca beyan edilen içindekiler listesine dayanır. Üretim ve hammadde kaynağı belgelenmemiştir.",
   "certainty.notAssessable": "Değerlendirilemez: Mevcut veriler yeterli değil.",
-
   "qualifier.porcine": "domuzdan",
   "qualifier.fish": "balık kaynaklı olduğu belirtilmiş",
   "qualifier.plant": "bitkisel kaynaklı olduğu belirtilmiş",
   "qualifier.nonAnimalEnzyme": "mikrobiyal / hayvansal olmayan kaynak belirtilmiş",
   "qualifier.synthetic": "sentetik üretim belirtilmiş",
   "qualifier.halalStated": "içindekiler listesinde üreticinin helal beyanı",
-
   "unknown.productNotFound": "Ürün Open Food Facts'te bulunmuyor. İçindekiler listesini fotoğraflayabilirsiniz.",
   "unknown.identityMismatch": "Veritabanı taranan barkoddan farklı bir ürün döndürdü. Veriler kullanılmadı.",
   "unknown.identityWeak": "Bu barkod için ürün adı kayıtlı değil, eşleşme kesin değil.",
@@ -142,7 +129,6 @@
   "unknown.dataOld": "Ürün bilgileri 3 yıldan uzun süredir güncellenmedi. Tarif değişmiş olabilir.",
   "unknown.manufacturingNotVerified": "Üretim yöntemleri, hammadde kaynağı ve olası bulaşmalar kontrol edilmedi.",
   "unknown.languageNotSupported": "İçindekiler listesi yalnızca bu uygulamanın henüz kural içermediği bir dilde mevcut (desteklenen: Almanca, İngilizce, Fransızca, Türkçe).",
-
   "rule.pork.name": "Domuz",
   "rule.pork.why": "Domuz eti ve domuzdan elde edilen tüm bileşenler tanınmış tüm helal standartlarına göre yasaktır.",
   "rule.porkDerived.name": "Domuz kaynaklı {item}",
@@ -179,7 +165,6 @@
   "rule.seafood_non_fish.why": "Karides, midye, kalamar ve benzerleri mezhebe göre, özellikle Hanefi mezhebinde, farklı değerlendirilir.",
   "rule.whey.name": "Peynir altı suyu",
   "rule.whey.why": "Peynir altı suyu peynir üretiminin yan ürünüdür. Bazı helal standartları kullanılan mayanın kaynağını kontrol eder. Bu not sonucu değiştirmez.",
-
   "ingredients.title": "İçindekiler",
   "ingredients.source.openFoodFacts": "Open Food Facts",
   "ingredients.source.ocrPhoto": "Fotoğraf (otomatik okundu)",
@@ -193,7 +178,6 @@
   "ingredients.legend.haram": "Kırmızı: yasak bileşen",
   "ingredients.legend.unclear": "Turuncu: belirsiz veya tartışmalı bileşen",
   "ingredients.legend.info": "Gri: netleşmiş veya yalnızca not",
-
   "sources.used": "Kullanılan kaynaklar",
   "sources.retrieved": "Alındı: {date}",
   "sources.version": "Veri sürümü: {version}",
@@ -209,7 +193,6 @@
   "sources.rulesBody": "Kural sürümü {version}, {date} tarihinde uygulandı. Kurallar kodda sabittir ve test senaryolarıyla güvence altındadır. Kararı yapay zekâ vermez.",
   "sources.limits": "Kontrolün sınırları",
   "sources.limitsBody": "Yalnızca içindekiler listesinde yazanlar kontrol edilir. Kontrol edilmeyenler: kesim, hammadde kaynağı, üretim tesisleri, bulaşma ve beyan edilmeyen yardımcı maddeler. Veritabanındaki helal etiketleri sertifika sayılmaz.",
-
   "ocr.title": "İçindekileri fotoğrafla",
   "ocr.frame": "Yalnızca içindekiler listesini fotoğraflayın – eksiksiz, düz ve net.",
   "ocr.tips.title": "İyi bir fotoğraf için",
@@ -229,7 +212,6 @@
   "ocr.analyze": "İçindekileri kontrol et",
   "ocr.retake": "Yeniden fotoğrafla",
   "ocr.notice": "İçindekiler listesinin fotoğrafı hammaddelerin kaynağını veya üretim koşullarını kanıtlamaz. Veritabanı kaydı olmadan bir fotoğraf asla helal onayı ile sonuçlanmaz.",
-
   "history.empty.title": "Henüz geçmiş yok",
   "history.empty.body": "Kontrol edilen ürünler telefonunuzda burada saklanır.",
   "history.photoEntry": "Fotoğraflanan içindekiler listesi",
@@ -237,7 +219,6 @@
   "history.offlineNote": "Kayıtlı sonuçlar kontrol tarihlerindeki durumu gösterir. Güncel veriler için bir sonucu açıp „Tekrar kontrol et“e dokunun. Silmek için sola kaydırın.",
   "favorites.empty.title": "Favori yok",
   "favorites.empty.body": "Bir ürünü burada saklamak için sonuçtaki yıldıza dokunun.",
-
   "settings.language": "Dil",
   "settings.theme": "Görünüm",
   "settings.theme.system": "Sistem",
@@ -253,13 +234,11 @@
   "settings.clearHistory": "Geçmişi sil",
   "settings.clearHistory.sub": "Favoriler korunur",
   "settings.clearHistory.confirm": "Favoriler dışındaki tüm kayıtlar bu telefondan silinecek.",
-
   "language.choose": "Lütfen dilinizi seçin. Daha sonra ayarlardan değiştirebilirsiniz.",
   "language.status.complete": "Tam",
   "language.status.draft": "Taslak – çeviri henüz kontrol edilmedi",
   "language.status.planned": "Hazırlanıyor",
   "language.note": "„Hazırlanıyor“ durumundaki diller ancak çeviri kontrol edildikten sonra etkinleştirilir. Dini terimler kontrol edilmeden makine çevirisiyle çevrilmez.",
-
   "info.rules.title": "Uygulama nasıl kontrol eder",
   "info.rules.body": "1. Barkod ürünü tanımlar. İçindekiler listesi Open Food Facts'ten yüklenir – yalnızca tam olarak bu barkod için.\n\n2. İçindekiler listesi tek tek bileşenlere ayrılır ve sabit, sürümlü bir kural listesiyle karşılaştırılır. Kararı yapay zekâ vermez.\n\n3. Sonuç:\n• HARAM – yalnızca yasak bir bileşen açıkça belirtilmişse (ör. domuz, domuz jelatini, kan, şarap, alkol).\n• BELİRSİZ – kaynak açık değilse (ör. kaynağı belirtilmemiş jelatin, aroma, E471, peynir mayası, helal beyanı olmayan et) veya değerlendirme âlimler arasında tartışmalıysa (ör. karmin, şarap sirkesi, deniz ürünleri).\n• DOĞRULANMADI – ürün kesin bulunamazsa ya da liste eksik, çelişkili, yalnızca fotoğraflanmış veya elle girilmişse.\n• İÇİNDEKİLERE GÖRE HELAL – yalnızca veritabanından gelen eksiksiz bir liste hiçbir sorunlu bileşen içermiyorsa. Bu bir sertifika değildir.\n• HELAL SERTİFİKALI – yalnızca tam olarak bu ürün için doğrulanmış, geçerli bir sertifika varsa. Henüz ücretsiz, doğrulanabilir bir sertifika kaynağı bağlı değil; bu nedenle bu durum şu anda görünmez.\n\nEksik bilgiler asla helal olarak değerlendirilmez.\n\nÖnemli: Kurallar ihtiyatlı ve yaygın ilkelerin teknik bir uygulamasıdır. Henüz bir âlimler kurulu tarafından incelenmemiştir. Şüphe halinde dini bilgiye sahip bir kişiye danışın.",
   "info.privacy.title": "Gizlilik",

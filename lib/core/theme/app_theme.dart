@@ -111,7 +111,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(64, 56),
-          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          textStyle: base.textTheme.labelLarge?.copyWith(fontSize: 17, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(Radii.button)),
         ),
@@ -119,7 +119,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(64, 52),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: base.textTheme.labelLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
           side: BorderSide(color: scheme.primary, width: 1.4),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(Radii.button)),

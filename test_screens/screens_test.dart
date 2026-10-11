@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
 // Erzeugt Bildschirmfotos der wichtigsten Seiten (für die Sichtprüfung in CI).
 // Ausführen: flutter test test_screens --update-goldens
 import 'dart:io';
