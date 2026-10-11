@@ -26,11 +26,18 @@
 - Treffer werden nur angezeigt; geprüft wird erst der angetippte Barcode (normale Abfrage).
 
 ## USDA FoodData Central (optional)
-- `GET https://api.nal.usda.gov/fdc/v1/foods/search?query=<GTIN>&dataType=Branded&api_key=…`
-- Nur aktiv, wenn beim Bauen ein **kostenloser Schlüssel** gesetzt wird
-  (`--dart-define=FDC_API_KEY=…`; in GitHub: Settings → Secrets → Actions → `FDC_API_KEY`).
-  Schlüssel gibt es unter https://api.data.gov/signup/. Hinweis: Ein in die App eingebauter
-  Schlüssel lässt sich aus der APK auslesen; er dient nur der Mengenbegrenzung (1.000/Std.).
+- `GET https://api.nal.usda.gov/fdc/v1/foods/search?query=<GTIN>&dataType=Branded&pageSize=5`,
+  Schlüssel im Kopf der Anfrage (`X-Api-Key`), **nie in der Adresse**.
+- **In der App ist kein Schlüssel eingebaut** (ein eingebauter Schlüssel ließe sich aus jeder
+  APK/IPA auslesen und würde von api.data.gov gesperrt). Die Builds setzen keinen Schlüssel.
+- Nur aktiv, wenn der Nutzer selbst in *Einstellungen → USDA-Schlüssel (optional)* einen eigenen,
+  kostenlosen Schlüssel von https://api.data.gov/signup/ einträgt. Ohne Schlüssel fehlt nur diese
+  Zusatzquelle („nicht eingerichtet“); alle anderen Funktionen bleiben gleich.
+- Ablage: `flutter_secure_storage` – iPhone-Schlüsselbund (nur dieses Gerät, nicht im Backup),
+  Android verschlüsselt mit dem Android-Keystore. Nicht in shared_preferences, nicht im Verlauf,
+  nicht in Exporten; wird nie wieder angezeigt, nur ersetzt oder gelöscht.
+- Lehnt USDA den Schlüssel ab (401/403), zeigt die App „Von USDA abgelehnt“ in den Einstellungen;
+  das Ergebnis bleibt ohne USDA-Daten (also ggf. NICHT VERIFIZIERT).
 - Abgefragt wird nur, wenn Open Food Facts kein Produkt oder keine Zutatenliste liefert.
 - Übernommen werden nur Datensätze mit **exakt gleicher GTIN**; mehrere Datensätze → der neueste.
 - Lizenz: Public Domain (CC0 1.0); Quellenangabe „USDA FoodData Central“ erfolgt in der App.
@@ -49,10 +56,12 @@
 | mobile_scanner | Barcode-Scan (ML Kit / Apple Vision) | BSD-3-Clause |
 | google_mlkit_text_recognition | Texterkennung auf dem Gerät | MIT (Plugin); ML Kit unter Google-Bedingungen |
 | image_picker, url_launcher, shared_preferences, http | Kamera/Galerie, Links, lokaler Speicher, Netzwerk | BSD-3-Clause |
+| flutter_secure_storage | Optionaler persönlicher USDA-Schlüssel im sicheren Gerätespeicher | BSD-3-Clause |
 
 ## Datenschutz (DSGVO-orientiert)
 - Keine Konten, keine Werbung, keine Analyse-/Tracking-Werkzeuge, kein eigener Server.
 - Übermittelt werden nur die **Barcode-Nummer** und – für die Zutatenrecherche – allgemeine Stoffkennungen (z. B. `en:e471`) an Open Food Facts (dabei technisch die IP-Adresse).
+- Nur wenn der Nutzer selbst einen USDA-Schlüssel einträgt und Open Food Facts keine Zutatenliste hat: Barcode-Nummer und Schlüssel an USDA FoodData Central (api.nal.usda.gov, USA).
 - Bei der Produktsuche: der eingegebene **Suchtext** an Open Food Facts.
 - Nur falls eingerichtet und nötig: die **Barcode-Nummer** an USDA FoodData Central.
 - Produktbilder werden direkt von Open Food Facts geladen.

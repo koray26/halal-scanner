@@ -25,6 +25,7 @@ Die neueste Testversion (APK für Android, unsignierte IPA für iPhone) liegt un
 
 - [Installation auf Android und iPhone](docs/INSTALLATION.md)
 - [Halal-Prüfregeln](docs/HALAL_REGELN.md)
+- [Sprachen: Oberfläche, Zutaten-Erkennung, Texterkennung](docs/SPRACHEN.md)
 - [Architektur](docs/ARCHITEKTUR.md)
 - [Datenquellen, Lizenzen, Datenschutz](docs/DATENQUELLEN_DATENSCHUTZ.md)
 - [Veröffentlichungs-Checkliste (Stores)](docs/STORE_CHECKLISTE.md)

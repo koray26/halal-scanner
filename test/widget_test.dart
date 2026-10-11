@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:halal_scanner/app.dart';
 import 'package:halal_scanner/core/i18n/strings.dart';
@@ -7,11 +8,14 @@ import 'package:halal_scanner/data/history_store.dart';
 import 'package:halal_scanner/domain/models.dart';
 import 'package:halal_scanner/domain/rules/halal_engine.dart';
 import 'package:halal_scanner/features/result/result_screen.dart';
+import 'package:halal_scanner/features/settings/settings_screen.dart';
+import 'package:halal_scanner/features/settings/usda_key_screen.dart';
 import 'package:halal_scanner/state/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<AppState> makeState(String lang) async {
   SharedPreferences.setMockInitialValues({'language': lang});
+  FlutterSecureStorage.setMockInitialValues({});
   final s = AppState();
   await s.init();
   return s;
@@ -56,14 +60,42 @@ void main() {
     expect(find.text('Sprache'), findsOneWidget);
   });
 
-  testWidgets('Arabisch wird rechts-nach-links dargestellt', (tester) async {
-    final state = await makeStateIn(tester, 'ar');
-    await tester.pumpWidget(HalalScannerApp(state: state));
-    await tester.pumpAndSettle();
-    final finder = find.text('مسح منتج');
-    expect(finder, findsOneWidget);
-    expect(Directionality.of(tester.element(finder)), TextDirection.rtl);
-  });
+  // Startbildschirm in jeder RTL-Sprache: Text sichtbar, Richtung rechts-nach-links.
+  for (final e in const {
+    'ar': 'مسح منتج',
+    'ur': 'پروڈکٹ اسکین کریں',
+    'fa': 'اسکن محصول',
+  }.entries) {
+    testWidgets('${e.key} wird rechts-nach-links dargestellt', (tester) async {
+      final state = await makeStateIn(tester, e.key);
+      await tester.pumpWidget(HalalScannerApp(state: state));
+      await tester.pumpAndSettle();
+      final finder = find.text(e.value);
+      expect(finder, findsOneWidget);
+      expect(Directionality.of(tester.element(finder)), TextDirection.rtl);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  // Links-nach-rechts-Sprachen der Priorität 2 starten ohne Fehler.
+  for (final e in const {
+    'id': 'Pindai produk',
+    'ms': 'Imbas produk',
+    'bn': 'পণ্য স্ক্যান করুন',
+    'hi': 'उत्पाद स्कैन करें',
+    'ha': 'Duba kaya', // Flutter-Standardtexte über den englischen Ersatz
+    'fr': 'Scanner un produit',
+  }.entries) {
+    testWidgets('${e.key}: Startbildschirm', (tester) async {
+      final state = await makeStateIn(tester, e.key);
+      await tester.pumpWidget(HalalScannerApp(state: state));
+      await tester.pumpAndSettle();
+      final finder = find.text(e.value);
+      expect(finder, findsOneWidget);
+      expect(Directionality.of(tester.element(finder)), TextDirection.ltr);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('Sprachwechsel zur Laufzeit', (tester) async {
     final state = await makeStateIn(tester, 'de');
@@ -77,6 +109,7 @@ void main() {
   testWidgets('Erster Start zeigt Sprachauswahl, geplante Sprachen gesperrt',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
     final state = AppState();
     await tester.runAsync(state.init);
     await tester.pumpWidget(HalalScannerApp(state: state));
@@ -85,7 +118,31 @@ void main() {
     await tester.scrollUntilVisible(find.text('اردو'), 200);
     final urdu = tester.widget<ListTile>(
         find.ancestor(of: find.text('اردو'), matching: find.byType(ListTile)));
-    expect(urdu.enabled, isFalse);
+    expect(urdu.enabled, isTrue); // Priorität 2: als Entwurf wählbar
+    await tester.scrollUntilVisible(find.text('简体中文'), 200);
+    final zh = tester.widget<ListTile>(
+        find.ancestor(of: find.text('简体中文'), matching: find.byType(ListTile)));
+    expect(zh.enabled, isFalse); // Priorität 3: in Vorbereitung
+  });
+
+  testWidgets('Sprachauswahl zeigt Oberfläche und Zutatenprüfung getrennt', (tester) async {
+    SharedPreferences.setMockInitialValues({'language': 'de'});
+    FlutterSecureStorage.setMockInitialValues({});
+    final state = AppState();
+    await tester.runAsync(state.init);
+    await tester.pumpWidget(AppScope(
+      state: state,
+      child: const MaterialApp(home: LanguagePickerScreen(firstRun: false)),
+    ));
+    await tester.pumpAndSettle();
+    // Deutsch: vollständig übersetzt, Zutaten vollständig geprüft.
+    expect(find.textContaining('werden vollständig geprüft'), findsWidgets);
+    // Französisch: eingeschränkt.
+    await tester.scrollUntilVisible(find.text('Français'), 200);
+    expect(find.textContaining('eingeschränkt geprüft'), findsWidgets);
+    // Urdu: Oberfläche als Entwurf, Zutaten noch nicht geprüft.
+    await tester.scrollUntilVisible(find.text('اردو'), 200);
+    expect(find.textContaining('nie grünes Ergebnis'), findsWidgets);
   });
 
   testWidgets('Statusanzeige hat Text, Symbol und Screenreader-Label', (tester) async {
@@ -189,5 +246,45 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Information ergänzen'), findsOneWidget);
     expect(find.text('Herstellerangabe oder Quelle einreichen'), findsOneWidget);
+  });
+
+  testWidgets('USDA-Schlüssel: verdeckte Eingabe, speichern, löschen', (tester) async {
+    final state = await makeStateIn(tester, 'de');
+    await tester.pumpWidget(AppScope(
+      state: state,
+      child: const MaterialApp(home: UsdaKeyScreen()),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Nicht eingerichtet – die App funktioniert auch ohne.'), findsOneWidget);
+    final field = tester.widget<TextField>(find.byKey(const ValueKey('usdaKey.input')));
+    expect(field.obscureText, isTrue);
+    expect(find.byKey(const ValueKey('usdaKey.remove')), findsNothing);
+
+    // Ungültig
+    await tester.enterText(find.byKey(const ValueKey('usdaKey.input')), 'zu kurz');
+    await tester.tap(find.byKey(const ValueKey('usdaKey.save')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('nicht wie ein gültiger Schlüssel'), findsOneWidget);
+    expect(state.hasUsdaKey, isFalse);
+
+    // Gültig
+    await tester.enterText(
+        find.byKey(const ValueKey('usdaKey.input')), 'AbCdEf0123456789AbCdEf0123456789AbCdEf01');
+    await tester.tap(find.byKey(const ValueKey('usdaKey.save')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(state.hasUsdaKey, isTrue);
+    expect(find.text('Eingerichtet – nur auf diesem Gerät gespeichert.'), findsOneWidget);
+    // Der gespeicherte Wert wird nie angezeigt.
+    expect(find.textContaining('AbCdEf0123'), findsNothing);
+
+    await tester.ensureVisible(find.byKey(const ValueKey('usdaKey.remove')));
+    await tester.tap(find.byKey(const ValueKey('usdaKey.remove')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(state.hasUsdaKey, isFalse);
+    expect(find.text('Nicht eingerichtet – die App funktioniert auch ohne.'), findsOneWidget);
   });
 }

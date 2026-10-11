@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:halal_scanner/data/feedback_store.dart';
 import 'package:halal_scanner/data/open_food_facts.dart';
@@ -272,6 +273,7 @@ void main() {
 
     setUp(() {
       SharedPreferences.setMockInitialValues({'language': 'de'});
+      FlutterSecureStorage.setMockInitialValues({});
       taxonomyHandler = (_) async => http.Response.bytes(
           File('test/fixtures/off/taxonomy-ingredients.json').readAsBytesSync(), 200);
     });
@@ -494,7 +496,7 @@ void main() {
     });
   });
 
-  test('Regelversion erhöht', () => expect(rulesetVersion, '2026.10-2'));
+  test('Regelversion erhöht', () => expect(rulesetVersion, '2026.10-3'));
 
   test('Verdict mit Recherche ist serialisierbar (Verlauf/Offline)', () {
     final v = eval(product('Zucker, Aroma, E471', link: 'https://example.org/p'));

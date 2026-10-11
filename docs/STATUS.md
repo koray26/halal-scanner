@@ -1,13 +1,21 @@
 # Projektstatus (Version 0.2.0, Oktober 2026)
 
-## 🆕 Branch `feature/weltweite-suche` (noch nicht in `main`, 183 Tests grün)
+## 🆕 Branch `feature/weltweite-suche` (noch nicht in `main`; letzter CI-Lauf: 183 Tests grün)
 - Produktnamen in allen Sprachen (`product_name_languages`), Name in App-Sprache bevorzugt; Marke nur als Anzeige-Ersatz
 - Getrennte Sachaussagen **Schweinebestandteile** und **Ethanol/alkoholische Zutaten**: nachgewiesen / in den geprüften Quellen nicht nachgewiesen / ungeklärt (abgeleitet, Regeln unverändert)
-- **USDA FoodData Central** als zweite Produktquelle (nur exakt gleiche GTIN, nur wenn Open Food Facts keine Zutaten hat) – **nur aktiv mit kostenlosem Schlüssel `FDC_API_KEY`**; ohne Schlüssel „nicht eingerichtet“
+- **USDA FoodData Central** als zweite Produktquelle (nur exakt gleiche GTIN, nur wenn Open Food Facts keine Zutaten hat) – **kein Schlüssel in der App eingebaut**; nur aktiv, wenn der Nutzer in den Einstellungen einen eigenen kostenlosen Schlüssel einträgt (sicher auf dem Gerät gespeichert, Versand im Anfragekopf); ohne Schlüssel „nicht eingerichtet“
 - Protokoll „Abgefragte Produktquellen“ je Scan, Hinweis bei unvollständiger Suche
 - **Produktsuche** nach Name/Marke/Hersteller (Open Food Facts), ohne Zusammenführung von Treffern
 - **PubChem**-Stoffidentität (CID, CAS) für 15 eindeutige Zusatzstoffe + 7 Vergleichsstoffe (Ethanol, Cetylalkohol …); Gemische ohne Eintrag
 - Quellenprüfung: [QUELLEN_UEBERSICHT.md](QUELLEN_UEBERSICHT.md)
+- **Sprachen** (Regelversion 2026.10-3, siehe [SPRACHEN.md](SPRACHEN.md)):
+  - Oberfläche: Deutsch, Englisch vollständig; Arabisch, Französisch, Türkisch (Priorität 1) sowie Indonesisch, Urdu, Bengalisch, Hindi, Malaiisch, Persisch, Hausa (Priorität 2) als ungeprüfte Entwürfe; vereinfachtes Chinesisch in Vorbereitung
+  - Zutaten-Erkennung: vollständig nur Deutsch/Englisch; Französisch/Türkisch eingeschränkt (kein Grün mehr, Lücken dokumentiert); alle anderen nicht unterstützt (nie Grün)
+  - Texterkennung: nur lateinische Schrift; jede andere Schrift blockiert Grün
+  - Rechts-nach-links für Arabisch, Urdu, Persisch; Barcode-Eingabe mit arabisch-indischen, persischen, Devanagari- und bengalischen Ziffern
+  - Türkische Großbuchstaben (İ/ı) werden jetzt erkannt
+  - Pepperoni, Chorizo, Mortadella ohne Unterzutaten → Liste unvollständig, nie Grün
+  - Neue Tests: `test/language_support_test.dart`, erweiterte `i18n_test.dart` und `widget_test.dart` – **noch nicht in CI ausgeführt**
 - Ungetestet auf echten Geräten (wie alles andere); USDA live nur mit DEMO_KEY geprüft
 
 ## ✅ Implementiert und automatisch getestet (130 Tests auf `main`, GitHub Actions)
@@ -42,7 +50,7 @@ Es wurde **kein echtes Gerät** getestet – weder Android noch iPhone. Ungetest
 - **Keine Laborergebnisse zu einzelnen Produkten**: keine kostenlose Quelle gefunden; Literatur belegt nichts über ein konkretes Produkt.
 - **Weitere nationale Lebensmitteldatenbanken** noch nicht recherchiert.
 - Vegan-/Vegetarisch-Kennzeichnungen stammen von Open-Food-Facts-Nutzern (Verpackungsangabe, nicht verifiziert).
-- Arabisch und Türkisch: Entwurf, nicht fachlich geprüft. 17 Sprachen gesperrt.
+- Übersetzungen außer Deutsch/Englisch: Entwurf, nicht von Muttersprachlern oder Fachleuten geprüft (Hausa mit geringster Sicherheit). 10 Sprachen in Vorbereitung.
 - Texterkennung nur lateinische Schrift.
 - Regeln nicht von islamischen Fachpersonen geprüft (offene Fragen in HALAL_REGELN.md, Abschnitt 9).
 

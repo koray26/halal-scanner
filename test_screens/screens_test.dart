@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:halal_scanner/app.dart';
 import 'package:halal_scanner/data/history_store.dart';
@@ -76,6 +77,7 @@ void main() {
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
     SharedPreferences.setMockInitialValues({'language': lang});
+    FlutterSecureStorage.setMockInitialValues({});
     state = AppState();
     await tester.runAsync(state.init);
     samples = [
@@ -163,6 +165,28 @@ void main() {
   testWidgets('09 Ergebnis Arabisch (Layout RTL)', (tester) async {
     await setup(tester, 'ar');
     await shot(tester, themed(state, ResultScreen(entry: samples[1])), '09_ar_rtl');
+  });
+
+  // Priorität 2: Layout-Prüfung (Schriften ohne Testschriftart erscheinen als
+  // Kästchen; geprüft werden Spiegelung, Umbrüche und Überläufe).
+  testWidgets('12 Start Urdu (RTL)', (tester) async {
+    await setup(tester, 'ur');
+    await shot(tester, HalalScannerApp(state: state), '12_ur_start');
+  });
+
+  testWidgets('13 Ergebnis Persisch (RTL)', (tester) async {
+    await setup(tester, 'fa');
+    await shot(tester, themed(state, ResultScreen(entry: samples[1])), '13_fa_ergebnis');
+  });
+
+  testWidgets('14 Ergebnis Indonesisch', (tester) async {
+    await setup(tester, 'id');
+    await shot(tester, themed(state, ResultScreen(entry: samples[0])), '14_id_haram');
+  });
+
+  testWidgets('15 Start Hausa (englische Flutter-Standardtexte)', (tester) async {
+    await setup(tester, 'ha');
+    await shot(tester, HalalScannerApp(state: state), '15_ha_start');
   });
 
 }

@@ -1,4 +1,4 @@
-# Halal-Prüfregeln (Regelversion 2026.10-2)
+# Halal-Prüfregeln (Regelversion 2026.10-3)
 
 > **Wichtig:** Diese Regeln sind eine technische Umsetzung vorsichtiger, verbreiteter
 > Bewertungsgrundsätze. Sie wurden **noch nicht von einem Gelehrtengremium oder einer
@@ -30,16 +30,21 @@
 | 8 | Sonst (Regel C) | GRÜN – HALAL NACH VOLLSTÄNDIGER ZUTATENPRÜFUNG – **keine** Zertifizierung, keine Garantie |
 
 Zutatenlisten aus der Datenbank werden als Text nur in **Deutsch, Englisch, Französisch und Türkisch**
-ausgewertet. Bei anderen Sprachen wertet die App die strukturierte Zutatenanalyse von Open Food Facts
-aus (Kennungen wie `en:gelatin`), um HARAM/UNKLAR zu erkennen – ein grünes Ergebnis ist dann nie möglich.
+ausgewertet. **Grün ist seit Regelversion 2026.10-3 nur noch mit einer deutschen oder englischen Liste
+möglich.** Französisch und Türkisch erkennen HARAM/UNKLAR, sind aber noch nicht ausreichend getestet
+(Lücken siehe [SPRACHEN.md](SPRACHEN.md)). Bei anderen Sprachen wertet die App die strukturierte
+Zutatenanalyse von Open Food Facts aus (Kennungen wie `en:gelatin`), um HARAM/UNKLAR zu erkennen – ein
+grünes Ergebnis ist dann nie möglich. Text in nicht-lateinischer Schrift (mehr als 20 % der Buchstaben)
+führt ebenfalls nie zu Grün. Die Sprache der App-Oberfläche hat keinen Einfluss auf das Ergebnis.
 
 ## 3. Freigabebedingungen für GRÜN (alle müssen erfüllt sein)
 
 1. Produkt eindeutig über den Barcode identifiziert (Barcode stimmt, Produktname vorhanden)
 2. Zutatenliste vorhanden
 3. Zutaten stammen aus der Produktdatenbank (nicht nur Foto oder Handeingabe)
-4. Sprache und Schrift werden unterstützt (keine Sprachfehler-Warnung der Datenbank)
-5. Liste vollständig (nicht als unvollständig markiert, nicht abgeschnitten, Klammern ausgeglichen, keine unsichere Texterkennung)
+4. Sprache und Schrift werden unterstützt: mindestens eine Datenbank-Liste auf Deutsch oder Englisch,
+   keine Liste überwiegend in nicht-lateinischer Schrift, keine Sprachfehler-Warnung der Datenbank
+5. Liste vollständig (nicht als unvollständig markiert, nicht abgeschnitten, Klammern ausgeglichen, keine unsichere Texterkennung, keine Wurstware wie Pepperoni/Chorizo/Mortadella ohne eigene Zutaten)
 6. Daten plausibel (keine Warnung „80 % unbekannte Zutaten“, höchstens die Hälfte unbekannter Zutaten)
 7. Keine widersprüchlichen Angaben
 8. Kein verbotener Bestandteil
@@ -99,7 +104,7 @@ App allgemeine PubChem-Stoffdaten an – sie belegen nie die Herkunft in einem P
 ## Zusätzliche Produktquelle (USDA FoodData Central)
 Zutatenlisten aus USDA FoodData Central werden mit denselben Regeln geprüft. Weil Freigabebedingung 3
 weiterhin Open-Food-Facts-Daten verlangt, können sie **HARAM oder UNKLAR aufdecken, aber nie allein zu
-GRÜN führen**. Die Regeln selbst sind unverändert (Regelversion bleibt 2026.10-2).
+GRÜN führen**. Durch diese Quelle wurde keine Regel geändert.
 
 ## 5. Wortlisten
 
@@ -170,3 +175,17 @@ den Begründungstexten der Regeln.
 5. Soll Molke/Käse mit unbekanntem Lab strenger bewertet werden?
 6. Reicht eine Vegan-Kennzeichnung als Beleg gegen tierische Herkunft (z. B. bei E471)?
 7. Wie sind Aromen mit technisch bedingten Alkoholspuren zu bewerten (derzeit: UNKLAR)?
+8. Ist Bierhefe als alkoholisches Getränk zu werten? (Derzeit wird nur türkisch „bira mayası“ als HARAM
+   erkannt; „Bierhefe“/„brewer’s yeast“ nicht.)
+9. Pepperoni, Chorizo und Mortadella ohne Unterzutaten gelten derzeit als „Liste nicht vollständig“
+   (NICHT VERIFIZIERT). Reicht das, oder sollen sie als UNKLAR (Tierart offen) gelten?
+10. Welche Bezeichnungen in Arabisch, Indonesisch, Malaiisch, Urdu, Bengali, Hindi, Persisch und Hausa
+    sollen in die Wortlisten? (Nur von Muttersprachlern geprüfte Begriffe; siehe SPRACHEN.md.)
+
+## 10. Änderungen je Regelversion
+- **2026.10-3:** Grün nur noch bei deutscher oder englischer Datenbank-Liste (Französisch/Türkisch:
+  höchstens HARAM/UNKLAR/NICHT VERIFIZIERT). Neuer Grund „Sprache eingeschränkt unterstützt“.
+  Listen überwiegend in nicht-lateinischer Schrift blockieren Grün. Türkisch „İ/ı“ wird beim Vergleich
+  vereinheitlicht, damit Großbuchstaben („JELATİN“, „SIĞIR“) erkannt werden. Pepperoni, Chorizo und
+  Mortadella ohne eigene Unterzutaten machen die Liste unvollständig (nie Grün; Grund „Wurstware ohne
+  Zutatenangabe“). Die Wortlisten für HARAM/UNKLAR sind unverändert; Bierhefe bleibt offen (Frage 8).

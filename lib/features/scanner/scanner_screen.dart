@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart' hide Barcode;
 
+import '../../core/i18n/digits.dart';
 import '../../core/i18n/strings.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/barcode.dart';
@@ -32,7 +33,10 @@ Future<void> showManualEntry(BuildContext context, {bool replace = false}) async
               controller: controller,
               autofocus: true,
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]'))],
+              inputFormatters: [
+                const NativeDigitsInputFormatter(),
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]')),
+              ],
               decoration: InputDecoration(
                 labelText: s.t('manual.label'),
                 errorText: error,

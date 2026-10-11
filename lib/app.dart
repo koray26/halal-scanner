@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/i18n/fallback_localizations.dart';
+import 'core/i18n/strings.dart';
 import 'core/theme/app_theme.dart';
 import 'features/history/history_screen.dart';
 import 'features/home/home_screen.dart';
@@ -38,14 +40,20 @@ Widget buildMaterialApp(AppState state, Widget home) {
     theme: AppTheme.light(),
     darkTheme: AppTheme.dark(),
     themeMode: state.themeMode,
-    locale: Locale(s.code),
-    supportedLocales: const [
-      Locale('de'),
-      Locale('en'),
-      Locale('ar'),
-      Locale('tr'),
+    locale: languageInfo(s.code).locale,
+    supportedLocales: [
+      for (final l in appLanguages.where((l) => l.selectable)) l.locale,
     ],
-    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    // Für Sprachen ohne eingebaute Flutter-Texte (z. B. Hausa) liefern die
+    // Ersatz-Delegates englische Standardtexte für Bedienelemente
+    // (Tooltips wie „Zurück“). Alle sichtbaren App-Texte kommen weiterhin
+    // aus assets/i18n.
+    localizationsDelegates: const [
+      ...GlobalMaterialLocalizations.delegates,
+      FallbackMaterialLocalizationsDelegate(),
+      FallbackCupertinoLocalizationsDelegate(),
+      FallbackWidgetsLocalizationsDelegate(),
+    ],
     // Schreibrichtung kommt aus unserem Sprachsystem (RTL für ar/ur/fa).
     builder: (context, child) => Directionality(
       textDirection: s.direction,

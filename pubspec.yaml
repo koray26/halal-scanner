@@ -17,6 +17,9 @@ dependencies:
   google_mlkit_text_recognition: ">=0.15.0 <0.18.0"
   image_picker: ^1.1.0
   url_launcher: ^6.3.0
+  # Optionaler persönlicher USDA-Schlüssel: iPhone-Schlüsselbund bzw.
+  # Android-Keystore (BSD-3-Clause, kostenlos).
+  flutter_secure_storage: ^10.0.0
 
 dev_dependencies:
   flutter_test:

@@ -17,9 +17,32 @@ class Barcode {
 
   static const validLengths = {8, 12, 13, 14};
 
+  /// Erste Ziffer (Null) folgender Ziffernsysteme: arabisch-indisch,
+  /// erweitert arabisch-indisch (Persisch/Urdu), Devanagari (Hindi), Bengalisch.
+  static const _digitZeros = [0x0660, 0x06F0, 0x0966, 0x09E6];
+
+  /// Wandelt Ziffern dieser Schriften in 0–9 um (z. B. ۴۰۰۶ → 4006),
+  /// damit Barcodes auch mit arabischer, persischer, Urdu-, Hindi- oder
+  /// bengalischer Tastatur eingegeben werden können. Andere Zeichen bleiben.
+  static String asciiDigits(String s) {
+    final out = StringBuffer();
+    for (final r in s.runes) {
+      var mapped = r;
+      for (final zero in _digitZeros) {
+        if (r >= zero && r <= zero + 9) {
+          mapped = 0x30 + (r - zero);
+          break;
+        }
+      }
+      out.writeCharCode(mapped);
+    }
+    return out.toString();
+  }
+
   /// Entfernt Leerzeichen/Bindestriche und prüft Länge sowie Prüfziffer.
+  /// Ziffern anderer Schriften werden vorher in 0–9 umgewandelt.
   static BarcodeCheck check(String raw) {
-    final cleaned = raw.replaceAll(RegExp(r'[\s\-]'), '');
+    final cleaned = asciiDigits(raw).replaceAll(RegExp(r'[\s\-]'), '');
     if (cleaned.isEmpty) return BarcodeCheck._(cleaned, BarcodeProblem.empty);
     if (!RegExp(r'^\d+$').hasMatch(cleaned)) {
       return BarcodeCheck._(cleaned, BarcodeProblem.notNumeric);

@@ -57,6 +57,8 @@ const _incompleteReasons = {
   UnknownReason.possiblyTruncated,
   UnknownReason.uncertainOcrText,
   UnknownReason.languageNotSupported,
+  UnknownReason.languageLimited,
+  UnknownReason.compositeUnspecified,
   UnknownReason.languageMismatch,
   UnknownReason.ingredientsMostlyUnrecognized,
   UnknownReason.unsupportedScript,

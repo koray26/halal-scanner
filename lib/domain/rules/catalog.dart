@@ -8,11 +8,39 @@
 /// HARAM nur bei ausdrücklich genanntem verbotenem Bestandteil.
 library;
 
-const String rulesetVersion = '2026.10-2';
+const String rulesetVersion = '2026.10-3';
 
-/// Sprachen, für die die Wortlisten gepflegt sind. Zutatenlisten in anderen
-/// Sprachen werden nicht ausgewertet (-> NICHT VERIFIZIERT).
+/// Sprachen, für die die Wortlisten gepflegt sind. Zutatenlisten in diesen
+/// Sprachen werden ausgewertet (HARAM/UNKLAR werden erkannt). Zutatenlisten in
+/// anderen Sprachen werden nicht nach Wortlisten ausgewertet
+/// (-> höchstens strukturierte Datenbankanalyse, nie Grün).
 const Set<String> supportedRuleLanguages = {'de', 'en', 'fr', 'tr'};
+
+/// Sprachen, deren Wortlisten durch Tests ausreichend abgesichert sind, um ein
+/// grünes Ergebnis zu erlauben. Französisch und Türkisch werden ausgewertet,
+/// können aber bis zur Absicherung nur HARAM, UNKLAR oder NICHT VERIFIZIERT
+/// ergeben (Regelversion 2026.10-3). Siehe docs/SPRACHEN.md.
+const Set<String> greenRuleLanguages = {'de', 'en'};
+
+/// Wie gut Zutatenlisten in einer Sprache geprüft werden (unabhängig von der
+/// Sprache der Benutzeroberfläche).
+enum IngredientSupport {
+  /// Wortlisten gepflegt und getestet; grünes Ergebnis möglich.
+  full,
+
+  /// Wortlisten vorhanden: HARAM/UNKLAR werden erkannt, aber kein Grün.
+  limited,
+
+  /// Keine Wortlisten: nur strukturierte Datenbankanalyse, nie Grün.
+  none,
+}
+
+IngredientSupport ingredientSupportFor(String lang) =>
+    greenRuleLanguages.contains(lang)
+        ? IngredientSupport.full
+        : supportedRuleLanguages.contains(lang)
+            ? IngredientSupport.limited
+            : IngredientSupport.none;
 
 enum RuleEffect {
   /// Ausdrücklich verbotener Bestandteil.
@@ -63,6 +91,17 @@ String word(String core) =>
     r'(?<![\p{L}\p{N}])(?:' + core + r')(?![\p{L}\p{N}])';
 
 const _l = r'\p{L}*';
+
+/// Vereinheitlicht türkisches „İ“ (U+0130) und „ı“ (U+0131) zu „i“.
+///
+/// Grund: Beim Vergleich ohne Groß-/Kleinschreibung behandelt Unicode „İ“
+/// nicht wie „i“ und „I“ nicht wie „ı“. Türkische Zutatenlisten in
+/// Großbuchstaben („JELATİN“, „SIĞIR“) würden sonst nicht erkannt.
+/// Wird auf Wortlisten UND Zutatentexte angewendet; die Textlänge bleibt
+/// gleich (je ein Zeichen), Fundstellen bleiben also gültig.
+/// Ändert keine Regel, nur die Schreibweise beim Vergleich.
+String turkicFold(String s) =>
+    s.replaceAll('\u0130', 'i').replaceAll('\u0131', 'i');
 
 final Map<Qualifier, List<String>> qualifierPatterns = {
   Qualifier.porcine: _porkCores,
@@ -519,6 +558,20 @@ const List<IngredientRule> ingredientRules = [
 
 /// Zusatzstoff-Codes aus Open-Food-Facts-Tags ("en:e471"), die als
 /// UNKLAR gewertet werden, falls sie im Text nicht bereits erkannt wurden.
+/// Sammelbezeichnungen für Wurstwaren, deren Tierart nur aus den
+/// Unterzutaten hervorgeht. Stehen sie OHNE eigene Zutatenangabe in der
+/// Liste, ist die Zutatenliste nicht vollständig -> nie Grün
+/// (NICHT VERIFIZIERT, sofern nicht HARAM/UNKLAR belegt ist).
+/// Mit Unterzutaten („Pepperoni (Schweinefleisch, Salz)“) werden diese
+/// normal geprüft. Kein HARAM/UNKLAR allein wegen des Namens.
+/// Achtung: „Peperoni“ (ein p) ist ein Gemüse und nicht gemeint.
+const List<String> compositeProductNames = [
+  'pepperonis?',
+  'chorizos?',
+  'mortadellas?',
+  'mortadelles?', // französische Schreibweise
+];
+
 const Map<String, String> additiveTagRules = {
   'en:e120': 'insect_derived',
   'en:e904': 'insect_derived',

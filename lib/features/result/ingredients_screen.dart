@@ -54,9 +54,12 @@ class IngredientsScreen extends StatelessWidget {
                       SelectableText.rich(_highlight(t.text, highlights, theme)),
                       if (t.lang != null &&
                           t.source.kind == SourceKind.openFoodFacts &&
-                          !supportedRuleLanguages.contains(t.lang)) ...[
+                          !greenRuleLanguages.contains(t.lang)) ...[
                         const SizedBox(height: Gap.s),
-                        Text(s.t('unknown.languageNotSupported'),
+                        Text(
+                            s.t(supportedRuleLanguages.contains(t.lang)
+                                ? 'unknown.languageLimited'
+                                : 'unknown.languageNotSupported'),
                             style: const TextStyle(color: AppColors.unclear)),
                       ],
                       if (t.uncertainFragments.isNotEmpty) ...[

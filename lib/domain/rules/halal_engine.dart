@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import '../barcode.dart';
 import '../models.dart';
 import '../research/research.dart';
+import '../script.dart';
 import 'catalog.dart';
 import 'ingredient_parser.dart';
 
@@ -69,7 +70,15 @@ enum UnknownReason {
   dataOld,
   manufacturingNotVerified,
   languageNotSupported,
+
+  /// Zutatenliste nur in einer Sprache, deren Wortlisten noch nicht für ein
+  /// grünes Ergebnis abgesichert sind (derzeit Französisch, Türkisch).
+  languageLimited,
   languageMismatch,
+
+  /// Wurstware wie Pepperoni, Chorizo oder Mortadella ohne eigene
+  /// Zutatenangabe: Tierart unbekannt, Liste daher nicht vollständig.
+  compositeUnspecified,
   ingredientsMostlyUnrecognized,
   labelContradiction,
   researchSourceUnavailable,
@@ -265,14 +274,17 @@ class Verdict {
       );
 }
 
+/// Wortlisten-Muster: ohne Groß-/Kleinschreibung, türkisch vereinheitlicht.
+RegExp _rx(String p, {bool asWord = true}) => RegExp(
+    asWord ? word(turkicFold(p)) : turkicFold(p),
+    caseSensitive: false,
+    unicode: true);
+
 class _CompiledRule {
   _CompiledRule(this.rule)
-      : patterns = rule.patterns
-            .map((p) => RegExp(word(p), caseSensitive: false, unicode: true))
-            .toList(),
-        exclusions = rule.exclusions
-            .map((p) => RegExp(p, caseSensitive: false, unicode: true))
-            .toList();
+      : patterns = rule.patterns.map(_rx).toList(),
+        exclusions =
+            rule.exclusions.map((p) => _rx(p, asWord: false)).toList();
   final IngredientRule rule;
   final List<RegExp> patterns;
   final List<RegExp> exclusions;
@@ -280,25 +292,28 @@ class _CompiledRule {
 
 class TextAnalysis {
   TextAnalysis(this.findings, this.ingredientCount, this.tracesText,
-      {this.unbalancedBrackets = false});
+      {this.unbalancedBrackets = false,
+      this.unspecifiedComposites = const []});
   final List<Finding> findings;
   final int ingredientCount;
   final String? tracesText;
   final bool unbalancedBrackets;
+
+  /// Wurstwaren ohne eigene Zutatenangabe (siehe [compositeProductNames]).
+  final List<String> unspecifiedComposites;
 }
 
 class HalalEngine {
   HalalEngine()
       : _rules = ingredientRules.map(_CompiledRule.new).toList(),
+        _composites = compositeProductNames.map(_rx).toList(),
         _qualifiers = {
           for (final e in qualifierPatterns.entries)
-            e.key: e.value
-                .map((p) =>
-                    RegExp(word(p), caseSensitive: false, unicode: true))
-                .toList(),
+            e.key: e.value.map(_rx).toList(),
         };
 
   final List<_CompiledRule> _rules;
+  final List<RegExp> _composites;
   final Map<Qualifier, List<RegExp>> _qualifiers;
   static const _research = ResearchPipeline();
 
@@ -308,16 +323,21 @@ class HalalEngine {
   /// Exklusionen werden nur im direkten Umfeld des Treffers geprüft.
   static const _exclusionWindow = 12;
 
-  Set<Qualifier> _qualifiersIn(String context) => {
-        for (final e in _qualifiers.entries)
-          if (e.value.any((r) => r.hasMatch(context))) e.key,
-      };
+  Set<Qualifier> _qualifiersIn(String context) {
+    final folded = turkicFold(context);
+    return {
+      for (final e in _qualifiers.entries)
+        if (e.value.any((r) => r.hasMatch(folded))) e.key,
+    };
+  }
 
   /// Prüft einen einzelnen Bestandteil gegen alle Regeln.
-  Map<String, Finding> _matchHead(String head, String context, String fullText,
-      SourceRef source, {bool structured = false}) {
+  Map<String, Finding> _matchHead(String originalHead, String context,
+      String fullText, SourceRef source, {bool structured = false}) {
     final nodeFindings = <String, Finding>{};
     final quals = _qualifiersIn(context);
+    // Vergleich auf der vereinheitlichten Form; gleiche Länge wie das Original.
+    final head = turkicFold(originalHead);
     for (final cr in _rules) {
       for (final re in cr.patterns) {
         final m = re.firstMatch(head);
@@ -325,10 +345,12 @@ class HalalEngine {
         final from = math.max(0, m.start - _exclusionWindow);
         final to = math.min(head.length, m.end + _exclusionWindow);
         final window = head.substring(from, to);
-        final matched = m.group(0)!;
-        if (cr.exclusions.any((x) => x.hasMatch(matched) || x.hasMatch(window))) {
+        if (cr.exclusions
+            .any((x) => x.hasMatch(m.group(0)!) || x.hasMatch(window))) {
           continue;
         }
+        // Angezeigt wird der Wortlaut der Quelle (z. B. „JELATİN“).
+        final matched = originalHead.substring(m.start, m.end);
         var effect = cr.rule.effect;
         var escalated = false;
         if (effect == RuleEffect.unclear &&
@@ -367,6 +389,7 @@ class HalalEngine {
   TextAnalysis analyzeText(IngredientText input) {
     final parsed = IngredientParser.parse(input.text);
     final findings = <Finding>[];
+    final composites = <String>[];
     var count = 0;
     for (final node in parsed.allNodes) {
       final head = node.head.trim();
@@ -374,11 +397,15 @@ class HalalEngine {
       count++;
       findings.addAll(
           _matchHead(head, node.qualifierContext, node.fullText, input.source).values);
+      if (node.children.isEmpty) {
+        final folded = turkicFold(head);
+        if (_composites.any((r) => r.hasMatch(folded))) composites.add(head);
+      }
     }
     final opens = '('.allMatches(parsed.normalizedText).length;
     final closes = ')'.allMatches(parsed.normalizedText).length;
     return TextAnalysis(findings, count, parsed.tracesText,
-        unbalancedBrackets: opens != closes);
+        unbalancedBrackets: opens != closes, unspecifiedComposites: composites);
   }
 
   /// Wertet die strukturierte Zutatenanalyse der Datenbank aus (Kennungen
@@ -541,6 +568,12 @@ class HalalEngine {
         .toList();
     final unsupportedLanguage = available.isNotEmpty && texts.isEmpty;
     if (unsupportedLanguage) unknowns.add(UnknownReason.languageNotSupported);
+    // Ausgewertet, aber Sprache noch nicht für Grün abgesichert.
+    final limitedLanguage = texts.isNotEmpty &&
+        !texts.any((t) =>
+            t.source.kind != SourceKind.openFoodFacts ||
+            greenRuleLanguages.contains(t.lang));
+    if (limitedLanguage) unknowns.add(UnknownReason.languageLimited);
 
     conditions[GreenCondition.ingredientListAvailable] = available.isNotEmpty;
     conditions[GreenCondition.databaseSource] = available.isNotEmpty &&
@@ -554,6 +587,9 @@ class HalalEngine {
     }
     if (analyses.any((a) => a.unbalancedBrackets)) {
       unknowns.add(UnknownReason.possiblyTruncated);
+    }
+    if (analyses.any((a) => a.unspecifiedComposites.isNotEmpty)) {
+      unknowns.add(UnknownReason.compositeUnspecified);
     }
 
     // Nicht unterstützte Sprache: strukturierte Datenbankanalyse nutzen.
@@ -590,7 +626,9 @@ class HalalEngine {
       if (t.source.kind == SourceKind.userEdited) {
         unknowns.add(UnknownReason.userEditedText);
       }
-      if (t.unsupportedScript) unknowns.add(UnknownReason.unsupportedScript);
+      if (t.unsupportedScript || hasUnsupportedScript(t.text)) {
+        unknowns.add(UnknownReason.unsupportedScript);
+      }
     }
 
     // --- Recherche je kritischer Zutat --------------------------------------
@@ -663,9 +701,11 @@ class HalalEngine {
 
     // --- Freigabebedingungen -----------------------------------------------
     conditions[GreenCondition.languageSupported] = !unsupportedLanguage &&
+        !limitedLanguage &&
         !unknowns.contains(UnknownReason.languageMismatch) &&
         !unknowns.contains(UnknownReason.unsupportedScript);
     conditions[GreenCondition.listComplete] = available.isNotEmpty &&
+        !unknowns.contains(UnknownReason.compositeUnspecified) &&
         !unknowns.contains(UnknownReason.ingredientsIncomplete) &&
         !unknowns.contains(UnknownReason.possiblyTruncated) &&
         !unknowns.contains(UnknownReason.uncertainOcrText);

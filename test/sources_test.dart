@@ -3,10 +3,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:halal_scanner/data/off_search.dart';
 import 'package:halal_scanner/data/open_food_facts.dart';
 import 'package:halal_scanner/data/usda_fdc.dart';
+import 'package:halal_scanner/data/usda_key_store.dart';
 import 'package:halal_scanner/domain/models.dart';
 import 'package:halal_scanner/domain/rules/halal_engine.dart';
 import 'package:halal_scanner/state/app_state.dart';
@@ -60,18 +62,22 @@ void main() {
       expect(await c.fetchByGtin(upc), isNull);
     });
 
-    test('Exakte GTIN wird übernommen, Schlüssel und Datentyp gesetzt', () async {
+    test('Exakte GTIN wird übernommen, Schlüssel im Kopf statt in der Adresse', () async {
       final seen = <Uri>[];
+      final headers = <Map<String, String>>[];
       final c = UsdaFdcClient(
         apiKey: 'TEST',
         clock: () => now,
         client: MockClient((r) async {
           seen.add(r.url);
+          headers.add(r.headers);
           return r.url.queryParameters['query'] == gtin14 ? foods([food()]) : foods([]);
         }),
       );
       final p = (await c.fetchByGtin(upc))!;
-      expect(seen.first.queryParameters['api_key'], 'TEST');
+      expect(headers.first['X-Api-Key'], 'TEST');
+      expect(seen.first.queryParameters.containsKey('api_key'), isFalse);
+      expect(seen.first.toString(), isNot(contains('TEST')));
       expect(seen.first.queryParameters['dataType'], 'Branded');
       expect(p.source.kind, SourceKind.usdaFdc);
       expect(p.source.url, contains('2742338'));
@@ -115,6 +121,14 @@ void main() {
       await expectError(() => http.Response('', 429), LookupError.rateLimited);
       await expectError(() => http.Response('{"error":"API_KEY_INVALID"}', 403),
           LookupError.server);
+      final rejected = UsdaFdcClient(
+          apiKey: 'TEST',
+          clock: () => now,
+          client: MockClient((_) async => http.Response('{"error":"API_KEY_INVALID"}', 403)));
+      await expectLater(
+          rejected.fetchByGtin(upc),
+          throwsA(isA<LookupException>()
+              .having((x) => x.detail, 'detail', UsdaFdcClient.keyRejected)));
       await expectError(() => http.Response('<html>', 200), LookupError.invalidResponse);
       final offline = UsdaFdcClient(
           apiKey: 'TEST',
@@ -190,17 +204,22 @@ void main() {
     });
 
     group('Abfragereihenfolge im App-Zustand', () {
-      setUp(() => SharedPreferences.setMockInitialValues({'language': 'de'}));
+      setUp(() {
+        SharedPreferences.setMockInitialValues({'language': 'de'});
+        FlutterSecureStorage.setMockInitialValues({});
+      });
 
       AppState makeState({
         required http.Response Function() off,
         UsdaFdcClient? fdc,
+        UsdaKeyStore? keys,
       }) =>
           AppState(
             off: OpenFoodFactsClient(client: MockClient((_) async => off()), clock: () => now),
             taxonomy: OffTaxonomyClient(
                 client: MockClient((_) async => http.Response('{}', 200)), clock: () => now),
             fdc: fdc,
+            usdaKeyStore: keys,
             clock: () => now,
           );
 
@@ -263,6 +282,113 @@ void main() {
         expect(e.product, isNull);
         expect(e.sourceChecks.last.status, SourceCheckStatus.unavailable);
         expect(e.verdict.status, HalalStatus.notVerified);
+      });
+
+      group('Persönlicher USDA-Schlüssel (optional, sicher gespeichert)', () {
+        const personalKey = 'AbCdEf0123456789AbCdEf0123456789AbCdEf01';
+
+        UsdaFdcClient fdcWith(List<Map<String, String>> headers,
+                {int status = 200}) =>
+            UsdaFdcClient(
+              clock: () => now,
+              client: MockClient((r) async {
+                headers.add(r.headers);
+                return status == 200
+                    ? foods([food()])
+                    : http.Response('{"error":"API_KEY_INVALID"}', status);
+              }),
+            );
+
+        test('Standard: kein Schlüssel eingebaut, USDA wird nicht abgefragt', () async {
+          final state = makeState(
+              off: notFound,
+              fdc: UsdaFdcClient(
+                  clock: () => now,
+                  client: MockClient((_) async => fail('darf nicht abfragen'))));
+          await state.loadUsdaKey();
+          expect(state.hasUsdaKey, isFalse);
+          final e = (await state.lookup(upc)).entry!;
+          expect(e.sourceChecks.last.status, SourceCheckStatus.notConfigured);
+          expect(e.verdict.status, HalalStatus.notVerified);
+        });
+
+        test('Ungültige Eingabe wird abgelehnt und nicht gespeichert', () async {
+          final state = makeState(off: notFound, fdc: fdcWith([]));
+          expect(await state.saveUsdaKey(''), UsdaKeyResult.invalidFormat);
+          expect(await state.saveUsdaKey('mit Leerzeichen 123'), UsdaKeyResult.invalidFormat);
+          expect(state.hasUsdaKey, isFalse);
+          expect(await UsdaKeyStore().read(), isNull);
+        });
+
+        test('Gespeicherter Schlüssel: sicherer Speicher, Kopfzeile, übersteht Neustart',
+            () async {
+          final headers = <Map<String, String>>[];
+          final state = makeState(off: notFound, fdc: fdcWith(headers));
+          expect(await state.saveUsdaKey('  $personalKey  '), UsdaKeyResult.saved);
+          expect(state.hasUsdaKey, isTrue);
+
+          // Liegt im sicheren Speicher, NICHT in shared_preferences.
+          expect(await UsdaKeyStore().read(), personalKey);
+          final prefs = await SharedPreferences.getInstance();
+          for (final k in prefs.getKeys()) {
+            expect('${prefs.get(k)}', isNot(contains(personalKey)), reason: k);
+          }
+
+          final e = (await state.lookup(upc)).entry!;
+          expect(e.sourceChecks.last.status, SourceCheckStatus.found);
+          expect(headers.first['X-Api-Key'], personalKey);
+          // Weder im Ergebnis noch im gespeicherten Verlauf.
+          expect(jsonEncode(e.toJson()), isNot(contains(personalKey)));
+          for (final k in prefs.getKeys()) {
+            expect('${prefs.get(k)}', isNot(contains(personalKey)), reason: k);
+          }
+
+          // „Neustart“: neuer App-Zustand liest den Schlüssel wieder ein.
+          final headers2 = <Map<String, String>>[];
+          final restarted = makeState(off: notFound, fdc: fdcWith(headers2));
+          await restarted.loadUsdaKey();
+          expect(restarted.hasUsdaKey, isTrue);
+          await restarted.lookup(upc);
+          expect(headers2.first['X-Api-Key'], personalKey);
+        });
+
+        test('Schlüssel löschen: entfernt, USDA wird nicht mehr abgefragt', () async {
+          final headers = <Map<String, String>>[];
+          final state = makeState(off: notFound, fdc: fdcWith(headers));
+          await state.saveUsdaKey(personalKey);
+          await state.removeUsdaKey();
+          expect(state.hasUsdaKey, isFalse);
+          expect(await UsdaKeyStore().read(), isNull);
+          final e = (await state.lookup(upc)).entry!;
+          expect(e.sourceChecks.last.status, SourceCheckStatus.notConfigured);
+          expect(headers, isEmpty);
+        });
+
+        test('Von USDA abgelehnter Schlüssel: Hinweis, Ergebnis NICHT VERIFIZIERT', () async {
+          final state = makeState(off: notFound, fdc: fdcWith([], status: 403));
+          await state.saveUsdaKey(personalKey);
+          final e = (await state.lookup(upc)).entry!;
+          expect(state.usdaKeyRejected, isTrue);
+          expect(e.product, isNull);
+          expect(e.sourceChecks.last.status, SourceCheckStatus.unavailable);
+          expect(e.verdict.status, HalalStatus.notVerified);
+        });
+      });
+
+      test('Kein USDA-Schlüssel in Build-Konfiguration oder App-Code', () {
+        final files = [
+          File('.github/workflows/build.yml'),
+          ...Directory('lib')
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart')),
+        ];
+        for (final f in files) {
+          final text = f.readAsStringSync();
+          expect(text, isNot(contains('FDC_API_KEY')), reason: f.path);
+          expect(text, isNot(contains('DEMO_KEY')), reason: f.path);
+          expect(text, isNot(contains("'api_key'")), reason: f.path);
+        }
       });
 
       test('Geprüfte Quellen bleiben im Verlauf gespeichert', () async {

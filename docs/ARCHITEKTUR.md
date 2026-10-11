@@ -5,12 +5,15 @@ lib/
 ├─ main.dart, app.dart          Start, Thema, Sprache/RTL, Navigation (5 Tabs)
 ├─ config.dart                  App-Name, Version, User-Agent, Open-Food-Facts-Felder
 ├─ core/
-│  ├─ i18n/strings.dart         Übersetzungssystem (assets/i18n/*.json), Sprachliste, RTL
+│  ├─ i18n/strings.dart         Übersetzungssystem (assets/i18n/*.json), Sprachliste mit Prioritäten, RTL
+│  ├─ i18n/fallback_localizations.dart  Englische Flutter-Standardtexte für Sprachen ohne eigene (Hausa)
+│  ├─ i18n/digits.dart          Barcode-Eingabe mit Ziffern anderer Schriften
 │  ├─ theme/app_theme.dart      Designsystem: Farben, Abstände, Radien, Statusfarben/-symbole
 │  └─ widgets/widgets.dart      Logo, Statusanzeige, Karten, Leerzustände
 ├─ domain/                      Reines Dart, ohne Flutter → vollständig testbar
-│  ├─ barcode.dart              GTIN-Prüfziffer, UPC-E→UPC-A, Produktvergleich
+│  ├─ barcode.dart              GTIN-Prüfziffer, UPC-E→UPC-A, Produktvergleich, Ziffern anderer Schriften
 │  ├─ models.dart               Produkt (inkl. strukturierter OFF-Zutaten), Zutatenliste, Quelle, Zertifikat
+│  ├─ script.dart               Schrift-Erkennung (Anteil nicht-lateinischer Buchstaben)
 │  ├─ knowledge/substances.dart Stoffwissen: E-Nummern, Stoffklassen, mögliche Herkünfte, Prüffragen
 │  ├─ knowledge/pubchem_data.dart PubChem-Stoffidentität (erzeugt von tool/fetch_pubchem.py)
 │  ├─ research/research.dart    Recherche-Pipeline je Zutat (Schritte, Belege, Prüffragen)
@@ -23,6 +26,7 @@ lib/
 │  ├─ open_food_facts.dart      Produkt-API (v2) + Taxonomie-API, Ratenbegrenzung, Fehlerbehandlung
 │  ├─ off_search.dart           Produktsuche nach Name/Marke (Search-a-licious)
 │  ├─ usda_fdc.dart             USDA FoodData Central (GTIN-Abgleich) + Zusammenführung
+│  ├─ usda_key_store.dart       Optionaler persönlicher USDA-Schlüssel (sicherer Gerätespeicher)
 │  ├─ feedback_store.dart       Unbestätigte Nutzerhinweise (lokal) + Export
 │  └─ history_store.dart        Verlauf/Favoriten/Einstellungen lokal (shared_preferences)
 ├─ state/app_state.dart         App-Zustand, Scan-/Foto-Ablauf, Offline-Rückfall
@@ -32,7 +36,7 @@ lib/
 ## Datenfluss beim Scan
 1. `ScannerScreen` (mobile_scanner, EAN-8/13, UPC-A/E) → Prüfziffer → Doppelscan-Schutz (3 s).
 2. `AppState.lookup` → `OpenFoodFactsClient.fetch` → `ProductRecord` (mit Quelle + Abrufzeit).
-   Kein Produkt oder keine Zutaten → (falls Schlüssel gesetzt) `UsdaFdcClient.fetchByGtin`,
+   Kein Produkt oder keine Zutaten → (nur mit persönlichem Nutzerschlüssel aus `UsdaKeyStore`) `UsdaFdcClient.fetchByGtin`,
    nur bei exakt gleicher GTIN → `mergeProductSources`. Jede Abfrage landet als `SourceCheck` im Scan.
 3. `AppState.evaluateWithResearch`: erster Durchgang offline → für offene Zutaten Abfrage der
    Open-Food-Facts-Taxonomie → zweiter Durchgang mit `ResearchContext`.
@@ -46,7 +50,8 @@ Text anzeigen/korrigieren → `IngredientText(source: ocrPhoto | userEdited)` �
 Foto/Nutzertext kann nie zu einer Halal-Freigabe führen (Regel E), wohl aber HARAM/UNKLAR anzeigen.
 
 ## Warum kein Backend?
-Die App braucht keine geheimen Schlüssel (Open Food Facts ist offen) und keine Konten.
+In der App ist kein geheimer Schlüssel eingebaut (Open Food Facts ist offen; USDA nur mit einem
+freiwilligen, persönlichen Schlüssel des Nutzers) und es gibt keine Konten.
 Ein Server würde Kosten, Wartung und Datenschutzpflichten verursachen, ohne die Prüfung zu verbessern.
 Die Datenstrukturen (`SourceRef`, `Certification`, Regelversion) sind so angelegt, dass später ein
 Backend (z. B. Supabase mit Row Level Security) für Nutzerkorrekturen, geprüfte Produkte und

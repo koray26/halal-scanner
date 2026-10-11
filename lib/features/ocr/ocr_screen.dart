@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/widgets.dart';
 import '../../domain/models.dart';
+import '../../domain/script.dart';
 import '../../state/app_state.dart';
 import '../result/result_screen.dart';
 
@@ -274,16 +275,15 @@ class OcrText {
   }
 
   /// Viele Fragezeichen/Sonderzeichen oder kaum Buchstaben deuten auf eine
-  /// nicht unterstützte Schrift (z. B. Arabisch) oder ein unlesbares Foto hin.
+  /// nicht unterstützte Schrift oder ein unlesbares Foto hin.
+  /// Die Texterkennung liest nur lateinische Schrift; JEDE andere Schrift
+  /// (Arabisch/Urdu/Persisch, Bengalisch, Devanagari, Chinesisch, Kyrillisch,
+  /// Thai, Tamil …) gilt als nicht unterstützt.
   static bool looksLikeUnsupportedScript(String text) {
     if (text.isEmpty) return false;
-    final nonLatinLetters =
-        RegExp(r'[\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Han}\p{Script=Hebrew}\p{Script=Devanagari}\p{Script=Bengali}]', unicode: true)
-            .allMatches(text)
-            .length;
     final letters = RegExp(r'\p{L}', unicode: true).allMatches(text).length;
     final noise = RegExp(r'[^\p{L}\p{N}\s,.;:()%\-/&+]', unicode: true).allMatches(text).length;
     if (letters == 0) return true;
-    return nonLatinLetters > letters * 0.2 || noise > text.length * 0.15;
+    return hasUnsupportedScript(text) || noise > text.length * 0.15;
   }
 }

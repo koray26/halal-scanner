@@ -7,6 +7,7 @@ import '../data/history_store.dart';
 import '../data/off_search.dart';
 import '../data/open_food_facts.dart';
 import '../data/usda_fdc.dart';
+import '../data/usda_key_store.dart';
 import '../domain/models.dart';
 import '../domain/research/research.dart';
 import '../domain/rules/halal_engine.dart';
@@ -20,11 +21,14 @@ class LookupOutcome {
   final bool fromCache;
 }
 
+enum UsdaKeyResult { saved, invalidFormat, storageFailed }
+
 class AppState extends ChangeNotifier {
   AppState({
     OpenFoodFactsClient? off,
     OffTaxonomyClient? taxonomy,
     UsdaFdcClient? fdc,
+    UsdaKeyStore? usdaKeyStore,
     OffSearchClient? productSearch,
     HistoryStore? history,
     SettingsStore? settings,
@@ -34,6 +38,7 @@ class AppState extends ChangeNotifier {
   })  : _off = off ?? OpenFoodFactsClient(),
         _taxonomy = taxonomy ?? OffTaxonomyClient(),
         _fdc = fdc ?? UsdaFdcClient(),
+        _usdaKeys = usdaKeyStore ?? UsdaKeyStore(),
         productSearch = productSearch ?? OffSearchClient(),
         _historyStore = history ?? HistoryStore(),
         _settings = settings ?? SettingsStore(),
@@ -44,6 +49,13 @@ class AppState extends ChangeNotifier {
   final OpenFoodFactsClient _off;
   final OffTaxonomyClient _taxonomy;
   final UsdaFdcClient _fdc;
+  final UsdaKeyStore _usdaKeys;
+
+  /// Ein persönlicher USDA-Schlüssel ist hinterlegt (Wert bleibt im Speicher).
+  bool get hasUsdaKey => _fdc.isConfigured;
+
+  /// USDA hat den hinterlegten Schlüssel zuletzt abgelehnt (ungültig/gesperrt).
+  bool usdaKeyRejected = false;
 
   /// Suche nach Produktname/Marke (Open Food Facts).
   final OffSearchClient productSearch;
@@ -75,6 +87,32 @@ class AppState extends ChangeNotifier {
     };
     history = await _historyStore.load();
     feedback = await _feedbackStore.load();
+    await loadUsdaKey();
+    notifyListeners();
+  }
+
+  /// Liest einen gespeicherten persönlichen USDA-Schlüssel (falls vorhanden).
+  Future<void> loadUsdaKey() async {
+    final usdaKey = await _usdaKeys.read();
+    if (usdaKey != null) _fdc.setApiKey(usdaKey);
+  }
+
+  /// Speichert einen persönlichen USDA-Schlüssel im sicheren Gerätespeicher.
+  Future<UsdaKeyResult> saveUsdaKey(String input) async {
+    final key = UsdaKeyStore.normalize(input);
+    if (key == null) return UsdaKeyResult.invalidFormat;
+    if (!await _usdaKeys.write(key)) return UsdaKeyResult.storageFailed;
+    _fdc.setApiKey(key);
+    usdaKeyRejected = false;
+    notifyListeners();
+    return UsdaKeyResult.saved;
+  }
+
+  /// Entfernt den Schlüssel; USDA wird danach nicht mehr abgefragt.
+  Future<void> removeUsdaKey() async {
+    await _usdaKeys.delete();
+    _fdc.setApiKey(null);
+    usdaKeyRejected = false;
     notifyListeners();
   }
 
@@ -126,11 +164,13 @@ class AppState extends ChangeNotifier {
       } else {
         try {
           final fdc = await _fdc.fetchByGtin(barcode);
+          usdaKeyRejected = false;
           checks.add(SourceCheck(SourceKind.usdaFdc,
               fdc == null ? SourceCheckStatus.notFound : SourceCheckStatus.found,
               checkedAt: now()));
           product = mergeProductSources(product, fdc);
-        } on LookupException {
+        } on LookupException catch (e) {
+          if (e.detail == UsdaFdcClient.keyRejected) usdaKeyRejected = true;
           checks.add(SourceCheck(SourceKind.usdaFdc, SourceCheckStatus.unavailable,
               checkedAt: now()));
         }

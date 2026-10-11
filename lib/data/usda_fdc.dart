@@ -3,7 +3,10 @@
 ///
 /// - Daten: Public Domain (CC0 1.0); Quellenangabe „USDA FoodData Central“.
 /// - Zugang: kostenloser api.data.gov-Schlüssel, Standardlimit 1.000
-///   Anfragen pro Stunde. Ohne Schlüssel wird nichts abgefragt.
+///   Anfragen pro Stunde. In der App ist KEIN Schlüssel eingebaut; nur ein
+///   vom Nutzer selbst eingetragener Schlüssel wird verwendet und im
+///   Kopf der Anfrage (`X-Api-Key`) gesendet, nie in der Adresse.
+///   Ohne Schlüssel wird nichts abgefragt.
 /// - Inhalt: Herstellerangaben für den US-Markt (GTIN, Marke, Zutaten).
 ///
 /// Die Suche ist eine Volltextsuche. Übernommen werden ausschließlich
@@ -30,18 +33,24 @@ class UsdaFdcClient {
     this.timeout = const Duration(seconds: 15),
   })  : _client = client ?? http.Client(),
         _clock = clock ?? DateTime.now,
-        _apiKey = apiKey ?? AppConfig.fdcApiKey;
+        _apiKey = apiKey ?? '';
 
   final Duration timeout;
   final http.Client _client;
   final DateTime Function() _clock;
-  final String _apiKey;
+  String _apiKey;
   final List<DateTime> _recent = [];
+
+  /// Kennung in [LookupException.detail], wenn USDA den Schlüssel ablehnt.
+  static const keyRejected = 'usda-key-rejected';
 
   /// Eigenes, vorsichtiges Limit (deutlich unter 1.000/Stunde).
   static const _maxPerMinute = 15;
 
   bool get isConfigured => _apiKey.isNotEmpty;
+
+  /// Setzt oder entfernt (`null`/leer) den persönlichen Schlüssel.
+  void setApiKey(String? key) => _apiKey = key?.trim() ?? '';
 
   /// GTIN-Schreibweisen, in denen FDC Barcodes speichert (14, 13, 12 Stellen).
   static List<String> gtinVariants(String barcode) {
@@ -85,13 +94,15 @@ class UsdaFdcClient {
         'query': query,
         'dataType': 'Branded',
         'pageSize': '5',
-        'api_key': _apiKey,
       },
     );
     http.Response res;
     try {
       res = await _client
-          .get(uri, headers: {'User-Agent': AppConfig.userAgent})
+          .get(uri, headers: {
+            'User-Agent': AppConfig.userAgent,
+            'X-Api-Key': _apiKey,
+          })
           .timeout(timeout);
     } on TimeoutException {
       throw LookupException(LookupError.timeout);
@@ -101,8 +112,11 @@ class UsdaFdcClient {
       throw LookupException(LookupError.network, e.message);
     }
     if (res.statusCode == 429) throw LookupException(LookupError.rateLimited);
+    if (res.statusCode == 401 || res.statusCode == 403) {
+      // Schlüssel ungültig, gesperrt oder noch nicht freigeschaltet.
+      throw LookupException(LookupError.server, keyRejected);
+    }
     if (res.statusCode >= 400) {
-      // 403: Schlüssel ungültig oder gesperrt.
       throw LookupException(LookupError.server, '${res.statusCode}');
     }
     Object? json;

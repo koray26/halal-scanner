@@ -8,6 +8,7 @@ import '../../core/widgets/widgets.dart';
 import '../../domain/rules/catalog.dart';
 import '../../state/app_state.dart';
 import '../feedback/feedback_screen.dart';
+import 'usda_key_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -78,6 +79,19 @@ class SettingsScreen extends StatelessWidget {
                 title: Text(s.t('settings.sources')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _openInfo(context, 'info.sources'),
+              ),
+              ListTile(
+                key: const ValueKey('settings.usdaKey'),
+                leading: const Icon(Icons.key_outlined),
+                title: Text(s.t('usdaKey.title')),
+                subtitle: Text(!state.hasUsdaKey
+                    ? s.t('usdaKey.status.none')
+                    : state.usdaKeyRejected
+                        ? s.t('usdaKey.status.rejected')
+                        : s.t('usdaKey.status.set')),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const UsdaKeyScreen())),
               ),
               ListTile(
                 leading: const Icon(Icons.lightbulb_outline),
@@ -195,8 +209,11 @@ class LanguagePickerScreen extends StatelessWidget {
                     title: Text(l.nativeName,
                         textDirection: l.rtl ? TextDirection.rtl : TextDirection.ltr,
                         style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text(s.t('language.status.${l.status.name}') +
-                        (l.note != null ? ' · ${l.note}' : '')),
+                    subtitle: Text(
+                        '${s.t('language.status.${l.status.name}')}'
+                        '${l.note != null ? ' · ${l.note}' : ''}\n'
+                        '${s.t('language.ingredients.${ingredientSupportFor(l.code).name}')}'),
+                    isThreeLine: true,
                     trailing: l.code == s.code && !firstRun
                         ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
                         : null,
