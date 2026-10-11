@@ -1,0 +1,123 @@
+# Tests ausführen und installierbare Dateien bauen.
+# Kostenlos: GitHub Actions ist für öffentliche Repositories gratis.
+name: Tests und Builds
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+
+jobs:
+  test:
+    name: Analyse und Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter --version
+      - run: flutter pub get
+      - name: Statische Analyse
+        run: flutter analyze --no-fatal-infos
+      - name: Tests
+        run: |
+          set -o pipefail
+          flutter test --reporter expanded 2>&1 | tee test-report.txt
+      - name: Testbericht hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testbericht
+          path: test-report.txt
+
+  android:
+    name: Android-APK
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: APK bauen
+        run: flutter build apk --release --dart-define=CONTACT_EMAIL=${{ vars.CONTACT_EMAIL || 'kontakt-nicht-konfiguriert@example.invalid' }}
+      - name: APK umbenennen
+        run: cp build/app/outputs/flutter-apk/app-release.apk HalalScanner.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: HalalScanner.apk
+
+  ios:
+    name: iPhone (unsigniert)
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: iOS bauen (ohne Signatur)
+        run: flutter build ios --release --no-codesign --dart-define=CONTACT_EMAIL=${{ vars.CONTACT_EMAIL || 'kontakt-nicht-konfiguriert@example.invalid' }}
+      - name: Unsignierte IPA verpacken
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr HalalScanner-unsigniert.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-unsigniert
+          path: HalalScanner-unsigniert.ipa
+
+  release:
+    name: Download-Seite aktualisieren
+    needs: [android, ios]
+    if: always() && needs.android.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Vorabversion "neueste-version" veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: neueste-version
+          name: Neueste Testversion
+          prerelease: true
+          make_latest: false
+          body: |
+            Automatisch gebaut aus Commit ${{ github.sha }}.
+
+            - **HalalScanner.apk** – für Android-Handys (direkt installierbar).
+            - **HalalScanner-unsigniert.ipa** – für iPhone; muss vor der Installation mit einer Apple-ID signiert werden (siehe docs/INSTALLATION.md).
+
+            Testversion – kein Ersatz für eine Halal-Zertifizierung.
+          fail_on_unmatched_files: false
+          files: |
+            dist/HalalScanner.apk
+            dist/HalalScanner-unsigniert.ipa
