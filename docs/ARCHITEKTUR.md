@@ -53,6 +53,6 @@ Backend (z. B. Supabase mit Row Level Security) für Nutzerkorrekturen, geprüft
 Zertifikate ergänzt werden kann – siehe STATUS.md.
 
 ## Build & Tests
-GitHub Actions (`.github/workflows/build.yml`): Analyse → 130 automatische Tests → Bildschirmfotos →
+GitHub Actions (`.github/workflows/build.yml`): Analyse → 183 automatische Tests → Bildschirmfotos →
 Android-APK (universal + arm64) → iOS-Build ohne Signatur → Veröffentlichung unter Releases.
 Die Protokolle landen zusätzlich in den Branches `ci-logs-test`, `ci-logs-android`, `ci-logs-ios`.

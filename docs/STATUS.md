@@ -1,6 +1,16 @@
 # Projektstatus (Version 0.2.0, Oktober 2026)
 
-## ✅ Implementiert und automatisch getestet (130 Tests, GitHub Actions)
+## 🆕 Branch `feature/weltweite-suche` (noch nicht in `main`, 183 Tests grün)
+- Produktnamen in allen Sprachen (`product_name_languages`), Name in App-Sprache bevorzugt; Marke nur als Anzeige-Ersatz
+- Getrennte Sachaussagen **Schweinebestandteile** und **Ethanol/alkoholische Zutaten**: nachgewiesen / in den geprüften Quellen nicht nachgewiesen / ungeklärt (abgeleitet, Regeln unverändert)
+- **USDA FoodData Central** als zweite Produktquelle (nur exakt gleiche GTIN, nur wenn Open Food Facts keine Zutaten hat) – **nur aktiv mit kostenlosem Schlüssel `FDC_API_KEY`**; ohne Schlüssel „nicht eingerichtet“
+- Protokoll „Abgefragte Produktquellen“ je Scan, Hinweis bei unvollständiger Suche
+- **Produktsuche** nach Name/Marke/Hersteller (Open Food Facts), ohne Zusammenführung von Treffern
+- **PubChem**-Stoffidentität (CID, CAS) für 15 eindeutige Zusatzstoffe + 7 Vergleichsstoffe (Ethanol, Cetylalkohol …); Gemische ohne Eintrag
+- Quellenprüfung: [QUELLEN_UEBERSICHT.md](QUELLEN_UEBERSICHT.md)
+- Ungetestet auf echten Geräten (wie alles andere); USDA live nur mit DEMO_KEY geprüft
+
+## ✅ Implementiert und automatisch getestet (130 Tests auf `main`, GitHub Actions)
 - Vier Ergebnisfarben: ROT HARAM · ORANGE UNKLAR · GRAU NICHT VERIFIZIERT · GRÜN HALAL NACH VOLLSTÄNDIGER ZUTATENPRÜFUNG (+ HALAL-ZERTIFIZIERT nur mit verifiziertem Zertifikat)
 - Zehn ausdrückliche Freigabebedingungen für Grün, als Checkliste in der App sichtbar
 - Automatische Recherche je kritischer Zutat (6 Schritte, siehe HALAL_REGELN.md), mit Prüffragen, Belegen, Quellenlinks, offenen Fragen und „Was würde klären?“
@@ -28,7 +38,9 @@ Es wurde **kein echtes Gerät** getestet – weder Android noch iPhone. Ungetest
 ## 🟠 Grenzen (ehrlich)
 - **Aromen bleiben fast immer UNKLAR**: Hersteller müssen Trägerstoffe wie Alkohol nicht angeben, und es gibt keine kostenlose Quelle dafür.
 - **Keine automatische Herstellerabfrage**: Herstellerseiten haben keine offene Schnittstelle; die App zeigt den Link und bereitet eine E-Mail vor.
-- **Keine Zertifikatsdatenbank**: HALAL-ZERTIFIZIERT erscheint derzeit nie.
+- **Keine Zertifikatsdatenbank**: HALAL-ZERTIFIZIERT erscheint derzeit nie. Für BPJPH, JAKIM, CICOT und IFANCA wurde keine kostenlose, dokumentierte Schnittstelle gefunden (siehe QUELLEN_UEBERSICHT.md).
+- **Keine Laborergebnisse zu einzelnen Produkten**: keine kostenlose Quelle gefunden; Literatur belegt nichts über ein konkretes Produkt.
+- **Weitere nationale Lebensmitteldatenbanken** noch nicht recherchiert.
 - Vegan-/Vegetarisch-Kennzeichnungen stammen von Open-Food-Facts-Nutzern (Verpackungsangabe, nicht verifiziert).
 - Arabisch und Türkisch: Entwurf, nicht fachlich geprüft. 17 Sprachen gesperrt.
 - Texterkennung nur lateinische Schrift.
