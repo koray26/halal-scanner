@@ -29,7 +29,7 @@
 
 ## Datenschutz (DSGVO-orientiert)
 - Keine Konten, keine Werbung, keine Analyse-/Tracking-Werkzeuge, kein eigener Server.
-- Übermittelt wird nur die **Barcode-Nummer** an Open Food Facts (dabei technisch die IP-Adresse).
+- Übermittelt werden nur die **Barcode-Nummer** und – für die Zutatenrecherche – allgemeine Stoffkennungen (z. B. `en:e471`) an Open Food Facts (dabei technisch die IP-Adresse).
 - Produktbilder werden direkt von Open Food Facts geladen.
 - Fotos der Zutatenliste werden **nur auf dem Gerät** ausgewertet und danach gelöscht.
 - Verlauf/Favoriten/Einstellungen liegen **nur lokal**; löschbar in den Einstellungen oder durch Deinstallation.
