@@ -162,6 +162,21 @@ void main() {
     await shot(tester, themed(state, ResultScreen(entry: samples[2])), '11_gruen_checkliste');
   });
 
+  testWidgets('16 Details aufgeklappt (ganze Seite)', (tester) async {
+    await setup(tester, 'de');
+    tester.view.physicalSize = const Size(1170, 9000);
+    final e = entry(state, 'Kekse', 'Beispielmarke',
+        'Weizenmehl, Zucker, Palmfett, Aroma, Salz', );
+    final w = themed(state, ResultScreen(entry: e));
+    await tester.pumpWidget(w);
+    await tester.pumpAndSettle();
+    for (final t in ['Was wurde gefunden?', 'Warum kein grünes Ergebnis?', 'Ausführliche Analyse']) {
+      await tester.tap(find.text(t));
+      await tester.pumpAndSettle();
+    }
+    await expectLater(find.byWidget(w), matchesGoldenFile('screens/16_details_offen.png'));
+  });
+
   testWidgets('09 Ergebnis Arabisch (Layout RTL)', (tester) async {
     await setup(tester, 'ar');
     await shot(tester, themed(state, ResultScreen(entry: samples[1])), '09_ar_rtl');

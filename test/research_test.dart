@@ -496,7 +496,7 @@ void main() {
     });
   });
 
-  test('Regelversion erhöht', () => expect(rulesetVersion, '2026.10-3'));
+  test('Regelversion erhöht', () => expect(rulesetVersion, '2026.10-4'));
 
   test('Verdict mit Recherche ist serialisierbar (Verlauf/Offline)', () {
     final v = eval(product('Zucker, Aroma, E471', link: 'https://example.org/p'));

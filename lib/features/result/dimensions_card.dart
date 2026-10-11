@@ -9,24 +9,30 @@ import '../../domain/rules/halal_engine.dart';
 /// Getrennte Sachaussagen: Schweinebestandteile und Alkohol.
 /// Der Halal-Status steht darüber in der Statuskarte.
 class DimensionsCard extends StatelessWidget {
-  const DimensionsCard({super.key, required this.verdict, required this.strings});
+  const DimensionsCard(
+      {super.key, required this.verdict, required this.strings, this.showTitle = true});
   final Verdict verdict;
   final AppStrings strings;
+
+  /// false: ohne eigene Karte/Überschrift (in einem aufklappbaren Abschnitt).
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
     final s = strings;
     final d = assessDimensions(verdict);
+    final body = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _Row(label: s.t('dimension.pork'), result: d.pork, strings: s),
+      const SizedBox(height: Gap.m),
+      _Row(label: s.t('dimension.alcohol'), result: d.alcohol, strings: s),
+      const SizedBox(height: Gap.m),
+      Text(s.t('dimension.note'), style: Theme.of(context).textTheme.bodySmall),
+    ]);
+    if (!showTitle) return body;
     return SectionCard(
       title: s.t('dimension.title'),
       icon: Icons.science_outlined,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _Row(label: s.t('dimension.pork'), result: d.pork, strings: s),
-        const SizedBox(height: Gap.m),
-        _Row(label: s.t('dimension.alcohol'), result: d.alcohol, strings: s),
-        const SizedBox(height: Gap.m),
-        Text(s.t('dimension.note'), style: Theme.of(context).textTheme.bodySmall),
-      ]),
+      child: body,
     );
   }
 }

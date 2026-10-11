@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "Une mention de certificat n’a pas pu être vérifiée.",
   "unknown.dataOld": "Les données du produit n’ont pas été mises à jour depuis plus de 3 ans. La recette a pu changer.",
   "unknown.manufacturingNotVerified": "Les procédés de fabrication, l’origine des matières premières et les contaminations possibles n’ont pas été vérifiés.",
-  "unknown.languageNotSupported": "La liste des ingrédients n’est disponible que dans une langue pour laquelle cette application n’a pas encore de règles de vérification. Les ingrédients sont actuellement vérifiés entièrement en allemand et en anglais ; en français et en turc seulement de façon limitée (sans résultat vert).",
+  "unknown.languageNotSupported": "La liste des ingrédients n’est disponible que dans une langue pour laquelle cette application n’a pas de listes de mots testées. Seuls certains termes connus sont détectés (p. ex. numéros E et noms du dictionnaire Open Food Facts). Un résultat vert n’est donc pas possible.",
   "rule.pork.name": "Porc",
   "rule.pork.why": "Le porc et tous les ingrédients issus du porc sont interdits selon toutes les normes halal reconnues.",
   "rule.porkDerived.name": "{item} d’origine porcine",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Listes d’ingrédients dans cette langue : entièrement vérifiées",
   "language.ingredients.limited": "Listes d’ingrédients dans cette langue : vérifiées de façon limitée (pas de résultat vert)",
   "language.ingredients.none": "Listes d’ingrédients dans cette langue : pas encore vérifiées (jamais de résultat vert)",
-  "unknown.compositeUnspecified": "La liste des ingrédients mentionne une charcuterie (p. ex. pepperoni, chorizo, mortadelle) sans ses propres ingrédients. L’espèce animale et l’origine ne sont donc pas connues."
+  "unknown.compositeUnspecified": "La liste des ingrédients mentionne une charcuterie (p. ex. pepperoni, chorizo, mortadelle) sans ses propres ingrédients. L’espèce animale et l’origine ne sont donc pas connues.",
+  "language.ingredients.basic": "Listes d’ingrédients dans cette langue : détection de base de termes isolés (jamais de résultat vert)",
+  "result.keyPoints": "L’essentiel",
+  "result.missing": "Il manque : {what}",
+  "result.morePoints": "{count} de plus sous « {section} »",
+  "result.detailsHeader": "Détails (toucher pour ouvrir)",
+  "result.meaning": "Que signifie ce résultat ?"
 }

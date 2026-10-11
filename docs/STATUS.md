@@ -8,14 +8,15 @@
 - **Produktsuche** nach Name/Marke/Hersteller (Open Food Facts), ohne Zusammenführung von Treffern
 - **PubChem**-Stoffidentität (CID, CAS) für 15 eindeutige Zusatzstoffe + 7 Vergleichsstoffe (Ethanol, Cetylalkohol …); Gemische ohne Eintrag
 - Quellenprüfung: [QUELLEN_UEBERSICHT.md](QUELLEN_UEBERSICHT.md)
-- **Sprachen** (Regelversion 2026.10-3, siehe [SPRACHEN.md](SPRACHEN.md)):
+- **Sprachen** (Regelversion 2026.10-4, siehe [SPRACHEN.md](SPRACHEN.md)):
   - Oberfläche: Deutsch, Englisch vollständig; Arabisch, Französisch, Türkisch (Priorität 1) sowie Indonesisch, Urdu, Bengalisch, Hindi, Malaiisch, Persisch, Hausa (Priorität 2) als ungeprüfte Entwürfe; vereinfachtes Chinesisch in Vorbereitung
-  - Zutaten-Erkennung: vollständig nur Deutsch/Englisch; Französisch/Türkisch eingeschränkt (kein Grün mehr, Lücken dokumentiert); alle anderen nicht unterstützt (nie Grün)
+  - Zutaten-Erkennung: vollständig nur Deutsch/Englisch; Französisch/Türkisch eingeschränkt (kein Grün mehr, Lücken dokumentiert); ar, id, ms, ur, bn, hi, fa, ha mit Grund-Erkennung über dieselben Regeln (HARAM/UNKLAR möglich, nie Grün, Lücken dokumentiert); Chinesisch nicht unterstützt
   - Texterkennung: nur lateinische Schrift; jede andere Schrift blockiert Grün
   - Rechts-nach-links für Arabisch, Urdu, Persisch; Barcode-Eingabe mit arabisch-indischen, persischen, Devanagari- und bengalischen Ziffern
   - Türkische Großbuchstaben (İ/ı) werden jetzt erkannt
   - Pepperoni, Chorizo, Mortadella ohne Unterzutaten → Liste unvollständig, nie Grün
-  - Neue Tests: `test/language_support_test.dart`, erweiterte `i18n_test.dart` und `widget_test.dart` – **noch nicht in CI ausgeführt**
+  - **Ergebnisseite vereinfacht:** oben Produkt, Status (Farbe + Symbol + Text), kurze Zusammenfassung und „Das Wichtigste“ (Zutat in App-Sprache, Originalwortlaut, Einstufung, was fehlt); alle Details eingeklappt
+  - Neue Tests: `test/cross_language_test.dart`, `test/language_support_test.dart`, erweiterte `i18n_test.dart` und `widget_test.dart` – **noch nicht in CI ausgeführt**
 - Ungetestet auf echten Geräten (wie alles andere); USDA live nur mit DEMO_KEY geprüft
 
 ## ✅ Implementiert und automatisch getestet (130 Tests auf `main`, GitHub Actions)

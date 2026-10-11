@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "A certificate reference could not be verified.",
   "unknown.dataOld": "The product data has not been updated for more than 3 years. The recipe may have changed.",
   "unknown.manufacturingNotVerified": "Production methods, origin of raw materials and possible contamination were not checked.",
-  "unknown.languageNotSupported": "The ingredient list is only available in a language for which this app has no checking rules yet. Ingredients are currently fully checked in German and English; French and Turkish only in a limited way (no green result).",
+  "unknown.languageNotSupported": "The ingredient list is only available in a language for which this app has no tested word lists. Only individual known terms are detected (e.g. E numbers and names from the Open Food Facts dictionary). A green result is therefore not possible.",
   "rule.pork.name": "Pork",
   "rule.pork.why": "Pork and all pig-derived ingredients are prohibited under all recognized halal standards.",
   "rule.porkDerived.name": "{item} from pork",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Ingredient lists in this language: fully checked",
   "language.ingredients.limited": "Ingredient lists in this language: checked with limitations (no green result)",
   "language.ingredients.none": "Ingredient lists in this language: not checked yet (never a green result)",
-  "unknown.compositeUnspecified": "The ingredient list names a sausage product (e.g. pepperoni, chorizo, mortadella) without its own ingredients. The animal species and origin are therefore unknown."
+  "unknown.compositeUnspecified": "The ingredient list names a sausage product (e.g. pepperoni, chorizo, mortadella) without its own ingredients. The animal species and origin are therefore unknown.",
+  "language.ingredients.basic": "Ingredient lists in this language: basic detection of individual terms (never a green result)",
+  "result.keyPoints": "Key points",
+  "result.missing": "Missing: {what}",
+  "result.morePoints": "{count} more under “{section}”",
+  "result.detailsHeader": "Details (tap to open)",
+  "result.meaning": "What does this result mean?"
 }

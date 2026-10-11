@@ -80,6 +80,23 @@ class Report {
 
   List<Finding> get relevant => [...v.haramFindings, ...v.unclearFindings];
 
+  /// Für die Kurzansicht: zuerst verbotene, dann noch ungeklärte Zutaten.
+  /// Belegte (aufgelöste) Zutaten stehen nur in den Details.
+  List<Investigation> get keyInvestigations => [
+        ...v.investigations.where((i) => i.effect == RuleEffect.haram),
+        ...v.investigations
+            .where((i) => i.effect == RuleEffect.unclear && !i.resolved),
+      ];
+
+  /// Gemeinsamer Zutatenbegriff in der Sprache der App (aus der Regel-ID),
+  /// unabhängig von der Sprache der Zutatenliste.
+  String conceptName(Investigation inv) {
+    final porkDerived = inv.effect == RuleEffect.haram &&
+        v.findings.any((f) => f.escalatedByPork && f.matchedText == inv.originalText);
+    final name = s.t('rule.${inv.ruleId}.name');
+    return porkDerived ? s.t('rule.porkDerived.name', {'item': name}) : name;
+  }
+
   List<String> whyTexts() {
     final out = <String>[];
     for (final f in relevant) {
@@ -216,9 +233,11 @@ class _ResultScreenState extends State<ResultScreen> {
                 ],
               ),
             ),
+          // --- Immer sichtbar: Produkt, Status, kurze Zusammenfassung --------
           _ProductHeader(entry: entry, strings: s),
           const SizedBox(height: Gap.m),
           Card(
+            key: const ValueKey('result.status'),
             clipBehavior: Clip.antiAlias,
             child: IntrinsicHeight(
               child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -230,141 +249,160 @@ class _ResultScreenState extends State<ResultScreen> {
                       StatusBadge(style: style, strings: s, large: true),
                       const SizedBox(height: Gap.m),
                       Text(r.summary(),
+                          key: const ValueKey('result.summary'),
                           style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: Gap.s),
-                      Text(s.t(style.meaningKey), style: theme.textTheme.bodyMedium),
                     ]),
                   ),
                 ),
               ]),
             ),
           ),
-          const SizedBox(height: Gap.m),
-          GreenChecklist(verdict: v, strings: s),
-          const SizedBox(height: Gap.m),
-          Semantics(
-            header: true,
-            child: Text(s.t('report.q.found'),
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-          ),
-          const SizedBox(height: Gap.xs),
-          if (v.investigations.isEmpty)
-            Text(s.t(v.findings.isEmpty && v.checkedIngredientCount == 0
-                ? 'report.found.nothingChecked'
-                : 'report.found.none'))
-          else ...[
-            Text(s.t('inv.intro'), style: theme.textTheme.bodySmall),
-            const SizedBox(height: Gap.s),
-            for (final inv in _sorted(v.investigations))
-              Padding(
-                padding: const EdgeInsets.only(bottom: Gap.s),
-                child: InvestigationCard(
-                  inv: inv,
-                  entry: entry,
-                  strings: s,
-                  initiallyExpanded: v.investigations.length == 1,
-                ),
-              ),
-          ],
-          if (v.investigations.any((i) => i.effect == RuleEffect.unclear && !i.resolved && !i.disputed) &&
-              entry.product != null) ...[
-            const SizedBox(height: Gap.xs),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.mail_outline),
-              label: Text(s.t('inquiry.buttonAll')),
-              onPressed: () => openManufacturerInquiry(context, entry,
-                  v.investigations.where((i) => i.effect == RuleEffect.unclear && !i.resolved).toList()),
-            ),
-          ],
-          const SizedBox(height: Gap.m),
-          DimensionsCard(verdict: v, strings: s),
-          const SizedBox(height: Gap.l),
-          Semantics(
-            header: true,
-            child: Text(s.t('report.details'),
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-          ),
-          const SizedBox(height: Gap.s),
-          if (r.whyTexts().isNotEmpty) ...[
+          // --- Immer sichtbar: die wichtigsten Zutaten ------------------------
+          if (r.keyInvestigations.isNotEmpty) ...[
             const SizedBox(height: Gap.m),
             SectionCard(
-              title: s.t('report.q.why'),
-              icon: Icons.lightbulb_outline,
-              child: _Bullets(r.whyTexts()),
-            ),
-          ],
-          const SizedBox(height: Gap.m),
-          SectionCard(
-            title: s.t('report.q.evidence'),
-            icon: Icons.fact_check_outlined,
-            child: Text(_evidenceText(s, entry)),
-          ),
-          if (r.unknownTexts().isNotEmpty) ...[
-            const SizedBox(height: Gap.m),
-            SectionCard(
-              title: s.t('report.q.unknown'),
-              icon: Icons.help_outline,
-              child: _Bullets(r.unknownTexts()),
-            ),
-          ],
-          if (v.infoFindings.isNotEmpty) ...[
-            const SizedBox(height: Gap.m),
-            SectionCard(
-              title: s.t('report.resolved'),
-              icon: Icons.info_outline,
-              child: _Bullets([
-                ...v.infoFindings.map((f) =>
-                    '„${f.matchedText}“: ${s.t('rule.${f.ruleId}.why')}'),
+              key: const ValueKey('result.keyPoints'),
+              title: s.t('result.keyPoints'),
+              icon: Icons.priority_high,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                for (final inv in r.keyInvestigations.take(_maxKeyPoints))
+                  _KeyPoint(inv: inv, report: r),
+                if (r.keyInvestigations.length > _maxKeyPoints)
+                  Text(
+                      s.t('result.morePoints', {
+                        'count': r.keyInvestigations.length - _maxKeyPoints,
+                        'section': s.t('report.q.found'),
+                      }),
+                      style: theme.textTheme.bodySmall),
               ]),
             ),
           ],
           const SizedBox(height: Gap.m),
-          SectionCard(
-            title: s.t('report.q.certainty'),
-            icon: Icons.balance,
-            child: Text(s.t('certainty.${v.certainty.name}')),
+          Wrap(spacing: Gap.s, runSpacing: Gap.s, children: [
+            FilledButton.icon(
+              icon: const Icon(Icons.list_alt),
+              label: Text(s.t('result.showIngredients')),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => IngredientsScreen(entry: entry))),
+            ),
+            if (v.status == HalalStatus.notVerified || v.status == HalalStatus.unclear)
+              OutlinedButton.icon(
+                icon: const Icon(Icons.photo_camera_outlined),
+                label: Text(s.t('home.photo')),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => OcrScreen(barcode: entry.barcode, product: p))),
+              ),
+          ]),
+          // --- Details: standardmäßig eingeklappt ----------------------------
+          const SizedBox(height: Gap.l),
+          Semantics(
+            header: true,
+            child: Text(s.t('result.detailsHeader'),
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+          ),
+          const SizedBox(height: Gap.s),
+          _Collapsible(
+            id: 'found',
+            title: s.t('report.q.found'),
+            icon: Icons.search,
+            children: [
+              if (v.investigations.isEmpty)
+                Text(s.t(v.findings.isEmpty && v.checkedIngredientCount == 0
+                    ? 'report.found.nothingChecked'
+                    : 'report.found.none'))
+              else ...[
+                Text(s.t('inv.intro'), style: theme.textTheme.bodySmall),
+                const SizedBox(height: Gap.s),
+                for (final inv in _sorted(v.investigations))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: Gap.s),
+                    child: InvestigationCard(
+                      inv: inv,
+                      entry: entry,
+                      strings: s,
+                      initiallyExpanded: v.investigations.length == 1,
+                    ),
+                  ),
+              ],
+              if (v.investigations.any((i) =>
+                      i.effect == RuleEffect.unclear && !i.resolved && !i.disputed) &&
+                  entry.product != null)
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.mail_outline),
+                  label: Text(s.t('inquiry.buttonAll')),
+                  onPressed: () => openManufacturerInquiry(
+                      context,
+                      entry,
+                      v.investigations
+                          .where((i) => i.effect == RuleEffect.unclear && !i.resolved)
+                          .toList()),
+                ),
+            ],
+          ),
+          if (v.greenConditions.isNotEmpty)
+            _Collapsible(
+              id: 'checklist',
+              title: s.t(v.status == HalalStatus.halalByIngredients
+                  ? 'green.title.met'
+                  : 'green.title.unmet'),
+              icon: Icons.checklist,
+              children: [GreenChecklist(verdict: v, strings: s, showTitle: false)],
+            ),
+          _Collapsible(
+            id: 'dimensions',
+            title: s.t('dimension.title'),
+            icon: Icons.science_outlined,
+            children: [DimensionsCard(verdict: v, strings: s, showTitle: false)],
+          ),
+          _Collapsible(
+            id: 'analysis',
+            title: s.t('report.details'),
+            icon: Icons.article_outlined,
+            children: [
+              _Sub(s.t('result.meaning'), Text(s.t(style.meaningKey))),
+              if (r.whyTexts().isNotEmpty) _Sub(s.t('report.q.why'), _Bullets(r.whyTexts())),
+              _Sub(s.t('report.q.evidence'), Text(_evidenceText(s, entry))),
+              if (r.unknownTexts().isNotEmpty)
+                _Sub(s.t('report.q.unknown'), _Bullets(r.unknownTexts())),
+              if (v.infoFindings.isNotEmpty)
+                _Sub(
+                    s.t('report.resolved'),
+                    _Bullets([
+                      ...v.infoFindings.map(
+                          (f) => '„${f.matchedText}“: ${s.t('rule.${f.ruleId}.why')}'),
+                    ])),
+              _Sub(s.t('report.q.certainty'), Text(s.t('certainty.${v.certainty.name}'))),
+            ],
+          ),
+          _Collapsible(
+            id: 'feedback',
+            title: s.t('feedback.section.title'),
+            icon: Icons.lightbulb_outline,
+            children: [ProductFeedbackSection(barcode: entry.barcode, productName: p?.name)],
           ),
           const SizedBox(height: Gap.m),
-          ProductFeedbackSection(barcode: entry.barcode, productName: p?.name),
-          const SizedBox(height: Gap.l),
-          FilledButton.icon(
-            icon: const Icon(Icons.list_alt),
-            label: Text(s.t('result.showIngredients')),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => IngredientsScreen(entry: entry))),
-          ),
-          const SizedBox(height: Gap.s),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.source_outlined),
-            label: Text(s.t('result.sources')),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => SourcesScreen(entry: entry))),
-          ),
-          if (v.status == HalalStatus.notVerified || v.status == HalalStatus.unclear) ...[
-            const SizedBox(height: Gap.s),
+          Wrap(spacing: Gap.s, runSpacing: Gap.s, children: [
             OutlinedButton.icon(
-              icon: const Icon(Icons.photo_camera_outlined),
-              label: Text(s.t('home.photo')),
+              icon: const Icon(Icons.source_outlined),
+              label: Text(s.t('result.sources')),
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => OcrScreen(barcode: entry.barcode, product: p))),
+                  builder: (_) => SourcesScreen(entry: entry))),
             ),
-          ],
-          if (entry.barcode != null) ...[
-            const SizedBox(height: Gap.s),
-            OutlinedButton.icon(
-              icon: _revalidating
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.refresh),
-              label: Text(s.t('result.revalidate')),
-              onPressed: _revalidating ? null : _revalidate,
+            if (entry.barcode != null)
+              OutlinedButton.icon(
+                icon: _revalidating
+                    ? const SizedBox(
+                        width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.refresh),
+                label: Text(s.t('result.revalidate')),
+                onPressed: _revalidating ? null : _revalidate,
+              ),
+            TextButton.icon(
+              icon: const Icon(Icons.flag_outlined),
+              label: Text(s.t('result.reportIssue')),
+              onPressed: _report,
             ),
-          ],
-          const SizedBox(height: Gap.s),
-          TextButton.icon(
-            icon: const Icon(Icons.flag_outlined),
-            label: Text(s.t('result.reportIssue')),
-            onPressed: _report,
-          ),
+          ]),
           const SizedBox(height: Gap.m),
           Text(s.t('result.disclaimer', {'version': ltr(rulesetVersion)}),
               style: theme.textTheme.bodySmall, textAlign: TextAlign.center),
@@ -372,6 +410,9 @@ class _ResultScreenState extends State<ResultScreen> {
       ),
     );
   }
+
+  /// Höchstens so viele Zutaten stehen oben; der Rest unter „Was wurde gefunden?“.
+  static const _maxKeyPoints = 4;
 
   static List<Investigation> _sorted(List<Investigation> list) {
     int rank(Investigation i) => i.effect == RuleEffect.haram
@@ -447,8 +488,8 @@ class _ProductHeader extends StatelessWidget {
       ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          width: 88,
-          height: 88,
+          width: 72,
+          height: 72,
           color: theme.colorScheme.surfaceContainerHighest,
           child: p?.imageUrl != null
               ? Image.network(
@@ -483,6 +524,107 @@ class _ProductHeader extends StatelessWidget {
       ),
     ]);
   }
+}
+
+/// Eine Zeile der Kurzansicht: Begriff, Wortlaut der Quelle, Einstufung und
+/// – bei ungeklärten Zutaten – was für eine Einstufung noch fehlt.
+class _KeyPoint extends StatelessWidget {
+  const _KeyPoint({required this.inv, required this.report});
+  final Investigation inv;
+  final Report report;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = report.s;
+    final theme = Theme.of(context);
+    final haram = inv.effect == RuleEffect.haram;
+    final color = haram ? AppColors.haram : AppColors.unclear;
+    final state = s.t(haram
+        ? 'inv.state.haram'
+        : inv.disputed
+            ? 'inv.state.disputed'
+            : 'inv.state.open');
+    final missing = haram || inv.openQuestions.isEmpty
+        ? null
+        : s.t('result.missing', {'what': s.t('clarify.${inv.openQuestions.first.name}')});
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Gap.s),
+      child: Semantics(
+        container: true,
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Symbol und Text tragen die Bedeutung – nicht nur die Farbe.
+          Icon(haram ? Icons.block : Icons.help, color: color, size: 22),
+          const SizedBox(width: Gap.s),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('${report.conceptName(inv)}: „${inv.originalText}“',
+                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+              Text(state,
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: color, fontWeight: FontWeight.w700)),
+              if (missing != null) Text(missing, style: theme.textTheme.bodyMedium),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// Aufklappbarer Abschnitt; standardmäßig geschlossen.
+class _Collapsible extends StatelessWidget {
+  const _Collapsible(
+      {required this.id, required this.title, required this.icon, required this.children});
+  final String id;
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Gap.s),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Theme(
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            key: ValueKey('result.section.$id'),
+            leading: Icon(icon, color: theme.colorScheme.primary),
+            title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+            childrenPadding: const EdgeInsets.fromLTRB(Gap.m, 0, Gap.m, Gap.m),
+            expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Unterüberschrift mit Inhalt innerhalb eines aufgeklappten Abschnitts.
+class _Sub extends StatelessWidget {
+  const _Sub(this.title, this.child);
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: Gap.m),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Semantics(
+            header: true,
+            child: Text(title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+          ),
+          const SizedBox(height: Gap.xs),
+          child,
+        ]),
+      );
 }
 
 class _Bullets extends StatelessWidget {

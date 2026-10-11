@@ -55,13 +55,16 @@ void main() {
       expect(ingredientSupportFor('en'), IngredientSupport.full);
       expect(ingredientSupportFor('fr'), IngredientSupport.limited);
       expect(ingredientSupportFor('tr'), IngredientSupport.limited);
-      for (final l in ['ar', 'id', 'ms', 'ur', 'bn', 'hi', 'fa', 'ha', 'zh']) {
-        expect(ingredientSupportFor(l), IngredientSupport.none, reason: l);
+      // Grund-Erkennung (gleiche Regeln, Begriffe aus dem Open-Food-Facts-
+      // Wörterbuch): HARAM/UNKLAR möglich, nie Grün.
+      for (final l in ['ar', 'id', 'ms', 'ur', 'bn', 'hi', 'fa', 'ha']) {
+        expect(ingredientSupportFor(l), IngredientSupport.basic, reason: l);
       }
+      expect(ingredientSupportFor('zh'), IngredientSupport.none);
     });
 
     test('Regelversion für die Sperre von Grün bei fr/tr', () {
-      expect(rulesetVersion, '2026.10-3');
+      expect(rulesetVersion, '2026.10-4');
     });
   });
 
@@ -173,8 +176,8 @@ void main() {
     });
   });
 
-  group('Priorität 2 und weitere: keine Wortlisten -> nie Grün', () {
-    // Unkritisch wirkende Listen. Ohne geprüfte Wortlisten darf die App
+  group('Priorität 2 und weitere: keine getesteten Wortlisten -> nie Grün', () {
+    // Unkritisch wirkende Listen. Ohne getestete Wortlisten darf die App
     // daraus kein Grün machen – auch nicht, wenn nichts gefunden wird.
     const samples = {
       'ar': 'سكر، ملح، ماء',
@@ -197,9 +200,17 @@ void main() {
       });
     }
 
-    test('Text wird ohne Wortlisten nicht ausgewertet (kein erfundenes HARAM/UNKLAR)', () {
-      // Ohne strukturierte Datenbank-Analyse bleibt es bei NICHT VERIFIZIERT.
-      expect(evalLang('gula, lemak babi', 'id').status, HalalStatus.notVerified);
+    test('Text wird mit denselben Regeln geprüft (Grund-Erkennung)', () {
+      // „babi“ steht bereits in den sprachübergreifenden Schweine-Begriffen.
+      expect(evalLang('gula, lemak babi', 'id').status, HalalStatus.haram);
+      // Unbekanntes bleibt NICHT VERIFIZIERT – nichts wird erfunden.
+      expect(evalLang('gula, garam', 'id').status, HalalStatus.notVerified);
+    });
+
+    test('Chinesisch: weder Wortlisten noch Grund-Erkennung', () {
+      final v = evalLang('糖、明胶、盐', 'zh');
+      expect(v.status, HalalStatus.notVerified);
+      expect(v.findings, isEmpty);
     });
 
     test('Strukturierte Datenbank-Analyse kann HARAM/UNKLAR liefern, nie Grün', () {

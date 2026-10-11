@@ -8,7 +8,11 @@
 /// HARAM nur bei ausdrücklich genanntem verbotenem Bestandteil.
 library;
 
-const String rulesetVersion = '2026.10-3';
+import 'off_terms.g.dart';
+
+export 'off_terms.g.dart' show offTermPatterns;
+
+const String rulesetVersion = '2026.10-4';
 
 /// Sprachen, für die die Wortlisten gepflegt sind. Zutatenlisten in diesen
 /// Sprachen werden ausgewertet (HARAM/UNKLAR werden erkannt). Zutatenlisten in
@@ -19,8 +23,17 @@ const Set<String> supportedRuleLanguages = {'de', 'en', 'fr', 'tr'};
 /// Sprachen, deren Wortlisten durch Tests ausreichend abgesichert sind, um ein
 /// grünes Ergebnis zu erlauben. Französisch und Türkisch werden ausgewertet,
 /// können aber bis zur Absicherung nur HARAM, UNKLAR oder NICHT VERIFIZIERT
-/// ergeben (Regelversion 2026.10-3). Siehe docs/SPRACHEN.md.
+/// ergeben (seit Regelversion 2026.10-3). Siehe docs/SPRACHEN.md.
 const Set<String> greenRuleLanguages = {'de', 'en'};
+
+/// Sprachen ohne eigene, getestete Wortlisten, deren Zutatenlisten trotzdem
+/// mit denselben Regeln geprüft werden: mit allen sprachunabhängigen Mustern
+/// (E-Nummern, international gebräuchliche Wörter) plus den aus dem
+/// Open-Food-Facts-Wörterbuch abgeleiteten Begriffen ([offTermPatterns]).
+/// Ergebnis höchstens HARAM/UNKLAR/NICHT VERIFIZIERT – nie Grün.
+const Set<String> detectOnlyLanguages = {
+  'ar', 'id', 'ms', 'ur', 'bn', 'hi', 'fa', 'ha',
+};
 
 /// Wie gut Zutatenlisten in einer Sprache geprüft werden (unabhängig von der
 /// Sprache der Benutzeroberfläche).
@@ -31,6 +44,10 @@ enum IngredientSupport {
   /// Wortlisten vorhanden: HARAM/UNKLAR werden erkannt, aber kein Grün.
   limited,
 
+  /// Grundlegende Erkennung (Begriffe aus dem Open-Food-Facts-Wörterbuch,
+  /// E-Nummern): einzelne HARAM/UNKLAR-Treffer möglich, nie Grün.
+  basic,
+
   /// Keine Wortlisten: nur strukturierte Datenbankanalyse, nie Grün.
   none,
 }
@@ -40,7 +57,9 @@ IngredientSupport ingredientSupportFor(String lang) =>
         ? IngredientSupport.full
         : supportedRuleLanguages.contains(lang)
             ? IngredientSupport.limited
-            : IngredientSupport.none;
+            : detectOnlyLanguages.contains(lang)
+                ? IngredientSupport.basic
+                : IngredientSupport.none;
 
 enum RuleEffect {
   /// Ausdrücklich verbotener Bestandteil.

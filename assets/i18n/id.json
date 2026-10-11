@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "Rujukan sertifikat tidak dapat diverifikasi.",
   "unknown.dataOld": "Data produk tidak diperbarui selama lebih dari 3 tahun. Resepnya mungkin sudah berubah.",
   "unknown.manufacturingNotVerified": "Metode produksi, asal bahan baku, dan kemungkinan kontaminasi tidak diperiksa.",
-  "unknown.languageNotSupported": "Daftar bahan hanya tersedia dalam bahasa yang belum memiliki aturan pemeriksaan di aplikasi ini. Saat ini bahan diperiksa sepenuhnya dalam bahasa Jerman dan Inggris; bahasa Prancis dan Turki hanya secara terbatas (tanpa hasil hijau).",
+  "unknown.languageNotSupported": "Daftar bahan hanya tersedia dalam bahasa yang belum memiliki daftar kata teruji di aplikasi ini. Hanya beberapa istilah yang dikenal yang terdeteksi (mis. nomor E dan nama dari kamus Open Food Facts). Karena itu hasil hijau tidak mungkin.",
   "rule.pork.name": "Babi",
   "rule.pork.why": "Babi dan semua bahan yang berasal dari babi dilarang menurut semua standar halal yang diakui.",
   "rule.porkDerived.name": "{item} dari babi",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Daftar bahan dalam bahasa ini: diperiksa sepenuhnya",
   "language.ingredients.limited": "Daftar bahan dalam bahasa ini: diperiksa secara terbatas (tanpa hasil hijau)",
   "language.ingredients.none": "Daftar bahan dalam bahasa ini: belum diperiksa (tidak pernah hasil hijau)",
-  "unknown.compositeUnspecified": "Daftar bahan menyebutkan produk sosis (mis. pepperoni, chorizo, mortadella) tanpa bahan-bahannya sendiri. Karena itu jenis hewan dan asalnya tidak diketahui."
+  "unknown.compositeUnspecified": "Daftar bahan menyebutkan produk sosis (mis. pepperoni, chorizo, mortadella) tanpa bahan-bahannya sendiri. Karena itu jenis hewan dan asalnya tidak diketahui.",
+  "language.ingredients.basic": "Daftar bahan dalam bahasa ini: deteksi dasar istilah tertentu (tidak pernah hasil hijau)",
+  "result.keyPoints": "Poin penting",
+  "result.missing": "Yang kurang: {what}",
+  "result.morePoints": "{count} lainnya di “{section}”",
+  "result.detailsHeader": "Detail (ketuk untuk membuka)",
+  "result.meaning": "Apa arti hasil ini?"
 }

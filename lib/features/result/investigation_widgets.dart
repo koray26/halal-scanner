@@ -15,9 +15,14 @@ import '../feedback/feedback_screen.dart';
 
 /// Checkliste der Freigabebedingungen ("Warum dieses Ergebnis?").
 class GreenChecklist extends StatelessWidget {
-  const GreenChecklist({super.key, required this.verdict, required this.strings});
+  const GreenChecklist(
+      {super.key, required this.verdict, required this.strings, this.showTitle = true});
   final Verdict verdict;
   final AppStrings strings;
+
+  /// false: ohne eigene Überschrift (z. B. in einem aufklappbaren Abschnitt,
+  /// der die Überschrift schon zeigt).
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -26,30 +31,32 @@ class GreenChecklist extends StatelessWidget {
     if (conds.isEmpty) return const SizedBox.shrink();
     final green = verdict.status == HalalStatus.halalByIngredients;
     final unmet = conds.entries.where((e) => !e.value).map((e) => e.key).toList();
+    final body = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(s.t(green ? 'green.intro.met' : 'green.intro.unmet')),
+      const SizedBox(height: Gap.s),
+      for (final c in (green ? conds.keys.toList() : unmet))
+        Padding(
+          padding: const EdgeInsets.only(bottom: Gap.xs),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(conds[c]! ? Icons.check_circle : Icons.cancel,
+                size: 20,
+                color: conds[c]! ? AppColors.halal : AppColors.notVerified,
+                semanticLabel: s.t(conds[c]! ? 'green.met' : 'green.unmet')),
+            const SizedBox(width: Gap.s),
+            Expanded(child: Text(s.t('green.cond.${c.name}'))),
+          ]),
+        ),
+      if (green) ...[
+        const SizedBox(height: Gap.s),
+        Text(s.t('green.notGuarantee'),
+            style: const TextStyle(fontWeight: FontWeight.w600)),
+      ],
+    ]);
+    if (!showTitle) return body;
     return SectionCard(
       title: s.t(green ? 'green.title.met' : 'green.title.unmet'),
       icon: Icons.checklist,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(s.t(green ? 'green.intro.met' : 'green.intro.unmet')),
-        const SizedBox(height: Gap.s),
-        for (final c in (green ? conds.keys.toList() : unmet))
-          Padding(
-            padding: const EdgeInsets.only(bottom: Gap.xs),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(conds[c]! ? Icons.check_circle : Icons.cancel,
-                  size: 20,
-                  color: conds[c]! ? AppColors.halal : AppColors.notVerified,
-                  semanticLabel: s.t(conds[c]! ? 'green.met' : 'green.unmet')),
-              const SizedBox(width: Gap.s),
-              Expanded(child: Text(s.t('green.cond.${c.name}'))),
-            ]),
-          ),
-        if (green) ...[
-          const SizedBox(height: Gap.s),
-          Text(s.t('green.notGuarantee'),
-              style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ]),
+      child: body,
     );
   }
 }

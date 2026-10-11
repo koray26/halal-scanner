@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "Ein Zertifikatshinweis konnte nicht überprüft werden.",
   "unknown.dataOld": "Die Produktdaten wurden seit über 3 Jahren nicht aktualisiert. Die Rezeptur kann sich geändert haben.",
   "unknown.manufacturingNotVerified": "Herstellungsverfahren, Herkunft der Rohstoffe und mögliche Verunreinigungen wurden nicht geprüft.",
-  "unknown.languageNotSupported": "Die Zutatenliste liegt nur in einer Sprache vor, für die diese App noch keine Prüfregeln hat. Zutaten werden derzeit auf Deutsch und Englisch vollständig geprüft; Französisch und Türkisch eingeschränkt (ohne grünes Ergebnis).",
+  "unknown.languageNotSupported": "Die Zutatenliste liegt nur in einer Sprache vor, für die diese App keine getesteten Wortlisten hat. Erkannt werden nur einzelne bekannte Begriffe (z. B. E-Nummern und Bezeichnungen aus dem Open-Food-Facts-Wörterbuch). Ein grünes Ergebnis ist deshalb nicht möglich.",
   "rule.pork.name": "Schwein",
   "rule.pork.why": "Schweinefleisch und alle Bestandteile vom Schwein sind nach allen anerkannten Halal-Standards verboten.",
   "rule.porkDerived.name": "{item} vom Schwein",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Zutatenlisten in dieser Sprache: werden vollständig geprüft",
   "language.ingredients.limited": "Zutatenlisten in dieser Sprache: eingeschränkt geprüft (kein grünes Ergebnis)",
   "language.ingredients.none": "Zutatenlisten in dieser Sprache: noch nicht geprüft (nie grünes Ergebnis)",
-  "unknown.compositeUnspecified": "Die Zutatenliste nennt eine Wurstware (z. B. Pepperoni, Chorizo, Mortadella) ohne ihre eigenen Zutaten. Tierart und Herkunft sind damit nicht bekannt."
+  "unknown.compositeUnspecified": "Die Zutatenliste nennt eine Wurstware (z. B. Pepperoni, Chorizo, Mortadella) ohne ihre eigenen Zutaten. Tierart und Herkunft sind damit nicht bekannt.",
+  "language.ingredients.basic": "Zutatenlisten in dieser Sprache: Grunderkennung einzelner Begriffe (nie grünes Ergebnis)",
+  "result.keyPoints": "Das Wichtigste",
+  "result.missing": "Es fehlt: {what}",
+  "result.morePoints": "Weitere {count} unter „{section}“",
+  "result.detailsHeader": "Details (zum Öffnen antippen)",
+  "result.meaning": "Was bedeutet dieses Ergebnis?"
 }

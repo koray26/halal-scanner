@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "Bir sertifika bilgisi doğrulanamadı.",
   "unknown.dataOld": "Ürün bilgileri 3 yıldan uzun süredir güncellenmedi. Tarif değişmiş olabilir.",
   "unknown.manufacturingNotVerified": "Üretim yöntemleri, hammadde kaynağı ve olası bulaşmalar kontrol edilmedi.",
-  "unknown.languageNotSupported": "İçindekiler listesi yalnızca bu uygulamanın henüz kontrol kuralı olmadığı bir dilde mevcut. İçindekiler şu anda Almanca ve İngilizce olarak tam kontrol edilir; Fransızca ve Türkçe yalnızca sınırlı olarak (yeşil sonuç olmadan).",
+  "unknown.languageNotSupported": "İçindekiler listesi yalnızca bu uygulamanın test edilmiş kelime listelerine sahip olmadığı bir dilde mevcut. Yalnızca bilinen bazı terimler tanınır (ör. E numaraları ve Open Food Facts sözlüğündeki adlar). Bu nedenle yeşil sonuç mümkün değildir.",
   "rule.pork.name": "Domuz",
   "rule.pork.why": "Domuz eti ve domuzdan elde edilen tüm bileşenler tanınmış tüm helal standartlarına göre yasaktır.",
   "rule.porkDerived.name": "Domuz kaynaklı {item}",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Bu dildeki içindekiler listeleri: tam olarak kontrol edilir",
   "language.ingredients.limited": "Bu dildeki içindekiler listeleri: sınırlı olarak kontrol edilir (yeşil sonuç yok)",
   "language.ingredients.none": "Bu dildeki içindekiler listeleri: henüz kontrol edilmiyor (asla yeşil sonuç yok)",
-  "unknown.compositeUnspecified": "İçindekiler listesi bir şarküteri ürününü (ör. pepperoni, chorizo, mortadella) kendi içindekileri olmadan belirtiyor. Bu nedenle hayvan türü ve kaynağı bilinmiyor."
+  "unknown.compositeUnspecified": "İçindekiler listesi bir şarküteri ürününü (ör. pepperoni, chorizo, mortadella) kendi içindekileri olmadan belirtiyor. Bu nedenle hayvan türü ve kaynağı bilinmiyor.",
+  "language.ingredients.basic": "Bu dildeki içindekiler listeleri: tek tek terimlerin temel tanınması (asla yeşil sonuç yok)",
+  "result.keyPoints": "Önemli noktalar",
+  "result.missing": "Eksik: {what}",
+  "result.morePoints": "“{section}” altında {count} tane daha",
+  "result.detailsHeader": "Ayrıntılar (açmak için dokunun)",
+  "result.meaning": "Bu sonuç ne anlama geliyor?"
 }

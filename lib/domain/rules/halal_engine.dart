@@ -307,6 +307,13 @@ class HalalEngine {
   HalalEngine()
       : _rules = ingredientRules.map(_CompiledRule.new).toList(),
         _composites = compositeProductNames.map(_rx).toList(),
+        _extra = {
+          for (final l in offTermPatterns.entries)
+            l.key: {
+              for (final r in l.value.entries)
+                r.key: r.value.map(_rx).toList(),
+            },
+        },
         _qualifiers = {
           for (final e in qualifierPatterns.entries)
             e.key: e.value.map(_rx).toList(),
@@ -314,6 +321,11 @@ class HalalEngine {
 
   final List<_CompiledRule> _rules;
   final List<RegExp> _composites;
+
+  /// Zusätzliche Begriffe je Sprache und Regel (aus dem Open-Food-Facts-
+  /// Wörterbuch abgeleitet, siehe off_terms.g.dart). Gleiche Regeln, nur
+  /// weitere Bezeichnungen.
+  final Map<String, Map<String, List<RegExp>>> _extra;
   final Map<Qualifier, List<RegExp>> _qualifiers;
   static const _research = ResearchPipeline();
 
@@ -333,13 +345,15 @@ class HalalEngine {
 
   /// Prüft einen einzelnen Bestandteil gegen alle Regeln.
   Map<String, Finding> _matchHead(String originalHead, String context,
-      String fullText, SourceRef source, {bool structured = false}) {
+      String fullText, SourceRef source,
+      {bool structured = false, String? lang}) {
     final nodeFindings = <String, Finding>{};
     final quals = _qualifiersIn(context);
     // Vergleich auf der vereinheitlichten Form; gleiche Länge wie das Original.
     final head = turkicFold(originalHead);
+    final extra = lang == null ? null : _extra[lang];
     for (final cr in _rules) {
-      for (final re in cr.patterns) {
+      for (final re in [...cr.patterns, ...?extra?[cr.rule.id]]) {
         final m = re.firstMatch(head);
         if (m == null) continue;
         final from = math.max(0, m.start - _exclusionWindow);
@@ -395,8 +409,10 @@ class HalalEngine {
       final head = node.head.trim();
       if (head.isEmpty) continue;
       count++;
-      findings.addAll(
-          _matchHead(head, node.qualifierContext, node.fullText, input.source).values);
+      findings.addAll(_matchHead(
+              head, node.qualifierContext, node.fullText, input.source,
+              lang: input.lang)
+          .values);
       if (node.children.isEmpty) {
         final folded = turkicFold(head);
         if (_composites.any((r) => r.hasMatch(folded))) composites.add(head);
@@ -421,9 +437,12 @@ class HalalEngine {
                 structured: true)
             .values);
       } else {
-        // Nicht in der Taxonomie: Originaltext trotzdem prüfen (z. B. "gelatine").
+        // Nicht in der Taxonomie: Originaltext trotzdem prüfen (z. B. "gelatine"),
+        // mit den Begriffen der Sprache aus der Kennung („id:lemak babi“).
+        final prefix = n.id.contains(':') ? n.id.split(':').first : null;
         out.addAll(_matchHead(n.text, '${n.text} | $parentContext',
-                '${n.text} (${n.id})', p.source, structured: true)
+                '${n.text} (${n.id})', p.source,
+                structured: true, lang: prefix ?? p.ingredientTexts.firstOrNull?.lang)
             .values);
       }
       for (final c in n.children) {
@@ -561,16 +580,23 @@ class HalalEngine {
     final available = (overrideTexts ?? product?.ingredientTexts ?? const [])
         .where((t) => t.text.trim().length >= 3)
         .toList();
-    final texts = available
-        .where((t) =>
-            t.source.kind != SourceKind.openFoodFacts ||
-            supportedRuleLanguages.contains(t.lang))
+    // Gemeinsame Prüfung für alle Sprachen: dieselben Regeln, je Sprache
+    // unterschiedlich viele bekannte Bezeichnungen.
+    // ruleTexts: Sprachen mit gepflegten Wortlisten (oder Foto/Handeingabe/USDA).
+    // detectTexts: Sprachen nur mit Grund-Erkennung – nie Grün.
+    bool hasRuleList(IngredientText t) =>
+        t.source.kind != SourceKind.openFoodFacts ||
+        supportedRuleLanguages.contains(t.lang);
+    final ruleTexts = available.where(hasRuleList).toList();
+    final detectTexts = available
+        .where((t) => !hasRuleList(t) && detectOnlyLanguages.contains(t.lang))
         .toList();
-    final unsupportedLanguage = available.isNotEmpty && texts.isEmpty;
+    final texts = [...ruleTexts, ...detectTexts];
+    final unsupportedLanguage = available.isNotEmpty && ruleTexts.isEmpty;
     if (unsupportedLanguage) unknowns.add(UnknownReason.languageNotSupported);
     // Ausgewertet, aber Sprache noch nicht für Grün abgesichert.
-    final limitedLanguage = texts.isNotEmpty &&
-        !texts.any((t) =>
+    final limitedLanguage = ruleTexts.isNotEmpty &&
+        !ruleTexts.any((t) =>
             t.source.kind != SourceKind.openFoodFacts ||
             greenRuleLanguages.contains(t.lang));
     if (limitedLanguage) unknowns.add(UnknownReason.languageLimited);
@@ -592,10 +618,15 @@ class HalalEngine {
       unknowns.add(UnknownReason.compositeUnspecified);
     }
 
-    // Nicht unterstützte Sprache: strukturierte Datenbankanalyse nutzen.
+    // Ohne gepflegte Wortliste zusätzlich die sprachunabhängige
+    // Datenbankanalyse nutzen (Kennungen wie en:gelatin); nur Regeln, die der
+    // Text noch nicht ausgelöst hat (keine doppelten Einträge).
     if (unsupportedLanguage && product != null && overrideTexts == null) {
-      findings.addAll(analyzeStructured(product));
-      count = product.allStructuredIngredients.length;
+      final known = findings.map((f) => f.ruleId).toSet();
+      findings.addAll(
+          analyzeStructured(product).where((f) => !known.contains(f.ruleId)));
+      final n = product.allStructuredIngredients.length;
+      if (n > count) count = n;
     }
 
     // Zusatzstoff-Tags der Quelle als Ergänzung (nur falls nicht im Text).
@@ -626,7 +657,8 @@ class HalalEngine {
       if (t.source.kind == SourceKind.userEdited) {
         unknowns.add(UnknownReason.userEditedText);
       }
-      if (t.unsupportedScript || hasUnsupportedScript(t.text)) {
+      if (t.unsupportedScript ||
+          (hasRuleList(t) && hasUnsupportedScript(t.text))) {
         unknowns.add(UnknownReason.unsupportedScript);
       }
     }
@@ -678,15 +710,27 @@ class HalalEngine {
 
     // --- Widersprüche ---------------------------------------------------------
     var conflict = unknowns.contains(UnknownReason.labelContradiction);
-    if (analyses.length > 1) {
-      final haramSets = analyses
-          .map((a) => a.findings
-              .where((f) => f.effect == RuleEffect.haram)
-              .map((f) => f.escalatedByPork ? 'pork' : f.ruleId)
-              .toSet())
-          .toList();
+    Set<String> haramOf(TextAnalysis a) => a.findings
+        .where((f) => f.effect == RuleEffect.haram)
+        .map((f) => f.escalatedByPork ? 'pork' : f.ruleId)
+        .toSet();
+    // analyses: zuerst die Listen mit gepflegten Wortlisten, dann die mit
+    // Grund-Erkennung (Reihenfolge wie in `texts`).
+    final ruleAnalyses = analyses.take(ruleTexts.length).toList();
+    final detectAnalyses = analyses.skip(ruleTexts.length).toList();
+    if (ruleAnalyses.length > 1) {
+      final haramSets = ruleAnalyses.map(haramOf).toList();
       final first = haramSets.first;
       if (haramSets.any((s) => s.length != first.length || !s.containsAll(first))) {
+        conflict = true;
+      }
+    }
+    // Grund-Erkennung: Ein fehlender Treffer ist kein Gegenbeleg (Wortschatz
+    // lückenhaft). Nennt sie aber einen verbotenen Stoff, den keine gepflegte
+    // Liste nennt, widersprechen sich die Sprachfassungen.
+    if (ruleAnalyses.isNotEmpty) {
+      final known = ruleAnalyses.expand(haramOf).toSet();
+      if (detectAnalyses.any((a) => !known.containsAll(haramOf(a)))) {
         conflict = true;
       }
     }

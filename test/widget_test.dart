@@ -7,6 +7,7 @@ import 'package:halal_scanner/core/widgets/widgets.dart';
 import 'package:halal_scanner/data/history_store.dart';
 import 'package:halal_scanner/domain/models.dart';
 import 'package:halal_scanner/domain/rules/halal_engine.dart';
+import 'package:halal_scanner/features/result/investigation_widgets.dart';
 import 'package:halal_scanner/features/result/result_screen.dart';
 import 'package:halal_scanner/features/settings/settings_screen.dart';
 import 'package:halal_scanner/features/settings/usda_key_screen.dart';
@@ -140,7 +141,7 @@ void main() {
     // Französisch: eingeschränkt.
     await tester.scrollUntilVisible(find.text('Français'), 200);
     expect(find.textContaining('eingeschränkt geprüft'), findsWidgets);
-    // Urdu: Oberfläche als Entwurf, Zutaten noch nicht geprüft.
+    // Urdu: Oberfläche als Entwurf, Zutaten nur mit Grund-Erkennung (nie Grün).
     await tester.scrollUntilVisible(find.text('اردو'), 200);
     expect(find.textContaining('nie grünes Ergebnis'), findsWidgets);
   });
@@ -226,7 +227,42 @@ void main() {
     expect(ar.t('status.haram'), 'حرام');
   });
 
-  testWidgets('UNKLAR: Recherche-Karte, Checkliste und Feedback-Formular', (tester) async {
+  testWidgets('Kurze Ergebnisseite: Status, Zusammenfassung und Zutat ohne Scrollen',
+      (tester) async {
+    final state = await makeStateIn(tester, 'de');
+    // Kleines Smartphone (360 × 640 logische Pixel).
+    tester.view.physicalSize = const Size(720, 1280);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    final entry = entryFor('Zucker, Gelatine', state);
+    await tester.pumpWidget(AppScope(
+      state: state,
+      child: MaterialApp(home: ResultScreen(entry: entry)),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Testgummi'), findsOneWidget);
+    expect(find.textContaining('4006381333931'), findsOneWidget);
+    // Status: Farbe UND Symbol UND Text.
+    expect(find.text('UNKLAR'), findsOneWidget);
+    expect(find.byIcon(Icons.help), findsWidgets);
+    // Wichtigste Zutat mit Begriff, Wortlaut, Einstufung und fehlender Angabe.
+    expect(find.text('Das Wichtigste'), findsOneWidget);
+    expect(find.text('Gelatine/Kollagen: „Gelatine“'), findsOneWidget);
+    expect(find.text('noch nicht abschließend geklärt'), findsOneWidget);
+    expect(find.textContaining('Es fehlt:'), findsOneWidget);
+    // Status und Zusammenfassung liegen vollständig im ersten Bildschirm,
+    // die wichtigsten Zutaten beginnen dort (Testschrift ist breiter als
+    // echte Schriften, auf Geräten passt mehr auf den Bildschirm).
+    for (final k in ['result.status', 'result.summary']) {
+      expect(tester.getRect(find.byKey(ValueKey(k))).bottom, lessThanOrEqualTo(640),
+          reason: k);
+    }
+    expect(tester.getRect(find.byKey(const ValueKey('result.keyPoints'))).top,
+        lessThan(640));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Details sind eingeklappt und lassen sich per Antippen öffnen', (tester) async {
     final state = await makeStateIn(tester, 'de');
     final entry = entryFor('Zucker, Aroma', state);
     await tester.pumpWidget(AppScope(
@@ -234,9 +270,29 @@ void main() {
       child: MaterialApp(home: ResultScreen(entry: entry)),
     ));
     await tester.pumpAndSettle();
+    // Überschriften der Abschnitte sind sichtbar, ihr Inhalt nicht.
+    expect(find.text('Details (zum Öffnen antippen)'), findsOneWidget);
     expect(find.text('Warum kein grünes Ergebnis?'), findsOneWidget);
-    await tester.scrollUntilVisible(find.textContaining('noch nicht abschließend geklärt'), 200);
-    expect(find.textContaining('noch nicht abschließend geklärt'), findsOneWidget);
+    expect(find.text('Was wurde gefunden?'), findsOneWidget);
+    expect(find.byType(InvestigationCard), findsNothing);
+    expect(find.text('Was bedeutet dieses Ergebnis?'), findsNothing);
+    expect(find.text('Weißt du mehr?'), findsNothing);
+
+    // „Ausführliche Analyse“ öffnen.
+    await tester.scrollUntilVisible(find.text('Ausführliche Analyse'), 200);
+    await tester.tap(find.text('Ausführliche Analyse'));
+    await tester.pumpAndSettle();
+    expect(find.text('Was bedeutet dieses Ergebnis?'), findsOneWidget);
+    // Wieder schließen.
+    await tester.tap(find.text('Ausführliche Analyse'));
+    await tester.pumpAndSettle();
+    expect(find.text('Was bedeutet dieses Ergebnis?'), findsNothing);
+
+    // „Was wurde gefunden?“ öffnen: Recherche-Karte und Feedback-Formular.
+    await tester.scrollUntilVisible(find.text('Was wurde gefunden?'), -200);
+    await tester.tap(find.text('Was wurde gefunden?'));
+    await tester.pumpAndSettle();
+    expect(find.byType(InvestigationCard), findsOneWidget);
     // Einzige Karte ist bereits aufgeklappt.
     await tester.scrollUntilVisible(find.text('Weißt du mehr?'), 200);
     expect(find.text('Welche Information würde die Einstufung klären?'), findsOneWidget);
@@ -246,6 +302,67 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Information ergänzen'), findsOneWidget);
     expect(find.text('Herstellerangabe oder Quelle einreichen'), findsOneWidget);
+  });
+
+  testWidgets('Gleiches Produkt, andere App-Sprache: gleiche Bewertung, übersetzter Begriff',
+      (tester) async {
+    for (final (lang, keyPoints, concept, status) in const [
+      ('de', 'Das Wichtigste', 'Gelatine/Kollagen', 'UNKLAR'),
+      ('en', 'Key points', 'Gelatine/collagen', 'UNCLEAR'),
+    ]) {
+      final state = await makeStateIn(tester, lang);
+      final entry = entryFor('Zucker, Gelatine', state);
+      expect(entry.verdict.status, HalalStatus.unclear, reason: lang);
+      await tester.pumpWidget(AppScope(
+        state: state,
+        child: MaterialApp(
+            key: ValueKey(lang), home: ResultScreen(entry: entry)),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text(status), findsOneWidget, reason: lang);
+      expect(find.text(keyPoints), findsOneWidget, reason: lang);
+      // Begriff in der App-Sprache, Wortlaut der Quelle unverändert.
+      expect(find.text('$concept: „Gelatine“'), findsOneWidget, reason: lang);
+    }
+  });
+
+  testWidgets('HARAM: verbotene Zutat steht oben, ohne Aufklappen', (tester) async {
+    final state = await makeStateIn(tester, 'de');
+    final entry = entryFor('Wasser, Zucker, Rotwein', state);
+    expect(entry.verdict.status, HalalStatus.haram);
+    await tester.pumpWidget(AppScope(
+      state: state,
+      child: MaterialApp(home: ResultScreen(entry: entry)),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('HARAM'), findsOneWidget);
+    expect(find.byIcon(Icons.block), findsWidgets);
+    expect(find.textContaining('„Rotwein“'), findsWidgets);
+    expect(find.text('haram'), findsOneWidget);
+    expect(find.textContaining('Es fehlt:'), findsNothing);
+  });
+
+  testWidgets('NICHT VERIFIZIERT ohne Funde: kein Kasten „Das Wichtigste“', (tester) async {
+    final state = await makeStateIn(tester, 'de');
+    final now = DateTime.now();
+    final src = SourceRef(kind: SourceKind.openFoodFacts, retrievedAt: now);
+    final p = ProductRecord(barcode: '4006381333931', source: src, name: 'Ohne Zutaten');
+    final entry = ScanEntry(
+      id: '2',
+      createdAt: now,
+      barcode: p.barcode,
+      product: p,
+      verdict: state.engine.evaluate(product: p, scannedBarcode: p.barcode, now: now),
+    );
+    expect(entry.verdict.status, HalalStatus.notVerified);
+    await tester.pumpWidget(AppScope(
+      state: state,
+      child: MaterialApp(home: ResultScreen(entry: entry)),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('NICHT VERIFIZIERT'), findsOneWidget);
+    expect(find.byKey(const ValueKey('result.keyPoints')), findsNothing);
+    expect(find.textContaining('Keine Bewertung möglich'), findsOneWidget);
   });
 
   testWidgets('USDA-Schlüssel: verdeckte Eingabe, speichern, löschen', (tester) async {

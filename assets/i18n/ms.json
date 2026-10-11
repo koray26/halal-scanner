@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "Rujukan sijil tidak dapat disahkan.",
   "unknown.dataOld": "Data produk tidak dikemas kini selama lebih 3 tahun. Resipinya mungkin telah berubah.",
   "unknown.manufacturingNotVerified": "Kaedah pengeluaran, asal bahan mentah dan kemungkinan pencemaran tidak disemak.",
-  "unknown.languageNotSupported": "Senarai ramuan hanya tersedia dalam bahasa yang belum mempunyai peraturan semakan dalam aplikasi ini. Pada masa ini ramuan disemak sepenuhnya dalam bahasa Jerman dan Inggeris; bahasa Perancis dan Turki hanya secara terhad (tanpa keputusan hijau).",
+  "unknown.languageNotSupported": "Senarai ramuan hanya tersedia dalam bahasa yang belum mempunyai senarai perkataan teruji dalam aplikasi ini. Hanya beberapa istilah yang diketahui dikesan (cth. nombor E dan nama daripada kamus Open Food Facts). Oleh itu keputusan hijau tidak mungkin.",
   "rule.pork.name": "Babi",
   "rule.pork.why": "Babi dan semua ramuan yang berasal daripada babi diharamkan menurut semua piawaian halal yang diiktiraf.",
   "rule.porkDerived.name": "{item} daripada babi",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Senarai ramuan dalam bahasa ini: disemak sepenuhnya",
   "language.ingredients.limited": "Senarai ramuan dalam bahasa ini: disemak secara terhad (tiada keputusan hijau)",
   "language.ingredients.none": "Senarai ramuan dalam bahasa ini: belum disemak (tidak sekali-kali keputusan hijau)",
-  "unknown.compositeUnspecified": "Senarai ramuan menyebut produk sosej (cth. pepperoni, chorizo, mortadella) tanpa ramuannya sendiri. Oleh itu jenis haiwan dan asalnya tidak diketahui."
+  "unknown.compositeUnspecified": "Senarai ramuan menyebut produk sosej (cth. pepperoni, chorizo, mortadella) tanpa ramuannya sendiri. Oleh itu jenis haiwan dan asalnya tidak diketahui.",
+  "language.ingredients.basic": "Senarai ramuan dalam bahasa ini: pengesanan asas istilah tertentu (tiada keputusan hijau)",
+  "result.keyPoints": "Perkara penting",
+  "result.missing": "Yang kurang: {what}",
+  "result.morePoints": "{count} lagi di bawah “{section}”",
+  "result.detailsHeader": "Butiran (ketik untuk membuka)",
+  "result.meaning": "Apakah maksud keputusan ini?"
 }

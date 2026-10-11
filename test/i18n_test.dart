@@ -184,6 +184,7 @@ void main() {
       for (final k in [
         'language.ingredients.full',
         'language.ingredients.limited',
+        'language.ingredients.basic',
         'language.ingredients.none',
         'unknown.languageLimited',
         'unknown.languageNotSupported',

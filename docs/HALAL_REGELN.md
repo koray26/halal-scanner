@@ -1,4 +1,4 @@
-# Halal-Prüfregeln (Regelversion 2026.10-3)
+# Halal-Prüfregeln (Regelversion 2026.10-4)
 
 > **Wichtig:** Diese Regeln sind eine technische Umsetzung vorsichtiger, verbreiteter
 > Bewertungsgrundsätze. Sie wurden **noch nicht von einem Gelehrtengremium oder einer
@@ -183,6 +183,13 @@ den Begründungstexten der Regeln.
     sollen in die Wortlisten? (Nur von Muttersprachlern geprüfte Begriffe; siehe SPRACHEN.md.)
 
 ## 10. Änderungen je Regelversion
+- **2026.10-4:** Zutatenlisten in ar, id, ms, ur, bn, hi, fa und ha werden mit denselben Regeln geprüft
+  („Grund-Erkennung“): sprachunabhängige Begriffe und E-Nummern sowie Bezeichnungen aus dem
+  Open-Food-Facts-Wörterbuch, die die Regel ihres englischen Eintrags erben. **Keine Regel und keine
+  Einstufung wurde geändert;** neu ist nur, dass diese Listen überhaupt ausgewertet werden. Ergebnis
+  höchstens HARAM/UNKLAR/NICHT VERIFIZIERT, nie Grün. Nennt eine solche Fassung einen verbotenen Stoff,
+  den die deutsche/englische Fassung nicht nennt, gilt das als Widerspruch. Bierhefe bleibt offen
+  (Begriffe mit „Hefe“ sind ausgeschlossen). Siehe SPRACHEN.md.
 - **2026.10-3:** Grün nur noch bei deutscher oder englischer Datenbank-Liste (Französisch/Türkisch:
   höchstens HARAM/UNKLAR/NICHT VERIFIZIERT). Neuer Grund „Sprache eingeschränkt unterstützt“.
   Listen überwiegend in nicht-lateinischer Schrift blockieren Grün. Türkisch „İ/ı“ wird beim Vergleich

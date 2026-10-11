@@ -1,13 +1,13 @@
 # Sprachen: Oberfläche, Zutaten-Erkennung und Texterkennung
 
-Stand: 11. Oktober 2026, Regelversion `2026.10-3`, Branch `feature/weltweite-suche`.
+Stand: 11. Oktober 2026, Regelversion `2026.10-4`, Branch `feature/weltweite-suche`.
 
 ## Grundsatz: drei getrennte Fähigkeiten
 
 | Fähigkeit | Was sie bedeutet | Wo im Code |
 |---|---|---|
 | **Benutzeroberfläche** | In welcher Sprache die App ihre Texte anzeigt. Ändert **nie** das Prüfergebnis. | `assets/i18n/*.json`, `lib/core/i18n/strings.dart` (`appLanguages`) |
-| **Zutaten-Erkennung** | In welcher Sprache eine Zutatenliste nach den Wortlisten geprüft wird. Hängt von der Sprache der **Zutatenliste** ab, nicht von der App-Sprache. | `lib/domain/rules/catalog.dart` (`supportedRuleLanguages`, `greenRuleLanguages`, `ingredientSupportFor`) |
+| **Zutaten-Erkennung** | In welcher Sprache eine Zutatenliste nach den Wortlisten geprüft wird. Hängt von der Sprache der **Zutatenliste** ab, nicht von der App-Sprache. | `lib/domain/rules/catalog.dart` (`supportedRuleLanguages`, `greenRuleLanguages`, `detectOnlyLanguages`, `ingredientSupportFor`), `lib/domain/rules/off_terms.g.dart` |
 | **Texterkennung (OCR)** | Ob ein Foto der Zutatenliste gelesen werden kann. Nur **lateinische Schrift**. Ein Foto führt nie zu Grün. | `lib/features/ocr/ocr_screen.dart`, `lib/domain/script.dart` |
 
 Eine übersetzte Oberfläche heißt also **nicht**, dass Zutatenlisten in dieser Sprache geprüft werden.
@@ -18,26 +18,47 @@ In der Sprachauswahl steht unter jeder Sprache beides getrennt.
 Stufen der Zutaten-Erkennung:
 - **vollständig**: Wortlisten gepflegt und getestet, Grün ist möglich.
 - **eingeschränkt**: Wortlisten vorhanden, HARAM und UNKLAR werden erkannt, aber **kein Grün** (ab Regelversion 2026.10-3).
-- **nein**: keine Wortlisten. Möglich ist höchstens HARAM oder UNKLAR über die strukturierte Zutatenanalyse von Open Food Facts, sonst NICHT VERIFIZIERT. **Nie Grün.**
+- **Grund-Erkennung** (ab 2026.10-4): keine getesteten Wortlisten. Die Liste wird trotzdem mit **denselben Regeln** geprüft – mit allen sprachunabhängigen Begriffen (E-Nummern, international gebräuchliche Wörter wie „gelatin“, „babi“, „خنزير“) und den Begriffen, die aus dem Open-Food-Facts-Wörterbuch abgeleitet sind. HARAM und UNKLAR sind möglich, sonst NICHT VERIFIZIERT. **Nie Grün.**
+- **nein**: weder Wortlisten noch Grund-Erkennung (derzeit Chinesisch). Möglich ist höchstens HARAM oder UNKLAR über die strukturierte Zutatenanalyse von Open Food Facts, sonst NICHT VERIFIZIERT. **Nie Grün.**
 
 | Sprache | Prio. | Benutzeroberfläche | Zutaten-Erkennung | Texterkennung (Foto) | Bekannte Einschränkungen |
 |---|---|---|---|---|---|
-| Arabisch (ar) | 1 | Entwurf, RTL | nein | nein (arabische Schrift) | Keine arabischen Wortlisten. Open Food Facts kennt „Schwein“, „Schmalz“ und „Alkohol“ auf Arabisch nicht (siehe Messung). |
+| Arabisch (ar) | 1 | Entwurf, RTL | Grund-Erkennung (43 Begriffe) | nein (arabische Schrift) | Keine getesteten Wortlisten. „خنزير“ (Schwein) ist sprachübergreifend erfasst; „Schmalz“ und „Alkohol“ fehlen auch im Open-Food-Facts-Wörterbuch. |
 | Englisch (en) | 1 | vollständig | vollständig | ja | Pepperoni/Chorizo/Mortadella ohne Unterzutaten → nie Grün; prosciutto, pancetta noch nicht erfasst, siehe unten. |
 | Deutsch (de) | 1 | vollständig | vollständig | ja | Wie Englisch, siehe unten. |
 | Französisch (fr) | 1 | Entwurf | eingeschränkt | ja | Lücken, u. a. „jambon“, „collagène“, „suif“, „mono- et diglycérides“, siehe unten. |
 | Türkisch (tr) | 1 | Entwurf | eingeschränkt | ja | Lücken, u. a. „kan“ (Blut), „kolajen“, „digliserit“, „et“ (Fleisch); „bira mayası“ (Bierhefe) wird als HARAM gewertet (offene Fachfrage). |
-| Indonesisch (id) | 2 | Entwurf | nein | ja (Lateinschrift, aber keine Regeln) | Nur „babi“ ist als Begriff vorhanden und wirkt nur über die Datenbankanalyse. |
-| Urdu (ur) | 2 | Entwurf, RTL | nein | nein (arabische Schrift) | Darstellung in Naskh statt Nastaliq, wenn das Gerät keine Nastaliq-Schrift hat. |
-| Bengalisch (bn) | 2 | Entwurf | nein | nein (bengalische Schrift) | – |
-| Hindi (hi) | 2 | Entwurf | nein | nein (Devanagari) | – |
-| Malaiisch (ms) | 2 | Entwurf | nein | ja (Lateinschrift, aber keine Regeln) | Wie Indonesisch. |
-| Persisch (fa) | 2 | Entwurf, RTL | nein | nein (arabische Schrift) | – |
-| Hausa (ha) | 2 | Entwurf, **geringste Übersetzungssicherheit** | nein | ja (Lateinschrift, aber keine Regeln) | Flutter bringt keine Hausa-Standardtexte für Bedienelemente mit; dort erscheint Englisch (z. B. Tooltip „Back“). |
+| Indonesisch (id) | 2 | Entwurf | Grund-Erkennung (22 Begriffe) | ja (Lateinschrift, aber keine Regeln) | „babi“ (Schwein) wird erkannt; kein Begriff für Wein („anggur“ heißt auch Traube und ist deshalb bewusst nicht enthalten). |
+| Urdu (ur) | 2 | Entwurf, RTL | Grund-Erkennung (12 Begriffe) | nein (arabische Schrift) | Kein Begriff für Schwein und Gelatine; Darstellung in Naskh statt Nastaliq, wenn das Gerät keine Nastaliq-Schrift hat. |
+| Bengalisch (bn) | 2 | Entwurf | Grund-Erkennung (16 Begriffe) | nein (bengalische Schrift) | – |
+| Hindi (hi) | 2 | Entwurf | Grund-Erkennung (18 Begriffe) | nein (Devanagari) | – |
+| Malaiisch (ms) | 2 | Entwurf | Grund-Erkennung (15 Begriffe) | ja (Lateinschrift, aber keine Regeln) | „babi“ wird erkannt; Wein nur als „wain“. |
+| Persisch (fa) | 2 | Entwurf, RTL | Grund-Erkennung (43 Begriffe) | nein (arabische Schrift) | – |
+| Hausa (ha) | 2 | Entwurf, **geringste Übersetzungssicherheit** | Grund-Erkennung (0 eigene Begriffe, nur sprachunabhängige) | ja (Lateinschrift, aber keine Regeln) | Flutter bringt keine Hausa-Standardtexte für Bedienelemente mit; dort erscheint Englisch (z. B. Tooltip „Back“). |
 | Vereinfachtes Chinesisch (zh-Hans) | 3 | in Vorbereitung | nein | nein (Han-Schrift) | – |
 | Suaheli, Somali, Albanisch, Bosnisch, Russisch, Kasachisch, Usbekisch, Aserbaidschanisch, Kurdisch | später | in Vorbereitung | nein | je nach Schrift | Somali und Kurdisch hätten ebenfalls keine Flutter-Standardtexte. |
 
 „Entwurf“ heißt: vollständig übersetzt, aber **nicht** von Muttersprachlern oder Fachleuten geprüft. Bei Zweifeln gilt die deutsche oder englische Fassung. Das sagt die App auch in der Sprachauswahl.
+
+## Gemeinsame Erkennung für alle Sprachen (ab Regelversion 2026.10-4)
+
+**Ursache, warum Ergebnisse in anderen Produktsprachen fehlten** (Prüfung des Codes am 11.10.2026):
+1. Die Bewertung hat Zutatenlisten nur ausgewertet, wenn sie auf Deutsch, Englisch, Französisch oder Türkisch vorlagen. Listen in allen anderen Sprachen wurden übersprungen – auch dann, wenn darin E-Nummern oder sprachübergreifende Begriffe wie „babi“ oder „خنزير“ standen, die die Regeln längst kennen.
+2. Ersatzweise diente nur die strukturierte Zutatenanalyse von Open Food Facts. Deren Wörterbuch kennt gerade in diesen Sprachen „Schwein“ und „Alkohol“ oft nicht (siehe Messung unten).
+3. Die App hat Zutatenlisten nur auf de, en, fr, tr und ar abgerufen; Listen auf id, ms, ur, bn, hi, fa und ha kamen nur an, wenn sie zufällig die Hauptliste waren.
+
+**Lösung (zentral, ohne Sonderregeln je Sprache):**
+- Jede Zutatenliste in einer Sprache mit Grund-Erkennung durchläuft **dieselbe Prüfung** wie Deutsch und Englisch. Die Regel-ID (z. B. `gelatine`, `pork`, `alcoholic_beverage`) ist die gemeinsame, sprachunabhängige Zutatenkennung; die Oberfläche zeigt den Namen dieser Kennung in der App-Sprache und daneben den Originalwortlaut.
+- Zusätzliche Bezeichnungen je Sprache stammen aus dem Open-Food-Facts-Wörterbuch (`taxonomies/food/ingredients.txt`, `taxonomies/additives.txt`, Stand `8852423`, Lizenz ODbL). Das Werkzeug `tool/off_terms/extract_off_terms.mjs` erzeugt daraus `lib/domain/rules/off_terms.g.dart`:
+  - Ein Begriff erbt die Regel, die die **bestehenden englischen Wortlisten** für den englischen Namen desselben Wörterbuch-Eintrags auslösen. Es entsteht also **keine neue Regel** und keine eigene Übersetzung.
+  - Entfernt werden: mehrdeutige Begriffe (ein Wort, verschiedene Regeln), Einträge mit Herkunftsangabe, Begriffe unter 3 Zeichen oder mit Ziffern, Begriffe mit „Hefe“ (offene Bierhefe-Frage) sowie einzelne von Hand geprüfte Fehleinträge (z. B. arabisch „جودة“ = Qualität).
+- Alle Sprachfassungen eines Produkts werden geprüft. Nennt eine Fassung mit Grund-Erkennung einen verbotenen Stoff, den die deutsche/englische Fassung nicht nennt, gilt das als Widerspruch (NICHT VERIFIZIERT). Fehlt dort ein Treffer, ist das **kein** Gegenbeleg (Wortschatz lückenhaft).
+- Die App ruft Zutatenlisten in allen 12 wählbaren Sprachen ab und zeigt die Fassung in App-Sprache zuerst; die anderen Fassungen sind eingeklappt.
+
+**Was das nicht leistet (ehrlich):**
+- Die Grund-Erkennung ist **nicht vollständig** und nicht von Muttersprachlern geprüft. Sie liefert deshalb nie Grün.
+- Bekannte Lücken (durch Tests festgehalten, `test/cross_language_test.dart`): Persisch, Urdu, Hindi und Bengalisch haben **kein allgemeines Wort für Schwein** („گوشت خوک“, „سور کا گوشت“, „सूअर का मांस“, „শূকরের মাংস“ werden nicht erkannt → NICHT VERIFIZIERT statt HARAM; erkannt werden nur „چربی خوک“ fa und „Schweineschwarte“ hi/bn); Urdu kennt auch Gelatine nicht; Indonesisch hat kein Wort für Wein; Hausa hat keine eigenen Begriffe.
+- Persisch/Urdu/Hindi „شراب/शराब“ bedeutet dort Wein bzw. alkoholisches Getränk und wird so gewertet. Im Arabischen heißt „شراب“ auch Sirup; deshalb ist es für Arabisch **nicht** enthalten.
 
 ## Wann eine Zutatenliste Grün ergeben kann
 
@@ -104,8 +125,7 @@ Die Stichprobe hat für die beiden Sprachen mit Grün eine Lücke gezeigt: itali
 
 **Produktnamen:** Die App liest alle Sprachfassungen (`product_name_languages`, `product_name_xx`) und zeigt bevorzugt den Namen in App-Sprache.
 
-**Zutatenlisten:** Die App liest die Hauptliste (`ingredients_text` mit der Hauptsprache `lang`) sowie `ingredients_text_de/en/fr/tr/ar`.
-Listen in anderen Sprachen kommen nur über die Hauptliste an.
+**Zutatenlisten:** Die App liest die Hauptliste (`ingredients_text` mit der Hauptsprache `lang`) sowie `ingredients_text_xx` für alle 12 wählbaren Sprachen (de, en, fr, tr, ar, id, ms, ur, bn, hi, fa, ha; seit 2026.10-4).
 
 **Strukturierte Zutatenanalyse:** Open Food Facts ordnet Zutaten über ein Wörterbuch (Taxonomie) Kennungen wie `en:gelatin` zu. Nur Begriffe aus diesem Wörterbuch werden erkannt.
 Messung am 11.10.2026: Wörterbuch `taxonomies/food/ingredients.txt` und `taxonomies/additives.txt` von github.com/openfoodfacts/openfoodfacts-server, Stand `8852423`.
@@ -149,7 +169,8 @@ Die Messung kann kostenlos über den vorhandenen, manuell gestarteten Ablauf `of
 |---|---|
 | `test/i18n_test.dart` | Alle Texte in allen wählbaren Sprachen vorhanden, keine leeren Texte, gleiche Platzhalter; Verbotsliste „garantiert/100 % halal“ je Sprache; RTL genau für ar/ur/fa; RTL-Texte wirklich in arabischer Schrift; fünf Ergebnis-Bezeichnungen je Sprache verschieden; Prioritäten; Ersatz-Standardtexte nur für Hausa |
 | `test/language_support_test.dart` | Zuordnung Sprache → Zutaten-Erkennung; de/en können Grün ergeben; fr/tr erkennen HARAM/UNKLAR, aber kein Grün; türkische Großbuchstaben; Priorität-2-Sprachen nie Grün; Datenbankanalyse; fremde Schriften; Ziffern anderer Schriften |
-| `test/widget_test.dart` | Startbildschirm in ar/ur/fa rechts-nach-links, in id/ms/bn/hi/ha/fr links-nach-rechts ohne Fehler; Sprachauswahl zeigt Oberfläche und Zutatenprüfung getrennt |
+| `test/cross_language_test.dart` | Gleiche Zutat → gleiche Regel-ID und gleiches Ergebnis über bis zu 11 Sprachen (Gelatine, Schwein, Wein, Ethanol, E-Nummern); bekannte Lücken bleiben NICHT VERIFIZIERT; mehrdeutige Begriffe; mehrere Sprachfassungen (Widerspruch, Reihenfolge); fehlende, unvollständige, abgeschnittene und unerkannte Daten; ungeklärte Zutat mit Wortlaut und offenen Fragen |
+| `test/widget_test.dart` | Kurze Ergebnisseite (Status, Zusammenfassung, wichtigste Zutat im ersten Bildschirm), eingeklappte Details öffnen/schließen, gleiche Bewertung bei anderer App-Sprache; Startbildschirm in ar/ur/fa rechts-nach-links, in id/ms/bn/hi/ha/fr links-nach-rechts ohne Fehler; Sprachauswahl zeigt Oberfläche und Zutatenprüfung getrennt |
 | `test_screens/screens_test.dart` | Bildschirmfotos zusätzlich für ur, fa, id, ha (Sichtprüfung von Spiegelung und Überläufen) |
 
 ## Offene Fragen
@@ -157,7 +178,8 @@ Die Messung kann kostenlos über den vorhandenen, manuell gestarteten Ablauf `of
 **Fachlich (für eine islamische Fachperson; derzeit niemand bestätigt):**
 1. Ist Bierhefe („bira mayası“, „Bierhefe“, „brewer’s yeast“) als alkoholisches Getränk zu werten (heute: nur Türkisch → HARAM) oder unbedenklich?
 2. Erledigt für Pepperoni, Chorizo und Mortadella (ohne Unterzutaten → NICHT VERIFIZIERT). Offen: prosciutto, pancetta.
-3. Welche arabischen, indonesischen, malaiischen, Urdu-, Bengali-, Hindi-, persischen und Hausa-Bezeichnungen sollen in die Wortlisten? Sie müssen von Muttersprachlern geprüft sein; die App erfindet keine Zutatenübersetzungen.
+3. Welche arabischen, indonesischen, malaiischen, Urdu-, Bengali-, Hindi-, persischen und Hausa-Bezeichnungen sollen in getestete Wortlisten? Sie müssen von Muttersprachlern geprüft sein; die App erfindet keine Zutatenübersetzungen. Die Grund-Erkennung (Begriffe aus dem Open-Food-Facts-Wörterbuch) ist dafür nur ein Anfang.
+5. Ein einzelner unbekannter Begriff in einer deutschen/englischen Liste verhindert Grün heute nicht; erst wenn laut Datenbank mehr als die Hälfte der Zutaten unbekannt ist. Soll das strenger werden? (Nicht geändert, da es die Bewertung betrifft.)
 4. Sollen die Übersetzungen der fünf Ergebnis-Bezeichnungen und der Regel-Erklärungen von Fachleuten der jeweiligen Sprache geprüft werden, bevor die Sprachen den Status „vollständig“ bekommen?
 
 **Technisch:**

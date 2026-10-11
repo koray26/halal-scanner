@@ -130,7 +130,7 @@
   "unknown.certificationUnverified": "Ba a iya tabbatar da ambaton takardar shaida ba.",
   "unknown.dataOld": "Ba a sabunta bayanan kaya ba fiye da shekaru 3. Wataƙila an canza yadda ake yin sa.",
   "unknown.manufacturingNotVerified": "Ba a duba hanyoyin sarrafawa, asalin kayan farko da yiwuwar gurɓatawa ba.",
-  "unknown.languageNotSupported": "Jerin sinadarai yana samuwa ne kawai a cikin harshen da wannan manhaja ba ta da ƙa’idojin dubawa a kansa tukuna. A yanzu ana duba sinadarai gaba ɗaya da Jamusanci da Turanci; da Faransanci da Turkanci kawai ta wani iyaka (ba tare da sakamakon kore ba).",
+  "unknown.languageNotSupported": "Jerin sinadaran yana samuwa ne kawai a harshen da wannan manhaja ba ta da jerin kalmomin da aka gwada. Wasu sanannun kalmomi kawai ake ganewa (misali lambobin E da sunaye daga ƙamus na Open Food Facts). Saboda haka sakamakon kore ba zai yiwu ba.",
   "rule.pork.name": "Naman alade",
   "rule.pork.why": "Alade da dukkan sinadaran da aka samo daga alade haramun ne bisa dukkan ma’aunan halal da aka amince da su.",
   "rule.porkDerived.name": "{item} daga alade",
@@ -471,5 +471,11 @@
   "language.ingredients.full": "Jerin sinadarai a wannan harshe: ana duba su gaba ɗaya",
   "language.ingredients.limited": "Jerin sinadarai a wannan harshe: ana duba su ta wani iyaka (babu sakamakon kore)",
   "language.ingredients.none": "Jerin sinadarai a wannan harshe: ba a duba su ba tukuna (ba sakamakon kore har abada)",
-  "unknown.compositeUnspecified": "Jerin sinadarai ya ambaci kayan tsiran nama (misali pepperoni, chorizo, mortadella) ba tare da sinadaransa ba. Saboda haka ba a san irin dabbar da asalinta ba."
+  "unknown.compositeUnspecified": "Jerin sinadarai ya ambaci kayan tsiran nama (misali pepperoni, chorizo, mortadella) ba tare da sinadaransa ba. Saboda haka ba a san irin dabbar da asalinta ba.",
+  "language.ingredients.basic": "Jerin sinadarai a wannan harshe: ganewa ta asali ta wasu kalmomi kawai (ba sakamakon kore ko kaɗan)",
+  "result.keyPoints": "Muhimman abubuwa",
+  "result.missing": "Abin da ya rage: {what}",
+  "result.morePoints": "Ƙarin {count} a ƙarƙashin “{section}”",
+  "result.detailsHeader": "Cikakkun bayanai (taɓa don buɗewa)",
+  "result.meaning": "Me wannan sakamakon yake nufi?"
 }

@@ -151,7 +151,11 @@ class OpenFoodFactsClient {
     }
 
     addText(str('ingredients_text'), mainLang);
-    for (final l in const ['de', 'en', 'fr', 'tr', 'ar']) {
+    // Alle Sprachen der App: Die Bewertung nutzt jede vorhandene Fassung
+    // (gleiche Regeln), die Anzeige bevorzugt die Sprache des Nutzers.
+    for (final l in const [
+      'de', 'en', 'fr', 'tr', 'ar', 'id', 'ms', 'ur', 'bn', 'hi', 'fa', 'ha', //
+    ]) {
       addText(str('ingredients_text_$l'), l);
     }
 
