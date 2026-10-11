@@ -169,10 +169,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('HARAM'), findsOneWidget);
     expect(find.textContaining('Schweinegelatine'), findsWidgets);
+    await tester.scrollUntilVisible(find.text('Zutaten anzeigen'), 200);
+    expect(find.text('Zutaten anzeigen'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Was wurde gefunden?'), 200);
     expect(find.text('Was wurde gefunden?'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Quellen und Begründung'), 200);
-    expect(find.text('Zutaten anzeigen'), findsOneWidget);
+    expect(find.text('Quellen und Begründung'), findsOneWidget);
   });
 
   testWidgets('Ergebnis UNKLAR bei Gelatine unbekannter Herkunft', (tester) async {

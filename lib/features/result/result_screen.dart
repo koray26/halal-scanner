@@ -235,7 +235,7 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           // --- Immer sichtbar: Produkt, Status, kurze Zusammenfassung --------
           _ProductHeader(entry: entry, strings: s),
-          const SizedBox(height: Gap.m),
+          const SizedBox(height: Gap.s),
           Card(
             key: const ValueKey('result.status'),
             clipBehavior: Clip.antiAlias,
@@ -247,7 +247,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     padding: const EdgeInsets.all(Gap.m),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       StatusBadge(style: style, strings: s, large: true),
-                      const SizedBox(height: Gap.m),
+                      const SizedBox(height: Gap.s + Gap.xs),
                       Text(r.summary(),
                           key: const ValueKey('result.summary'),
                           style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
