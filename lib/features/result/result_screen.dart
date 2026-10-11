@@ -238,8 +238,6 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
           ),
           const SizedBox(height: Gap.m),
-          DimensionsCard(verdict: v, strings: s),
-          const SizedBox(height: Gap.m),
           GreenChecklist(verdict: v, strings: s),
           const SizedBox(height: Gap.m),
           Semantics(
@@ -276,6 +274,8 @@ class _ResultScreenState extends State<ResultScreen> {
                   v.investigations.where((i) => i.effect == RuleEffect.unclear && !i.resolved).toList()),
             ),
           ],
+          const SizedBox(height: Gap.m),
+          DimensionsCard(verdict: v, strings: s),
           const SizedBox(height: Gap.l),
           Semantics(
             header: true,
