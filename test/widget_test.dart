@@ -17,6 +17,10 @@ Future<AppState> makeState(String lang) async {
   return s;
 }
 
+/// Echte asynchrone Arbeit (Asset-Laden) außerhalb der Fake-Zeit ausführen.
+Future<AppState> makeStateIn(WidgetTester tester, String lang) async =>
+    (await tester.runAsync(() => makeState(lang)))!;
+
 ScanEntry entryFor(String ingredients, AppState state) {
   final now = DateTime.now();
   final src = SourceRef(kind: SourceKind.openFoodFacts, retrievedAt: now);
@@ -38,7 +42,7 @@ ScanEntry entryFor(String ingredients, AppState state) {
 
 void main() {
   testWidgets('Startbildschirm: Deutsch, Scan-Button, Navigation', (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     await tester.pumpWidget(HalalScannerApp(state: state));
     await tester.pumpAndSettle();
     expect(find.text('Produkt scannen'), findsOneWidget);
@@ -53,7 +57,7 @@ void main() {
   });
 
   testWidgets('Arabisch wird rechts-nach-links dargestellt', (tester) async {
-    final state = await makeState('ar');
+    final state = await makeStateIn(tester, 'ar');
     await tester.pumpWidget(HalalScannerApp(state: state));
     await tester.pumpAndSettle();
     final finder = find.text('مسح منتج');
@@ -62,10 +66,10 @@ void main() {
   });
 
   testWidgets('Sprachwechsel zur Laufzeit', (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     await tester.pumpWidget(HalalScannerApp(state: state));
     await tester.pumpAndSettle();
-    await state.setLanguage('en');
+    await tester.runAsync(() => state.setLanguage('en'));
     await tester.pumpAndSettle();
     expect(find.text('Scan product'), findsOneWidget);
   });
@@ -74,7 +78,7 @@ void main() {
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final state = AppState();
-    await state.init();
+    await tester.runAsync(state.init);
     await tester.pumpWidget(HalalScannerApp(state: state));
     await tester.pumpAndSettle();
     expect(find.text('Deutsch'), findsOneWidget);
@@ -84,7 +88,7 @@ void main() {
   });
 
   testWidgets('Statusanzeige hat Text, Symbol und Screenreader-Label', (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -96,7 +100,7 @@ void main() {
   });
 
   testWidgets('Ergebnis HARAM zeigt Zutat, Begründung und Buttons', (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     final entry = entryFor('Zucker, Schweinegelatine', state);
     expect(entry.verdict.status, HalalStatus.haram);
     await tester.pumpWidget(AppScope(
@@ -112,7 +116,7 @@ void main() {
   });
 
   testWidgets('Ergebnis UNKLAR bei Gelatine unbekannter Herkunft', (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     final entry = entryFor('Zucker, Gelatine', state);
     await tester.pumpWidget(AppScope(
       state: state,
@@ -125,7 +129,7 @@ void main() {
 
   testWidgets('Barrierefreiheit: Startseite erfüllt Tap-Target-Richtlinien',
       (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(HalalScannerApp(state: state));
     await tester.pumpAndSettle();
@@ -135,7 +139,7 @@ void main() {
   });
 
   testWidgets('Große Schrift (200 %) ohne Layout-Fehler', (tester) async {
-    final state = await makeState('de');
+    final state = await makeStateIn(tester, 'de');
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.reset);

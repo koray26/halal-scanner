@@ -37,7 +37,7 @@ jobs:
           mkdir -p ci-logs
           set +e
           flutter analyze --no-fatal-infos > ci-logs/analyze.txt 2>&1; echo $? > ci-logs/analyze.code
-          flutter test --reporter expanded > ci-logs/test-report.txt 2>&1; echo $? > ci-logs/test.code
+          flutter test --timeout=90s --reporter expanded > ci-logs/test-report.txt 2>&1; echo $? > ci-logs/test.code
           tail -n 60 ci-logs/analyze.txt; tail -n 80 ci-logs/test-report.txt
       - name: Protokolle im Branch ci-logs-test ablegen
         if: always()

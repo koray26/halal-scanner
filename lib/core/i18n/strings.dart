@@ -69,7 +69,9 @@ class AppStrings {
 
   static Future<Map<String, String>> _loadMap(
       AssetBundle bundle, String code) async {
-    final raw = await bundle.loadString('assets/i18n/$code.json');
+    // load + utf8 statt loadString: kein Isolate für große Dateien nötig.
+    final data = await bundle.load('assets/i18n/$code.json');
+    final raw = utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
     final json = jsonDecode(raw) as Map<String, dynamic>;
     return json.map((k, v) => MapEntry(k, v as String));
   }
