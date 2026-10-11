@@ -1,0 +1,34 @@
+# Ruft einmalig echte Beispielantworten von Open Food Facts ab, um das
+# Datenformat zu dokumentieren (nur lesend, wenige Anfragen, kein Login).
+name: Open-Food-Facts-Formatprobe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/off-probe.yml']
+
+permissions:
+  contents: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  UA: 'HalalScanner/0.2.0 (https://github.com/koray26/halal-scanner)'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Beispielantworten abrufen
+        run: |
+          mkdir -p ci-logs
+          F='code,product_name,brands,lang,ingredients_text,ingredients,ingredients_analysis_tags,ingredients_tags,labels_tags,categories_tags,allergens_tags,traces_tags,additives_tags,link,manufacturing_places,origins,customer_service,states_tags,data_quality_warnings_tags,unknown_ingredients_n,ingredients_n,known_ingredients_n,last_modified_t'
+          for c in 3017624010701 4008400402222 4001686301265 5000159407236; do
+            curl -s -A "$UA" "https://world.openfoodfacts.org/api/v2/product/$c.json?fields=$F" > ci-logs/product-$c.json; sleep 5
+          done
+          curl -s -A "$UA" "https://world.openfoodfacts.org/api/v2/product/0000000000000.json" > ci-logs/product-notfound.json; sleep 5
+          curl -s -A "$UA" "https://world.openfoodfacts.org/api/v2/taxonomy?tagtype=ingredients&tags=en:flavouring,en:natural-flavouring,en:gelatin,en:e471,en:rennet,en:beef-gelatin&fields=name,vegan,vegetarian,wikidata,parents,e_number,description&lc=de,en" > ci-logs/taxonomy-ingredients.json; sleep 5
+          curl -s -A "$UA" "https://world.openfoodfacts.org/api/v2/taxonomy?tagtype=additives&tags=en:e471,en:e120,en:e322&fields=name,vegan,vegetarian,wikidata,additives_classes,description&lc=de,en" > ci-logs/taxonomy-additives.json
+          ls -la ci-logs
+      - run: ./tool/publish_logs.sh ci-logs-off-probe
